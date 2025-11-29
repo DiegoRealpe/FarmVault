@@ -1,5 +1,5 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-import { listDevices } from "../functions/list-all-devices/resource";
+import { listAllDevicesFn } from "../functions/list-all-devices/resource";
 
 const schema = a.schema({
   // Models stored in Dynamo
@@ -108,7 +108,7 @@ const schema = a.schema({
       // allow.group('tempViewer'),
       allow.publicApiKey(),
     ])
-    .handler(a.handler.function(listDevices)),
+    .handler(a.handler.function(listAllDevicesFn)),
 
   // ---- Admin Mutations ----
   // grantUserAccess: a
