@@ -35,7 +35,7 @@ const schema = a
         name: a.string(), // "North field temp sensor"
         description: a.string(),
         location: a.string(), // "North field, row 3"
-        lastSeenAt: a.datetime(), // derived from latest reading
+        // lastSeenAt: a.datetime(), // derived from latest reading
       })
       .authorization((allow) => [
         allow.group('farmAdmin'),
@@ -62,7 +62,7 @@ const schema = a
       name: a.string(),
       devEui: a.string().required(),
       type: a.ref('DeviceType').required(),
-      lastSeenAt: a.datetime(),
+      // lastSeenAt: a.datetime(),
     }),
 
     TimeSeriesPoint: a.customType({
