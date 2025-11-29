@@ -1,143 +1,143 @@
-import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
-import { listDevices } from '../functions/list-devices/resource';
+import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
+import { listDevices } from "../functions/list-all-devices/resource";
 
-const schema = a
-  .schema({
-    // Models stored in Dynamo
-    Todo: a
+const schema = a.schema({
+  // Models stored in Dynamo
+  Todo: a
     .model({
       content: a.string(),
     })
     .authorization((allow) => [allow.publicApiKey()]),
 
-    Farm: a
-      .model({
-        name: a.string().required(),
-        // Cognito sub of the primary farm owner/admin
-        ownerSub: a.string().required(),
-        description: a.string().required(),
-        region: a.string(), // optional by default
-      })
-      .authorization((allow) => [
-        allow.group('farmAdmin'),
-      ]),
+  Farm: a
+    .model({
+      name: a.string().required(),
+      // Cognito sub of the primary farm owner/admin
+      ownerSub: a.string().required(),
+      description: a.string().required(),
+      region: a.string(), // optional by default
+    })
+    .authorization((allow) => [
+      allow.publicApiKey(),
+      // allow.group('farmAdmin'),
+    ]),
 
-    DeviceType: a.enum(['TEMPERATURE', 'MOISTURE']),
-    IoTDevice: a
-      .model({
-        id: a.id().required(),
-        type: a.ref('DeviceType').required(), // TEMPERATURE or MOISTURE
-        farmId: a.string().required(), // references Farm.id
-        devEui: a.string().required(), // unique identifier from the network server
-        applicationId: a.string().required(),
-        gatewayId: a.string(), // optional: device might talk via different gateways
-        // nicer metadata for UI
-        name: a.string(), // "North field temp sensor"
-        description: a.string(),
-        location: a.string(), // "North field, row 3"
-        // lastSeenAt: a.datetime(), // derived from latest reading
-      })
-      .authorization((allow) => [
-        allow.group('farmAdmin'),
-      ]),
-
-    UserAccess: a
-      .model({
-        userSub: a.string().required(),
-        farmId: a.string().required(), //Maybe not needed?
-        datasetKeys: a.string().array().required(),
-        // Optional: restrict to certain devices only (future-ready)
-        deviceIds: a.id().array(),
-        expiresAt: a.datetime().required(),   // ISO string for app logic/UI
-        ttl: a.integer().required(),     // epoch seconds for Dynamo TTL
-        createdBySub: a.string().required(),
-      })
-      .authorization((allow) => [
-        allow.group('farmAdmin'),
-      ]),
-
-    // -- Custom Types --
-    IoTDeviceView: a.customType({
+  DeviceType: a.enum(["TEMPERATURE", "MOISTURE"]),
+  IoTDevice: a
+    .model({
       id: a.id().required(),
-      name: a.string(),
-      devEui: a.string().required(),
-      type: a.ref('DeviceType').required(),
-      // lastSeenAt: a.datetime(),
-    }),
+      type: a.ref("DeviceType").required(), // TEMPERATURE or MOISTURE
+      farmId: a.string().required(), // references Farm.id
+      devEui: a.string().required(), // unique identifier from the network server
+      applicationId: a.string().required(),
+      gatewayId: a.string(), // optional: device might talk via different gateways
+      // nicer metadata for UI
+      name: a.string(), // "North field temp sensor"
+      description: a.string(),
+      location: a.string(), // "North field, row 3"
+      // lastSeenAt: a.datetime(), // derived from latest reading
+    })
+    .authorization((allow) => [
+      allow.publicApiKey(),
+      // allow.group('farmAdmin'),
+    ]),
 
-    TimeSeriesPoint: a.customType({
-      timestamp: a.datetime().required(),
-      value: a.float().required(),
-    }),
+  UserAccess: a
+    .model({
+      userSub: a.string().required(),
+      farmId: a.string().required(), //Maybe not needed?
+      datasetKeys: a.string().array().required(),
+      // Optional: restrict to certain devices only (future-ready)
+      deviceIds: a.id().array(),
+      expiresAt: a.datetime().required(), // ISO string for app logic/UI
+      ttl: a.integer().required(), // epoch seconds for Dynamo TTL
+      createdBySub: a.string().required(),
+    })
+    .authorization((allow) => [
+      allow.publicApiKey(),
+      // allow.group('farmAdmin'),
+    ]),
 
-    // ---- Lambda Backed Queries ----
-    // getFarmIotData: a
-    //   .query()
-    //   .arguments({
-    //     farmId: a.string().required(),
-    //     deviceId: a.id().required(),
-    //     datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
-    //     from: a.datetime(),                // optional
-    //     to: a.datetime(),                  // optional
-    //   })
-    //   .returns(
-    //     a.ref("TimeSeriesPoint").array(),
-    //   )
-    //   .authorization((allow) => [
-    //     // Both admins and temp viewers can call this,
-    //     // but the Lambda enforces TempAccessGrant and device visibility.
-    //     allow.group('farmAdmin'),
-    //     allow.group('tempViewer'),
-    //   ])
-    //   ,
-      // .handler(a.handler.function(tempUserGetFarmIotDataFn)),
-    
-    listDevices: a
-      .query()
-      .arguments({
-        farmId: a.string().required(),
-      })
-      .returns(
-        a.ref("IoTDeviceView").array(),
-      )
-      .authorization((allow) => [
-        // Same idea: admins & temps can call it,
-        // Lambda decides what each caller actually sees.
-        allow.group('farmAdmin'),
-        allow.group('tempViewer'),
-      ])
-      .handler(a.handler.function(listDevices)),
+  // -- Custom Types --
+  IoTDeviceView: a.customType({
+    id: a.id().required(),
+    name: a.string(),
+    devEui: a.string().required(),
+    type: a.ref("DeviceType").required(),
+    // lastSeenAt: a.datetime(),
+  }),
 
-    // ---- Admin Mutations ----
-    // grantUserAccess: a
-    //   .mutation()
-    //   .arguments({
-    //     farmId: a.string().required(),
-    //     // The email of the user you’re granting access to.
-    //     // Lambda will:
-    //     //  - look up or create the Cognito user
-    //     //  - ensure they’re in tempViewer group (for now)
-    //     userEmail: a.string().required(),
-    //     datasetKeys: a.string().array().required(),
-    //     // Optional: restrict to certain devices
-    //     deviceIds: a.id().array(),
-    //     expiresAt: a.datetime().required(),
-    //   })
-    //   .returns(a.ref('UserAccess'))
-    //   .authorization((allow) => [
-    //     allow.group('farmAdmin'),
-    //   ])
-      // .handler(a.handler.function(grantUserAccessFn)),
+  TimeSeriesPoint: a.customType({
+    timestamp: a.datetime().required(),
+    value: a.float().required(),
+  }),
 
-  })
-  // (optional) let specific functions use the Data client with proper auth
-  // .authorization((allow) => [
-  //   // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
-  //   // or iotDataFetcher to read from TempAccessGrant.
-  //   allow.resource(grantTempUserAccessFn),
-  //   allow.resource(iotDataFetcher),
-  // ]);
+  // ---- Lambda Backed Queries ----
+  // getFarmIotData: a
+  //   .query()
+  //   .arguments({
+  //     farmId: a.string().required(),
+  //     deviceId: a.id().required(),
+  //     datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
+  //     from: a.datetime(),                // optional
+  //     to: a.datetime(),                  // optional
+  //   })
+  //   .returns(
+  //     a.ref("TimeSeriesPoint").array(),
+  //   )
+  //   .authorization((allow) => [
+  //     // Both admins and temp viewers can call this,
+  //     // but the Lambda enforces TempAccessGrant and device visibility.
+  // allow.publicApiKey()
+  // allow.group('farmAdmin'),
+  // allow.group('tempViewer'),
+  //   ])
+  //   ,
+  // .handler(a.handler.function(tempUserGetFarmIotDataFn)),
 
+  listAllDevices: a
+    .query()
+    .arguments({
+      farmId: a.string().required(),
+    })
+    .returns(a.ref("IoTDeviceView").array())
+    .authorization((allow) => [
+      // Same idea: admins & temps can call it,
+      // Lambda decides what each caller actually sees.
+      // allow.group('farmAdmin'),
+      // allow.group('tempViewer'),
+      allow.publicApiKey(),
+    ])
+    .handler(a.handler.function(listDevices)),
+
+  // ---- Admin Mutations ----
+  // grantUserAccess: a
+  //   .mutation()
+  //   .arguments({
+  //     farmId: a.string().required(),
+  //     // The email of the user you’re granting access to.
+  //     // Lambda will:
+  //     //  - look up or create the Cognito user
+  //     //  - ensure they’re in tempViewer group (for now)
+  //     userEmail: a.string().required(),
+  //     datasetKeys: a.string().array().required(),
+  //     // Optional: restrict to certain devices
+  //     deviceIds: a.id().array(),
+  //     expiresAt: a.datetime().required(),
+  //   })
+  //   .returns(a.ref('UserAccess'))
+  //   .authorization((allow) => [
+  // allow.group('farmAdmin'),
+  //   ])
+  // .handler(a.handler.function(grantUserAccessFn)),
+});
+// (optional) let specific functions use the Data client with proper auth
+// .authorization((allow) => [
+//   // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
+//   // or iotDataFetcher to read from TempAccessGrant.
+//   allow.resource(grantTempUserAccessFn),
+//   allow.resource(iotDataFetcher),
+// ]);
 
 // 2) Export Schema type for typed clients
 export type Schema = ClientSchema<typeof schema>;
