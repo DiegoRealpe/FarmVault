@@ -67,7 +67,6 @@ const schema = a.schema({
     farmId: a.string().required(), // references Farm.id
     applicationId: a.string().required(),
     gatewayId: a.string(), // optional: device might talk via different gateways
-    name: a.string(), // "North field temp sensor"
     description: a.string(),
     location: a.string(), // "North field, row 3"
   }),
