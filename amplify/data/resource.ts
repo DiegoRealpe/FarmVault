@@ -64,7 +64,12 @@ const schema = a.schema({
     name: a.string(),
     devEui: a.string().required(),
     type: a.ref("DeviceType").required(),
-    // lastSeenAt: a.datetime(),
+    farmId: a.string().required(), // references Farm.id
+    applicationId: a.string().required(),
+    gatewayId: a.string(), // optional: device might talk via different gateways
+    name: a.string(), // "North field temp sensor"
+    description: a.string(),
+    location: a.string(), // "North field, row 3"
   }),
 
   TimeSeriesPoint: a.customType({
