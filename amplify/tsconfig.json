@@ -12,6 +12,7 @@
       "$amplify/*": [
         "../.amplify/generated/*"
       ]
-    }
+    },
+    "noImplicitAny": false
   }
 }
