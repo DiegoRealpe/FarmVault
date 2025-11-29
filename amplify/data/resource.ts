@@ -1,4 +1,5 @@
 import { a, defineData, type ClientSchema } from '@aws-amplify/backend';
+import { listDevices } from '../functions/list-devices/resource';
 
 const schema = a
   .schema({
@@ -12,7 +13,6 @@ const schema = a
         region: a.string(), // optional by default
       })
       .authorization((allow) => [
-        allow.ownerDefinedIn('ownerSub'),
         allow.group('farmAdmin'),
       ]),
 
@@ -65,25 +65,25 @@ const schema = a
     }),
 
     // ---- Lambda Backed Queries ----
-    getFarmIotData: a
-      .query()
-      .arguments({
-        farmId: a.string().required(),
-        deviceId: a.id().required(),
-        datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
-        from: a.datetime(),                // optional
-        to: a.datetime(),                  // optional
-      })
-      .returns(
-        a.ref("TimeSeriesPoint").array(),
-      )
-      .authorization((allow) => [
-        // Both admins and temp viewers can call this,
-        // but the Lambda enforces TempAccessGrant and device visibility.
-        allow.group('farmAdmin'),
-        allow.group('tempViewer'),
-      ])
-      ,
+    // getFarmIotData: a
+    //   .query()
+    //   .arguments({
+    //     farmId: a.string().required(),
+    //     deviceId: a.id().required(),
+    //     datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
+    //     from: a.datetime(),                // optional
+    //     to: a.datetime(),                  // optional
+    //   })
+    //   .returns(
+    //     a.ref("TimeSeriesPoint").array(),
+    //   )
+    //   .authorization((allow) => [
+    //     // Both admins and temp viewers can call this,
+    //     // but the Lambda enforces TempAccessGrant and device visibility.
+    //     allow.group('farmAdmin'),
+    //     allow.group('tempViewer'),
+    //   ])
+    //   ,
       // .handler(a.handler.function(tempUserGetFarmIotDataFn)),
     
     listDevices: a
@@ -100,27 +100,27 @@ const schema = a
         allow.group('farmAdmin'),
         allow.group('tempViewer'),
       ])
-      // .handler(a.handler.function(tempUserListDevicesFn));
-,
+      .handler(a.handler.function(listDevices)),
+
     // ---- Admin Mutations ----
-    grantUserAccess: a
-      .mutation()
-      .arguments({
-        farmId: a.string().required(),
-        // The email of the user you’re granting access to.
-        // Lambda will:
-        //  - look up or create the Cognito user
-        //  - ensure they’re in tempViewer group (for now)
-        userEmail: a.string().required(),
-        datasetKeys: a.string().array().required(),
-        // Optional: restrict to certain devices
-        deviceIds: a.id().array(),
-        expiresAt: a.datetime().required(),
-      })
-      .returns(a.ref('UserAccess'))
-      .authorization((allow) => [
-        allow.group('farmAdmin'),
-      ])
+    // grantUserAccess: a
+    //   .mutation()
+    //   .arguments({
+    //     farmId: a.string().required(),
+    //     // The email of the user you’re granting access to.
+    //     // Lambda will:
+    //     //  - look up or create the Cognito user
+    //     //  - ensure they’re in tempViewer group (for now)
+    //     userEmail: a.string().required(),
+    //     datasetKeys: a.string().array().required(),
+    //     // Optional: restrict to certain devices
+    //     deviceIds: a.id().array(),
+    //     expiresAt: a.datetime().required(),
+    //   })
+    //   .returns(a.ref('UserAccess'))
+    //   .authorization((allow) => [
+    //     allow.group('farmAdmin'),
+    //   ])
       // .handler(a.handler.function(grantUserAccessFn)),
 
   })
