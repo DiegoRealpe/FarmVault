@@ -1,11 +1,6 @@
 import type { Schema } from '../../data/resource';
 import { Amplify } from 'aws-amplify';
 import { generateClient } from 'aws-amplify/data';
-import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-
-const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig();
-
-Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
