@@ -4,10 +4,10 @@ export const auth = defineAuth({
   loginWith: {
     email: true,
   },
-  userAttributes: {
-    email: { required: true },
-  },
-  groups: ['farmAdmin', 'tempViewer'],
+  // userAttributes: {
+  //   email: { required: true },
+  // },
+  // groups: ['farmAdmin', 'tempViewer'],
   // access: (allow) => [
   //   allow.resource("grantTempUserAccessFn").to([
   //     "createUser",

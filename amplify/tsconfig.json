@@ -1,8 +1,9 @@
 {
+  "extends": "../tsconfig.json",
   "compilerOptions": {
-    "target": "es2022",
-    "module": "es2022",
-    "moduleResolution": "bundler",
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "resolveJsonModule": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
@@ -14,5 +15,6 @@
       ]
     },
     "noImplicitAny": false
-  }
+  },
+  "include": ["./**/*.ts"]
 }
