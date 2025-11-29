@@ -25,7 +25,7 @@ const schema = a.schema({
   DeviceType: a.enum(["TEMPERATURE", "MOISTURE"]),
   IoTDevice: a
     .model({
-      id: a.id().required(),
+      id: a.string().required(),
       type: a.ref("DeviceType").required(), // TEMPERATURE or MOISTURE
       farmId: a.string().required(), // references Farm.id
       devEui: a.string().required(), // unique identifier from the network server
@@ -48,7 +48,7 @@ const schema = a.schema({
       farmId: a.string().required(), //Maybe not needed?
       datasetKeys: a.string().array().required(),
       // Optional: restrict to certain devices only (future-ready)
-      deviceIds: a.id().array(),
+      deviceIds: a.string().array(),
       expiresAt: a.datetime().required(), // ISO string for app logic/UI
       ttl: a.integer().required(), // epoch seconds for Dynamo TTL
       createdBySub: a.string().required(),
@@ -60,7 +60,7 @@ const schema = a.schema({
 
   // -- Custom Types --
   IoTDeviceView: a.customType({
-    id: a.id().required(),
+    id: a.string().required(),
     name: a.string(),
     devEui: a.string().required(),
     type: a.ref("DeviceType").required(),
@@ -77,7 +77,7 @@ const schema = a.schema({
   //   .query()
   //   .arguments({
   //     farmId: a.string().required(),
-  //     deviceId: a.id().required(),
+  //     deviceId: a.string().required(),
   //     datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
   //     from: a.datetime(),                // optional
   //     to: a.datetime(),                  // optional
@@ -122,7 +122,7 @@ const schema = a.schema({
   //     userEmail: a.string().required(),
   //     datasetKeys: a.string().array().required(),
   //     // Optional: restrict to certain devices
-  //     deviceIds: a.id().array(),
+  //     deviceIds: a.string().array(),
   //     expiresAt: a.datetime().required(),
   //   })
   //   .returns(a.ref('UserAccess'))
