@@ -130,14 +130,13 @@ const schema = a.schema({
   // allow.group('farmAdmin'),
   //   ])
   // .handler(a.handler.function(grantUserAccessFn)),
-});
+})
 // (optional) let specific functions use the Data client with proper auth
-// .authorization((allow) => [
-//   // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
-//   // or iotDataFetcher to read from TempAccessGrant.
-//   allow.resource(grantTempUserAccessFn),
-//   allow.resource(iotDataFetcher),
-// ]);
+.authorization((allow) => [
+  // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
+  // or iotDataFetcher to read from TempAccessGrant.
+  allow.resource(listAllDevicesFn),
+]);
 
 // 2) Export Schema type for typed clients
 export type Schema = ClientSchema<typeof schema>;
