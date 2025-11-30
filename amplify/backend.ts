@@ -106,7 +106,7 @@ const glueJob = new glue.CfnJob(glueStack, 'IotTestWriteParquetJob', {
   command: {
     name: 'glueetl', // Spark-based Glue ETL job
     pythonVersion: '3',
-    scriptLocation: `s3://${bucket.bucketName}/scripts/test_write_parquet.py`,
+    scriptLocation: `s3://${bucket.bucketName}/script/iot_json_to_parquet.py`,
   },
   glueVersion: '4.0',
   defaultArguments: {
