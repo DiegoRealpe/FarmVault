@@ -1,5 +1,6 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { listAllDevicesFn } from "../functions/list-all-devices/resource";
+import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 
 const schema = a.schema({
   // Models stored in Dynamo
@@ -84,27 +85,26 @@ const schema = a.schema({
   }),
 
   // ---- Lambda Backed Queries ----
-  // getFarmIotData: a
-  //   .query()
-  //   .arguments({
-  //     farmId: a.string().required(),
-  //     deviceId: a.string().required(),
-  //     datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
-  //     from: a.datetime(),                // optional
-  //     to: a.datetime(),                  // optional
-  //   })
-  //   .returns(
-  //     a.ref("TimeSeriesPoint").array(),
-  //   )
-  //   .authorization((allow) => [
-  //     // Both admins and temp viewers can call this,
-  //     // but the Lambda enforces TempAccessGrant and device visibility.
-  // allow.publicApiKey()
-  // allow.group('farmAdmin'),
-  // allow.group('tempViewer'),
-  //   ])
-  //   ,
-  // .handler(a.handler.function(tempUserGetFarmIotDataFn)),
+  getFarmIotData: a
+    .query()
+    .arguments({
+      // farmId: a.string().required(),
+      deviceId: a.string().required(),
+      // datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
+      // from: a.datetime(),                // optional
+      // to: a.datetime(),                  // optional
+    })
+    .returns(
+      a.ref("TimeSeriesPoint").array(),
+    )
+    .authorization((allow) => [
+      // Both admins and temp viewers can call this,
+      // but the Lambda enforces TempAccessGrant and device visibility.
+      allow.publicApiKey()
+      // allow.group('farmAdmin'),
+      // allow.group('tempViewer'),
+    ])
+    .handler(a.handler.function(getFarmIotDataFn)),
 
   listAllDevices: a
     .query()
@@ -147,6 +147,7 @@ const schema = a.schema({
   // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
   // or iotDataFetcher to read from TempAccessGrant.
   allow.resource(listAllDevicesFn),
+  allow.resource(getFarmIotDataFn),
 ]);
 
 // 2) Export Schema type for typed clients
