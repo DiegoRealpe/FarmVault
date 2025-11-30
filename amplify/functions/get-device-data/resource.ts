@@ -1,6 +1,6 @@
 import { defineFunction } from '@aws-amplify/backend';
 
-export const getFarmIotDataFn = defineFunction({
-  name: 'get-farm-iot-data',
+export const getDeviceDataFn = defineFunction({
+  name: 'get-device-data',
   entry: './handler.ts',
 });
