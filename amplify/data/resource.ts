@@ -16,6 +16,8 @@ const schema = a.schema({
       ownerSub: a.string().required(),
       description: a.string().required(),
       region: a.string(), // optional by default
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
     })
     .authorization((allow) => [
       allow.publicApiKey(),
@@ -35,7 +37,8 @@ const schema = a.schema({
       name: a.string(), // "North field temp sensor"
       description: a.string(),
       location: a.string(), // "North field, row 3"
-      // lastSeenAt: a.datetime(), // derived from latest reading
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
     })
     .authorization((allow) => [
       allow.publicApiKey(),
@@ -52,6 +55,8 @@ const schema = a.schema({
       expiresAt: a.datetime().required(), // ISO string for app logic/UI
       ttl: a.integer().required(), // epoch seconds for Dynamo TTL
       createdBySub: a.string().required(),
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
     })
     .authorization((allow) => [
       allow.publicApiKey(),
@@ -69,6 +74,8 @@ const schema = a.schema({
     gatewayId: a.string(), // optional: device might talk via different gateways
     description: a.string(),
     location: a.string(), // "North field, row 3"
+    createdAt: a.datetime().required(),
+    updatedAt: a.datetime().required(),
   }),
 
   TimeSeriesPoint: a.customType({
