@@ -113,7 +113,7 @@ const glueJob = new glue.CfnJob(glueStack, 'IotTestWriteParquetJob', {
     '--job-language': 'python',
     '--enable-metrics': 'true',
     // Argument your script reads as OUTPUT_S3_PATH
-    '--OUTPUT_S3_PATH': `s3://${bucket.bucketName}/parquet/test/`,
+    '--PARQUET_S3_PATH': `s3://${bucket.bucketName}/parquet/`,
   },
 });
 
