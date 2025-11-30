@@ -5,7 +5,14 @@ import { metricsBucket } from "./storage/resource";
 import { listAllDevicesFn } from "./functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+// import * as glue from 'aws-cdk-lib/aws-glue';
+// import * as iam from 'aws-cdk-lib/aws-iam';
 import * as path from 'path';
+import { fileURLToPath } from 'url';
+
+// ESM-compatible __dirname / __filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 export const backend = defineBackend({
   auth,
@@ -30,3 +37,5 @@ new s3deploy.BucketDeployment(glueAssetsStack, 'DeployGlueScripts', {
     ),
   ],
 });
+
+// const glueStack = backend.createStack('GlueInfra');
