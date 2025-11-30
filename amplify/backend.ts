@@ -161,3 +161,30 @@ const athenaWorkGroup = new athena.CfnWorkGroup(glueStack, 'FarmVaultAthenaWg', 
 });
 
 athenaWorkGroup.addDependency(glueJob);
+
+const getFarmIotDataCfn = backend.getFarmIotDataFn.resources.lambda;
+
+// 1) Athena: start/poll/get results
+getFarmIotDataCfn.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: [
+      'athena:StartQueryExecution',
+      'athena:GetQueryExecution',
+      'athena:GetQueryResults',
+    ],
+    resources: ['*'], // you can tighten this later
+  }),
+);
+
+// 2) Glue Catalog read (optional but recommended)
+getFarmIotDataCfn.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: [
+      'glue:GetDatabase',
+      'glue:GetDatabases',
+      'glue:GetTable',
+      'glue:GetTables',
+    ],
+    resources: ['*'], // can be narrowed to specific DB/table ARNs
+  }),
+);
