@@ -5,6 +5,7 @@ import { metricsBucket } from "./storage/resource";
 import { listAllDevicesFn } from "./functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as path from 'path';
 
 export const backend = defineBackend({
   auth,
@@ -24,6 +25,8 @@ new s3deploy.BucketDeployment(glueAssetsStack, 'DeployGlueScripts', {
   destinationBucket: bucket,
   destinationKeyPrefix: 'script/', // will result in script/iot_json_to_parquet.py
   sources: [
-    s3deploy.Source.asset('glue-scripts'), // path in your repo root
+    s3deploy.Source.asset(
+      path.join(__dirname, 'glue-scripts')
+    ),
   ],
 });
