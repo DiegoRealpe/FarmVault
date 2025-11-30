@@ -7,6 +7,7 @@ import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
 import * as glue from 'aws-cdk-lib/aws-glue';
 import * as iam from 'aws-cdk-lib/aws-iam';
+import * as athena from 'aws-cdk-lib/aws-athena';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
 import { Stack } from "aws-cdk-lib";
@@ -146,4 +147,17 @@ const crawler = new glue.CfnCrawler(glueStack, 'IotParquetCrawler', {
 
 // Optional: ensure crawler sees DB
 crawler.addDependency(glueDb);
-crawler.addDependency(glueJob);
+
+const athenaWorkGroup = new athena.CfnWorkGroup(glueStack, 'FarmVaultAthenaWg', {
+  name: 'farmvault-wg', // you'll refer to this in the console and in Lambda
+  workGroupConfiguration: {
+    resultConfiguration: {
+      outputLocation: `s3://${bucket.bucketName}/athena-results/`,
+    },
+    // Optional extras:
+    // enforceWorkGroupConfiguration: true,
+    // publishCloudWatchMetricsEnabled: true,
+  },
+});
+
+athenaWorkGroup.addDependency(glueJob);

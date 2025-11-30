@@ -19,5 +19,10 @@ export const metricsBucket = defineStorage({
       allow.authenticated.to(['read', 'write']),
       allow.resource(getFarmIotDataFn).to(['read', 'write', 'delete'])
     ],
+    'athena-results/*': [
+      allow.guest.to(['read']),
+      allow.authenticated.to(['read', 'write']),
+      allow.resource(getFarmIotDataFn).to(['read', 'write', 'delete'])
+    ],
   }),
 });
