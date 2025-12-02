@@ -8,7 +8,6 @@ import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as glue from "aws-cdk-lib/aws-glue";
 import * as iam from "aws-cdk-lib/aws-iam";
 import * as athena from "aws-cdk-lib/aws-athena";
-import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { Stack } from "aws-cdk-lib";
@@ -23,16 +22,6 @@ export const backend = defineBackend({
   metricsBucket,
   listAllDevicesFn,
   getDeviceDataFn,
-});
-
-const getIotDeviceDataFn = backend.getDeviceDataFn.resources.lambda;
-const lambdaStack = getIotDeviceDataFn.stack;
-
-new lambda.LayerVersion(lambdaStack, 'AthenaSdkLayer', {
-  code: lambda.Code.fromAsset(path.join(__dirname, 'layers/athena-sdk')),
-  compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
-  layerVersionName: 'farmvault-athena-sdk',
-  description: 'Layer providing @aws-sdk/client-athena for IoT resolvers',
 });
 
 const glueAssetsStack = backend.createStack("GlueAssets");
