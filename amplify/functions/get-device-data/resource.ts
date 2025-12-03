@@ -1,9 +1,0 @@
-import { defineFunction } from '@aws-amplify/backend';
-
-export const getDeviceDataFn = defineFunction({
-  name: 'get-device-data',
-  entry: './handler.ts',
-  layers: {
-    '@aws-sdk/client-athena': 'athena-sdk:1',
-  }
-});

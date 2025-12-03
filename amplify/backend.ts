@@ -3,13 +3,13 @@ import { auth } from "./auth/resource";
 import { data } from "./data/resource";
 import { metricsBucket } from "./storage/resource";
 import { listAllDevicesFn } from "./functions/list-all-devices/resource";
-import { getDeviceDataFn } from "./functions/get-device-data/resource";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-import * as glue from "aws-cdk-lib/aws-glue";
-import * as iam from "aws-cdk-lib/aws-iam";
-import * as athena from "aws-cdk-lib/aws-athena";
-import * as path from "path";
-import { fileURLToPath } from "url";
+import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
+import * as s3deploy from 'aws-cdk-lib/aws-s3-deployment';
+import * as glue from 'aws-cdk-lib/aws-glue';
+import * as iam from 'aws-cdk-lib/aws-iam';
+import * as athena from 'aws-cdk-lib/aws-athena';
+import * as path from 'path';
+import { fileURLToPath } from 'url';
 import { Stack } from "aws-cdk-lib";
 
 // ESM-compatible __dirname / __filename
@@ -21,60 +21,64 @@ export const backend = defineBackend({
   data,
   metricsBucket,
   listAllDevicesFn,
-  getDeviceDataFn,
+  getFarmIotDataFn
 });
 
-const glueAssetsStack = backend.createStack("GlueAssets");
+const glueAssetsStack = backend.createStack('GlueAssets');
 
 // Get the S3 bucket created by Amplify Storage
 const bucket = backend.metricsBucket.resources.bucket;
 
 // Deploy local glue-scripts/ folder into s3://<bucket>/script/
-new s3deploy.BucketDeployment(glueAssetsStack, "DeployGlueScripts", {
+new s3deploy.BucketDeployment(glueAssetsStack, 'DeployGlueScripts', {
   destinationBucket: bucket,
-  destinationKeyPrefix: "script/", // will result in script/iot_json_to_parquet.py
-  sources: [s3deploy.Source.asset(path.join(__dirname, "glue-scripts"))],
+  destinationKeyPrefix: 'script/', // will result in script/iot_json_to_parquet.py
+  sources: [
+    s3deploy.Source.asset(
+      path.join(__dirname, 'glue-scripts')
+    ),
+  ],
 });
 
-const glueStack = backend.createStack("GlueInfra");
+const glueStack = backend.createStack('GlueInfra');
 
 // Glue Catalog account id (same as stack account)
 const catalogId = Stack.of(glueStack).account;
 
 // 1) Glue Database (CfnDatabase)
-const glueDb = new glue.CfnDatabase(glueStack, "IotTelemetryDb", {
+const glueDb = new glue.CfnDatabase(glueStack, 'IotTelemetryDb', {
   catalogId,
   databaseInput: {
-    name: "iot_telemetry", // name in Glue Data Catalog
+    name: 'iot_telemetry', // name in Glue Data Catalog
   },
 });
 
 // 2) Glue Table pointing at Parquet output (CfnTable)
-const glueTable = new glue.CfnTable(glueStack, "IotTelemetryParquetTable", {
+const glueTable = new glue.CfnTable(glueStack, 'IotTelemetryParquetTable', {
   catalogId,
   databaseName: glueDb.ref, // or 'iot_telemetry'
   tableInput: {
-    name: "iot_metrics_parquet",
-    tableType: "EXTERNAL_TABLE",
+    name: 'iot_metrics_parquet',
+    tableType: 'EXTERNAL_TABLE',
     storageDescriptor: {
       location: `s3://${bucket.bucketName}/parquet/`,
       inputFormat:
-        "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+        'org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat',
       outputFormat:
-        "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+        'org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat',
       serdeInfo: {
         serializationLibrary:
-          "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+          'org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe',
       },
       columns: [
-        { name: "id", type: "string" },
-        { name: "payload", type: "string" },
-        { name: "moisture", type: "int" },
-        { name: "timestamp", type: "string" },
-        { name: "event_ts", type: "timestamp" },
-        { name: "application_id", type: "string" },
-        { name: "device_id", type: "string" },
-        { name: "gateway_id", type: "string" },
+        { name: 'id', type: 'string' },
+        { name: 'payload', type: 'string' },
+        { name: 'moisture', type: 'int' },
+        { name: 'timestamp', type: 'string' },
+        { name: 'event_ts', type: 'timestamp' },
+        { name: 'application_id', type: 'string' },
+        { name: 'device_id', type: 'string' },
+        { name: 'gateway_id', type: 'string' },
       ],
     },
   },
@@ -84,54 +88,54 @@ const glueTable = new glue.CfnTable(glueStack, "IotTelemetryParquetTable", {
 glueTable.addDependency(glueDb);
 
 // 3) Glue Job role (IAM)
-const glueJobRole = new iam.Role(glueStack, "GlueJobRole", {
-  assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
+const glueJobRole = new iam.Role(glueStack, 'GlueJobRole', {
+  assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
 });
 
 // Standard Glue service role policy
 glueJobRole.addManagedPolicy(
-  iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole")
+  iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSGlueServiceRole'),
 );
 
 // Allow the job to read & write in our data lake bucket
 bucket.grantReadWrite(glueJobRole);
 
 // 4) Glue Job (CfnJob) running test_write_parquet.py
-const glueJob = new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
-  name: "iot-test-write-parquet", // visible name in Glue console
+const glueJob = new glue.CfnJob(glueStack, 'IotTestWriteParquetJob', {
+  name: 'iot-test-write-parquet', // visible name in Glue console
   role: glueJobRole.roleArn,
   command: {
-    name: "glueetl", // Spark-based Glue ETL job
-    pythonVersion: "3",
+    name: 'glueetl', // Spark-based Glue ETL job
+    pythonVersion: '3',
     scriptLocation: `s3://${bucket.bucketName}/script/iot_json_to_parquet.py`,
   },
-  glueVersion: "4.0",
+  glueVersion: '4.0',
   defaultArguments: {
-    "--job-language": "python",
-    "--enable-metrics": "true",
+    '--job-language': 'python',
+    '--enable-metrics': 'true',
     // Argument your script reads as OUTPUT_S3_PATH
-    "--PARQUET_S3_PATH": `s3://${bucket.bucketName}/parquet/`,
+    '--PARQUET_S3_PATH': `s3://${bucket.bucketName}/parquet/`,
   },
 });
 
 // 5) Glue Crawler role (IAM)
-const glueCrawlerRole = new iam.Role(glueStack, "GlueCrawlerRole", {
-  assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
+const glueCrawlerRole = new iam.Role(glueStack, 'GlueCrawlerRole', {
+  assumedBy: new iam.ServicePrincipal('glue.amazonaws.com'),
 });
 
 glueCrawlerRole.addManagedPolicy(
-  iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole")
+  iam.ManagedPolicy.fromAwsManagedPolicyName('service-role/AWSGlueServiceRole'),
 );
 
 // Crawler just needs read access on the bucket
 bucket.grantRead(glueCrawlerRole);
 
 // 6) Glue Crawler (CfnCrawler) to scan Parquet in /parquet/
-const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
-  name: "iot-parquet-crawler",
+const crawler = new glue.CfnCrawler(glueStack, 'IotParquetCrawler', {
+  name: 'iot-parquet-crawler',
   role: glueCrawlerRole.roleArn,
   databaseName: glueDb.ref,
-  tablePrefix: "iot_", // tables created by crawler will start with 'iot_'
+  tablePrefix: 'iot_', // tables created by crawler will start with 'iot_'
   targets: {
     s3Targets: [
       {
@@ -144,47 +148,16 @@ const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
 // Optional: ensure crawler sees DB
 crawler.addDependency(glueDb);
 
-const athenaWorkGroup = new athena.CfnWorkGroup(
-  glueStack,
-  "FarmVaultAthenaWg",
-  {
-    name: "farmvault-wg", // you'll refer to this in the console and in Lambda
-    workGroupConfiguration: {
-      resultConfiguration: {
-        outputLocation: `s3://${bucket.bucketName}/athena-results/`,
-      },
-      // Optional extras:
-      // enforceWorkGroupConfiguration: true,
-      // publishCloudWatchMetricsEnabled: true,
+const athenaWorkGroup = new athena.CfnWorkGroup(glueStack, 'FarmVaultAthenaWg', {
+  name: 'farmvault-wg', // you'll refer to this in the console and in Lambda
+  workGroupConfiguration: {
+    resultConfiguration: {
+      outputLocation: `s3://${bucket.bucketName}/athena-results/`,
     },
-  }
-);
+    // Optional extras:
+    // enforceWorkGroupConfiguration: true,
+    // publishCloudWatchMetricsEnabled: true,
+  },
+});
 
 athenaWorkGroup.addDependency(glueJob);
-
-const getDeviceDataCfn = backend.getDeviceDataFn.resources.lambda;
-
-// 1) Athena: start/poll/get results
-getDeviceDataCfn.addToRolePolicy(
-  new iam.PolicyStatement({
-    actions: [
-      "athena:StartQueryExecution",
-      "athena:GetQueryExecution",
-      "athena:GetQueryResults",
-    ],
-    resources: ["*"], // you can tighten this later
-  })
-);
-
-// 2) Glue Catalog read (optional but recommended)
-getDeviceDataCfn.addToRolePolicy(
-  new iam.PolicyStatement({
-    actions: [
-      "glue:GetDatabase",
-      "glue:GetDatabases",
-      "glue:GetTable",
-      "glue:GetTables",
-    ],
-    resources: ["*"], // can be narrowed to specific DB/table ARNs
-  })
-);

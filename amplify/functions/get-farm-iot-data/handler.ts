@@ -1,5 +1,5 @@
 export const handler = async (_event) => {
-  return "Hello from my first function!";
+  return "Hello from my second function!";
 };
 
 // import {
