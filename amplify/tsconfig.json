@@ -11,9 +11,7 @@
     "skipLibCheck": true,
     "types": ["node"],
     "paths": {
-      "$amplify/*": [
-        "../.amplify/generated/*"
-      ]
+      "$amplify/*": ["../.amplify/generated/*"]
     },
     "noImplicitAny": false
   },

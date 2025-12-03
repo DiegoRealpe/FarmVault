@@ -1,4 +1,4 @@
-import { defineAuth } from '@aws-amplify/backend';
+import { defineAuth } from "@aws-amplify/backend";
 
 export const auth = defineAuth({
   loginWith: {
@@ -11,7 +11,7 @@ export const auth = defineAuth({
   // access: (allow) => [
   //   allow.resource("grantTempUserAccessFn").to([
   //     "createUser",
-  //     "manageGroups", 
+  //     "manageGroups",
   //     "addUserToGroup"
   //   ])
   // ]
