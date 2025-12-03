@@ -9,13 +9,18 @@ export const handler = async (_event) => {
 //   GetQueryResultsCommand,
 //   QueryExecutionState,
 // } from '@aws-sdk/client-athena';
+// import type { Schema } from "../../data/resource";
+// import { Amplify } from "aws-amplify";
+// import { generateClient } from "aws-amplify/data";
+// import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+// import { env } from "$amplify/env/list-all-devices";
 
 // const athena = new AthenaClient({});
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // type AthenaRow = Record<string, string | null>;
 
-// export const handler = async (event: any) => {
+// export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event: any) => {
 //   console.log('[getIotDeviceData] Event:', JSON.stringify(event));
 
 //   // GraphQL args are typically under event.arguments
@@ -97,10 +102,10 @@ export const handler = async (_event) => {
 
 //   const rows = resultsResp.ResultSet?.Rows ?? [];
 //   if (rows.length === 0) {
-//     return {
+//     return [{
 //       deviceId: deviceIdArg,
 //       points: [],
-//     };
+//     }];
 //   }
 
 //   const headerCells = rows[0].Data ?? [];
@@ -133,8 +138,8 @@ export const handler = async (_event) => {
 //   );
 
 //   // Matches DeviceTimeSeries type
-//   return {
+//   return [{
 //     deviceId: deviceIdArg,
 //     points,
-//   };
+//   }];
 // };

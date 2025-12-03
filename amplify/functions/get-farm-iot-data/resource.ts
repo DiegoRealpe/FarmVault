@@ -3,4 +3,7 @@ import { defineFunction } from "@aws-amplify/backend";
 export const getFarmIotDataFn = defineFunction({
   name: "get-farm-iot-data",
   entry: "./handler.ts",
+  layers: {
+    '@aws-sdk/client-athena': 'athena-sdk:1',
+  }
 });
