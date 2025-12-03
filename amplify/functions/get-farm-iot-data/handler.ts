@@ -1,21 +1,24 @@
-export const handler = async (_event) => {
-  return "Hello from my second function!";
-};
 
-// import {
-//   AthenaClient,
-//   StartQueryExecutionCommand,
-//   GetQueryExecutionCommand,
-//   GetQueryResultsCommand,
-//   QueryExecutionState,
-// } from '@aws-sdk/client-athena';
-// import type { Schema } from "../../data/resource";
-// import { Amplify } from "aws-amplify";
-// import { generateClient } from "aws-amplify/data";
-// import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-// import { env } from "$amplify/env/list-all-devices";
+import {
+    AthenaClient,
+    // StartQueryExecutionCommand,
+    // GetQueryExecutionCommand,
+    // GetQueryResultsCommand,
+    // QueryExecutionState,
+  } from '@aws-sdk/client-athena';
+  // import type { Schema } from "../../data/resource";
+  // import { Amplify } from "aws-amplify";
+  // import { generateClient } from "aws-amplify/data";
+  // import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+  // import { env } from "$amplify/env/list-all-devices";
+  
+  // const athena = 
+  new AthenaClient({});
 
-// const athena = new AthenaClient({});
+  export const handler = async (_event) => {
+    return "Hello from my second function!";
+  };
+
 // const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // type AthenaRow = Record<string, string | null>;
