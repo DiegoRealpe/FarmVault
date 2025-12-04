@@ -36,6 +36,10 @@ new s3deploy.BucketDeployment(glueAssetsStack, "DeployGlueScripts", {
   sources: [s3deploy.Source.asset(path.join(__dirname, "glue-scripts"))],
 });
 
+backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
+  iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
+)
+
 const glueStack = backend.createStack("GlueInfra");
 
 // Glue Catalog account id (same as stack account)

@@ -5,5 +5,5 @@ export const getFarmIotDataFn = defineFunction({
   entry: "./handler.ts",
   layers: {
     '@aws-sdk/client-athena': 'athena-sdk:1',
-  }
+  },
 });
