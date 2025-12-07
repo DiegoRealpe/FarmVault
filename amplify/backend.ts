@@ -24,13 +24,13 @@ export const backend = defineBackend({
   getFarmIotDataFn,
 });
 
-const glueAssetsStack = backend.createStack("GlueAssets");
+const backendStack = backend.stack
 
 // Get the S3 bucket created by Amplify Storage
 const bucket = backend.metricsBucket.resources.bucket;
 
 // Deploy local glue-scripts/ folder into s3://<bucket>/script/
-new s3deploy.BucketDeployment(glueAssetsStack, "DeployGlueScripts", {
+new s3deploy.BucketDeployment(backendStack, "DeployGlueScripts", {
   destinationBucket: bucket,
   destinationKeyPrefix: "script/", // will result in script/iot_json_to_parquet.py
   sources: [s3deploy.Source.asset(path.join(__dirname, "glue-scripts"))],
