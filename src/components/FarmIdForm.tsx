@@ -1,6 +1,5 @@
-// components/FarmIdForm.tsx
 import { useState } from 'react';
-import '../pages/DeviceTable.css';
+import '../pages/DevicePage.css';
 
 interface FarmIdFormProps {
   currentFarmId: string;
