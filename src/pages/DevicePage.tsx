@@ -14,7 +14,7 @@ function DevicePage() {
   const [error, setError] = useState<string | null>(null);
   
   // TODO: Replace with actual farmId from your app state/context
-  const farmId = "default-farm-id"; // Replace with actual farm ID logic
+  const farmId = "farm-001"; // Replace with actual farm ID logic
 
   useEffect(() => {
     async function fetchDevices() {
