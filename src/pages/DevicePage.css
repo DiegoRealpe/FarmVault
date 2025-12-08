@@ -1,0 +1,273 @@
+.device-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.device-header {
+  margin-bottom: 24px;
+}
+
+.device-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.device-subtitle {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+/* Loading States */
+.loading-container {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.loading-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007AFF;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Error States */
+.error-container {
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.error-message {
+  color: #c62828;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.error-message::before {
+  content: '⚠️';
+}
+
+/* Empty State */
+.empty-state {
+  padding: 40px;
+  text-align: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.empty-state p {
+  margin: 0 0 16px 0;
+  color: #666;
+}
+
+.refresh-button {
+  padding: 8px 16px;
+  background-color: #007AFF;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.refresh-button:hover {
+  background-color: #0056CC;
+}
+
+/* Device Stats & Controls */
+.device-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.device-count {
+  background-color: #007AFF;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.refresh-small {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.refresh-small:hover {
+  background-color: #e0e0e0;
+}
+
+/* Device Table */
+.device-table-container {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+.device-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 800px;
+}
+
+.device-table thead {
+  background-color: #fafafa;
+}
+
+.device-table th {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.device-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.device-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+.device-table td {
+  padding: 16px;
+  font-size: 0.875rem;
+}
+
+/* Device Name Column */
+.device-name {
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.device-description {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* Device EUI Column */
+.device-eui {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: #333;
+}
+
+/* Device Type Badge */
+.type-badge {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  display: inline-block;
+}
+
+.type-sensor {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+
+.type-gateway {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.type-actuator {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+
+.type-default {
+  background-color: #f5f5f5;
+  color: #666;
+}
+
+/* Location Column */
+.device-location {
+  color: #333;
+}
+
+.no-location {
+  color: #999;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Gateway Column */
+.gateway-id {
+  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-size: 0.8125rem;
+  color: #333;
+}
+
+.no-gateway {
+  color: #999;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* Last Updated Column */
+.last-updated {
+  font-size: 0.875rem;
+  color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .device-container {
+    padding: 16px;
+  }
+  
+  .device-title {
+    font-size: 1.5rem;
+  }
+  
+  .device-table th,
+  .device-table td {
+    padding: 12px 8px;
+  }
+  
+  .device-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  
+  .refresh-small {
+    align-self: flex-start;
+  }
+}

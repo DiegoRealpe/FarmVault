@@ -115,7 +115,7 @@ const schema = a
       .arguments({
         farmId: a.string().required(),
       })
-      .returns(a.ref("IoTDeviceView").array())
+      .returns(a.ref("IoTDeviceView").array().required())
       .authorization((allow) => [
         // Same idea: admins & temps can call it,
         // Lambda decides what each caller actually sees.
