@@ -1,42 +1,22 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
-import outputs from "../amplify_outputs.json";
-import { Amplify } from "aws-amplify";
-
-Amplify.configure(outputs);
-const client = generateClient<Schema>();
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import TabFooter from './components/TabFooter';
+import LandingPage from './pages/LandingPage';
+import UserPage from './pages/UserPage';
+import SettingsPage from './pages/SettingsPage';
+import './App.css';
 
 function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
-
   return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial. Also, Diego is awesome
-        </a>
+    <Router>
+      <div className="app">
+        <Routes>
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/user" element={<UserPage />} />
+          <Route path="/settings" element={<SettingsPage />} />
+        </Routes>
+        <TabFooter />
       </div>
-    </main>
+    </Router>
   );
 }
 

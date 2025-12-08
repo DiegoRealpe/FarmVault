@@ -7,7 +7,7 @@ import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
 import * as glue from "aws-cdk-lib/aws-glue";
 import * as iam from "aws-cdk-lib/aws-iam";
-import * as athena from "aws-cdk-lib/aws-athena";
+// import * as athena from "aws-cdk-lib/aws-athena";
 import * as path from "path";
 import { fileURLToPath } from "url";
 import { Stack } from "aws-cdk-lib";
@@ -101,7 +101,7 @@ glueJobRole.addManagedPolicy(
 bucket.grantReadWrite(glueJobRole);
 
 // 4) Glue Job (CfnJob) running test_write_parquet.py
-const glueJob = new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
+new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
   name: "iot-test-write-parquet", // visible name in Glue console
   role: glueJobRole.roleArn,
   command: {
@@ -148,20 +148,20 @@ const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
 // Optional: ensure crawler sees DB
 crawler.addDependency(glueDb);
 
-const athenaWorkGroup = new athena.CfnWorkGroup(
-  glueStack,
-  "FarmVaultAthenaWg",
-  {
-    name: "farmvault-wg", // you'll refer to this in the console and in Lambda
-    workGroupConfiguration: {
-      resultConfiguration: {
-        outputLocation: `s3://${bucket.bucketName}/athena-results/`,
-      },
-      // Optional extras:
-      // enforceWorkGroupConfiguration: true,
-      // publishCloudWatchMetricsEnabled: true,
-    },
-  },
-);
+// const athenaWorkGroup = new athena.CfnWorkGroup(
+//   glueStack,
+//   "FarmVaultAthenaWg",
+//   {
+//     name: "farmvault-wg", // you'll refer to this in the console and in Lambda
+//     workGroupConfiguration: {
+//       resultConfiguration: {
+//         outputLocation: `s3://${bucket.bucketName}/athena-results/`,
+//       },
+//       // Optional extras:
+//       // enforceWorkGroupConfiguration: true,
+//       // publishCloudWatchMetricsEnabled: true,
+//     },
+//   },
+// );
 
-athenaWorkGroup.addDependency(glueJob);
+// athenaWorkGroup.addDependency(glueJob);
