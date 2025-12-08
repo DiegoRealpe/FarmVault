@@ -1,0 +1,36 @@
+/* pages/GrantsPage.css */
+.grants-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.grants-header {
+  margin-bottom: 32px;
+}
+
+.grants-title {
+  font-size: 2rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 8px 0;
+}
+
+.grants-subtitle {
+  color: #666;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.grants-content {
+  padding: 40px;
+  text-align: center;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.grants-content p {
+  margin-bottom: 12px;
+  color: #666;
+}

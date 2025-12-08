@@ -6,13 +6,8 @@ import DeviceTable from "../components/DeviceTable";
 import FarmIdForm from "../components/FarmIdForm";
 import { AppDispatch, RootState } from "../app/store";
 
-// Type for our devices
-// type DeviceType = Schema["IoTDeviceView"]["type"];
-
 function DevicePage() {
   const dispatch = useDispatch<AppDispatch>();
-  
-  // Get all state from Redux without selectors
   const { devices, farmId, loading, error } = useSelector((state: RootState) => state.devices);
 
   useEffect(() => {
@@ -35,7 +30,6 @@ function DevicePage() {
         <p className="device-subtitle">Manage and monitor your IoT devices</p>
       </header>
       
-      {/* Farm ID Selection Form */}
       <div className="farm-id-section">
         <FarmIdForm 
           currentFarmId={farmId}
@@ -44,7 +38,6 @@ function DevicePage() {
         />
       </div>
 
-      {/* Device Table */}
       <DeviceTable 
         devices={devices}
         loading={loading}

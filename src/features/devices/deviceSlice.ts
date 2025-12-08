@@ -20,7 +20,6 @@ const initialState: DeviceState = {
   error: null,
 };
 
-// Async thunk to fetch devices
 export const fetchDevices = createAsyncThunk<Device[], string, { rejectValue: string }>(
   'devices/fetchDevices',
   async (farmId: string, { rejectWithValue }) => {

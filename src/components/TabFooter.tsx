@@ -6,8 +6,9 @@ const TabFooter = () => {
   
   const tabs = [
     { id: 1, name: 'Todos', path: '/', icon: '📝' },
-    { id: 2, name: 'Devices', path: '/devices', icon: '👤' },
-    { id: 3, name: 'Settings', path: '/settings', icon: '⚙️' },
+    { id: 2, name: 'Devices', path: '/devices', icon: '📡' },
+    { id: 3, name: 'Grants', path: '/grants', icon: '🔑' }, // Add this
+    { id: 4, name: 'Settings', path: '/settings', icon: '⚙️' },
   ];
 
   return (
