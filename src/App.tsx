@@ -4,6 +4,10 @@ import LandingPage from './pages/LandingPage';
 import DevicePage from './pages/DevicePage';
 import SettingsPage from './pages/SettingsPage';
 import './App.css';
+import outputs from "../amplify_outputs.json";
+import { Amplify } from "aws-amplify";
+
+Amplify.configure(outputs);
 
 function App() {
   return (

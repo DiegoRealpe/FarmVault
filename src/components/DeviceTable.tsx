@@ -1,5 +1,5 @@
 // import type { Schema } from '../../amplify/data/resource';
-import '../pages/DeviceTable.css';
+import '../pages/DevicePage.css';
 
 // type DeviceType = Schema['IoTDeviceView']['type'];
 
