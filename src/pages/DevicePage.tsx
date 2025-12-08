@@ -1,4 +1,3 @@
-// pages/DevicePage.tsx
 import { useEffect, useState } from "react";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../amplify/data/resource";
@@ -18,28 +17,21 @@ interface FarmIdFormProps {
 
 function FarmIdForm({ currentFarmId, onFarmIdChange, isLoading }: FarmIdFormProps) {
   const [inputValue, setInputValue] = useState(currentFarmId);
-  const [isEditing, setIsEditing] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (inputValue.trim()) {
+    if (inputValue.trim() && inputValue.trim() !== currentFarmId) {
       onFarmIdChange(inputValue.trim());
-      setIsEditing(false);
     }
   };
 
-  const handleCancel = () => {
-    setInputValue(currentFarmId);
-    setIsEditing(false);
-  };
-
-  if (isEditing) {
-    return (
-      <form className="farm-id-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="farmId" className="form-label">
-            Farm ID
-          </label>
+  return (
+    <form className="farm-id-form" onSubmit={handleSubmit}>
+      <div className="form-group">
+        <label htmlFor="farmId" className="form-label">
+          Farm ID
+        </label>
+        <div className="form-input-group">
           <input
             id="farmId"
             type="text"
@@ -47,45 +39,21 @@ function FarmIdForm({ currentFarmId, onFarmIdChange, isLoading }: FarmIdFormProp
             onChange={(e) => setInputValue(e.target.value)}
             className="form-input"
             placeholder="Enter farm ID..."
-            autoFocus
             disabled={isLoading}
           />
-        </div>
-        <div className="form-actions">
           <button
             type="submit"
-            className="btn btn-primary"
-            disabled={isLoading || !inputValue.trim()}
+            className="btn btn-submit"
+            disabled={isLoading || !inputValue.trim() || inputValue.trim() === currentFarmId}
           >
             {isLoading ? 'Loading...' : 'View Devices'}
           </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={handleCancel}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
         </div>
-      </form>
-    );
-  }
-
-  return (
-    <div className="farm-id-display">
-      <div className="farm-id-info">
-        <span className="farm-id-label">Currently viewing Farm ID:</span>
-        <span className="farm-id-value">{currentFarmId}</span>
+        <div className="form-hint">
+          Enter a Farm ID to view its IoT devices
+        </div>
       </div>
-      <button
-        className="btn btn-edit"
-        onClick={() => setIsEditing(true)}
-        disabled={isLoading}
-      >
-        Change Farm
-      </button>
-    </div>
+    </form>
   );
 }
 
@@ -273,12 +241,6 @@ function DevicePage() {
     };
   }, [farmId]);
 
-  const handleFarmIdChange = (newFarmId: string) => {
-    if (newFarmId !== farmId) {
-      setFarmId(newFarmId);
-    }
-  };
-
   return (
     <div className="device-container">
       <header className="device-header">
@@ -290,7 +252,7 @@ function DevicePage() {
       <div className="farm-id-section">
         <FarmIdForm 
           currentFarmId={farmId}
-          onFarmIdChange={handleFarmIdChange}
+          onFarmIdChange={setFarmId}
           isLoading={loading}
         />
       </div>

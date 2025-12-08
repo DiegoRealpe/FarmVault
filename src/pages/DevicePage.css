@@ -33,15 +33,19 @@
   width: 20px;
   height: 20px;
   border: 3px solid #f3f3f3;
-  border-top: 3px solid #007AFF;
+  border-top: 3px solid #007aff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: 12px;
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error States */
@@ -61,7 +65,7 @@
 }
 
 .error-message::before {
-  content: '⚠️';
+  content: "⚠️";
 }
 
 /* Empty State */
@@ -79,7 +83,7 @@
 
 .refresh-button {
   padding: 8px 16px;
-  background-color: #007AFF;
+  background-color: #007aff;
   color: white;
   border: none;
   border-radius: 4px;
@@ -89,7 +93,7 @@
 }
 
 .refresh-button:hover {
-  background-color: #0056CC;
+  background-color: #0056cc;
 }
 
 /* Device Stats & Controls */
@@ -101,7 +105,7 @@
 }
 
 .device-count {
-  background-color: #007AFF;
+  background-color: #007aff;
   color: white;
   padding: 4px 8px;
   border-radius: 4px;
@@ -181,7 +185,7 @@
 
 /* Device EUI Column */
 .device-eui {
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
   font-size: 0.8125rem;
   color: #333;
 }
@@ -229,7 +233,7 @@
 
 /* Gateway Column */
 .gateway-id {
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
   font-size: 0.8125rem;
   color: #333;
 }
@@ -251,161 +255,117 @@
   .device-container {
     padding: 16px;
   }
-  
+
   .device-title {
     font-size: 1.5rem;
   }
-  
+
   .device-table th,
   .device-table td {
     padding: 12px 8px;
   }
-  
+
   .device-controls {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
   }
-  
+
   .refresh-small {
     align-self: flex-start;
   }
 
-/* ========== Farm ID Form Styles ========== */
-.farm-id-section {
-  margin-bottom: 24px;
-  padding: 20px;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
-}
-
-.farm-id-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.form-label {
-  font-weight: 600;
-  color: #333;
-  font-size: 0.875rem;
-}
-
-.form-input {
-  padding: 10px 12px;
-  border: 2px solid #e0e0e0;
-  border-radius: 6px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #007AFF;
-}
-
-.form-input:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-}
-
-.form-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.btn {
-  padding: 10px 20px;
-  border: none;
-  border-radius: 6px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s;
-}
-
-.btn:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-primary {
-  background-color: #007AFF;
-  color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-  background-color: #0056CC;
-}
-
-.btn-secondary {
-  background-color: #6c757d;
-  color: white;
-}
-
-.btn-secondary:hover:not(:disabled) {
-  background-color: #545b62;
-}
-
-.btn-edit {
-  background-color: transparent;
-  color: #007AFF;
-  border: 1px solid #007AFF;
-}
-
-.btn-edit:hover:not(:disabled) {
-  background-color: rgba(0, 122, 255, 0.1);
-}
-
-.farm-id-display {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.farm-id-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.farm-id-label {
-  font-size: 0.875rem;
-  color: #666;
-}
-
-.farm-id-value {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #333;
-  font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
-}
-
-/* ========== Responsive Design Updates ========== */
-@media (max-width: 768px) {
-  .farm-id-display {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-  
+  /* ========== Farm ID Form Styles ========== */
   .farm-id-section {
-    padding: 16px;
+    margin-bottom: 24px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  
-  .form-actions {
-    flex-direction: column;
-  }
-  
-  .btn {
+
+  .farm-id-form {
     width: 100%;
   }
-}
+
+  .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.875rem;
+  }
+
+  .form-input-group {
+    display: flex;
+    gap: 8px;
+  }
+
+  .form-input {
+    flex: 1;
+    padding: 10px 12px;
+    border: 2px solid #e0e0e0;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+  }
+
+  .form-input:focus {
+    outline: none;
+    border-color: #007aff;
+  }
+
+  .form-input:disabled {
+    background-color: #f5f5f5;
+    cursor: not-allowed;
+  }
+
+  .btn-submit {
+    padding: 10px 24px;
+    background-color: #007aff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    white-space: nowrap;
+    min-width: 120px;
+  }
+
+  .btn-submit:hover:not(:disabled) {
+    background-color: #0056cc;
+  }
+
+  .btn-submit:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+  }
+
+  .form-hint {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+  }
+
+  /* ========== Responsive Design Updates ========== */
+  @media (max-width: 768px) {
+    .farm-id-section {
+      padding: 16px;
+    }
+
+    .form-input-group {
+      flex-direction: column;
+    }
+
+    .btn-submit {
+      width: 100%;
+    }
+  }
 }
