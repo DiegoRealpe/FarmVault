@@ -6,168 +6,202 @@ import "./DevicePage.css";
 
 const client = generateClient<Schema>();
 
-function DevicePage() {
-  
-  // const [devices, setDevices] = useState<Array<Schema["IoTDeviceView"]["type"]>>([]);
-  const [devices, setDevices] = useState<Array<any>>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  
-  // TODO: Replace with actual farmId from your app state/context
-  const farmId = "farm-001"; // Replace with actual farm ID logic
+// Type for our devices
+// type DeviceType = Schema["IoTDeviceView"]["type"];
 
-  useEffect(() => {
-    async function fetchDevices() {
-      if (!farmId) {
-        setError("No farm ID provided");
-        setLoading(false);
-        return;
-      }
+// ================ FarmIdForm Component ================
+interface FarmIdFormProps {
+  currentFarmId: string;
+  onFarmIdChange: (farmId: string) => void;
+  isLoading: boolean;
+}
 
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await client.queries.listAllDevices({
-          farmId: farmId
-        });
-        
-        if (response.data) {
-          setDevices(response.data);
-        } else {
-          setError("No devices found");
-        }
-      } catch (err) {
-        console.error("Error fetching devices:", err);
-        setError("Failed to load devices. Please try again.");
-      } finally {
-        setLoading(false);
-      }
+function FarmIdForm({ currentFarmId, onFarmIdChange, isLoading }: FarmIdFormProps) {
+  const [inputValue, setInputValue] = useState(currentFarmId);
+  const [isEditing, setIsEditing] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim()) {
+      onFarmIdChange(inputValue.trim());
+      setIsEditing(false);
     }
+  };
 
-    fetchDevices();
-  }, [farmId]);
+  const handleCancel = () => {
+    setInputValue(currentFarmId);
+    setIsEditing(false);
+  };
 
+  if (isEditing) {
+    return (
+      <form className="farm-id-form" onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="farmId" className="form-label">
+            Farm ID
+          </label>
+          <input
+            id="farmId"
+            type="text"
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            className="form-input"
+            placeholder="Enter farm ID..."
+            autoFocus
+            disabled={isLoading}
+          />
+        </div>
+        <div className="form-actions">
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={isLoading || !inputValue.trim()}
+          >
+            {isLoading ? 'Loading...' : 'View Devices'}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={handleCancel}
+            disabled={isLoading}
+          >
+            Cancel
+          </button>
+        </div>
+      </form>
+    );
+  }
+
+  return (
+    <div className="farm-id-display">
+      <div className="farm-id-info">
+        <span className="farm-id-label">Currently viewing Farm ID:</span>
+        <span className="farm-id-value">{currentFarmId}</span>
+      </div>
+      <button
+        className="btn btn-edit"
+        onClick={() => setIsEditing(true)}
+        disabled={isLoading}
+      >
+        Change Farm
+      </button>
+    </div>
+  );
+}
+
+// ================ DeviceTable Component ================
+interface DeviceTableProps {
+  devices: any[];
+  loading: boolean;
+  error: string | null;
+}
+
+function DeviceTable({ devices, loading, error }: DeviceTableProps) {
   if (loading) {
     return (
-      <div className="device-container">
-        <header className="device-header">
-          <h1 className="device-title">IoT Devices</h1>
-        </header>
-        <div className="loading-container">
-          <div className="loading-spinner"></div>
-          <p>Loading devices...</p>
-        </div>
+      <div className="loading-container">
+        <div className="loading-spinner"></div>
+        <p>Loading devices...</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="device-container">
-        <header className="device-header">
-          <h1 className="device-title">IoT Devices</h1>
-        </header>
-        <div className="error-container">
-          <p className="error-message">{error}</p>
-        </div>
+      <div className="error-container">
+        <p className="error-message">{error}</p>
+      </div>
+    );
+  }
+
+  if (devices.length === 0) {
+    return (
+      <div className="empty-state">
+        <p>No devices found for this farm.</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="refresh-button"
+        >
+          Refresh
+        </button>
       </div>
     );
   }
 
   return (
-    <div className="device-container">
-      <header className="device-header">
-        <h1 className="device-title">IoT Devices</h1>
-        <p className="device-subtitle">Manage and monitor your IoT devices</p>
-      </header>
-      
-      {devices.length === 0 ? (
-        <div className="empty-state">
-          <p>No devices found for this farm.</p>
-          <button 
-            onClick={() => window.location.reload()}
-            className="refresh-button"
-          >
-            Refresh
-          </button>
+    <>
+      <div className="device-controls">
+        <div>
+          <span className="device-count">
+            {devices.length} device{devices.length !== 1 ? 's' : ''}
+          </span>
         </div>
-      ) : (
-        <>
-          <div className="device-controls">
-            <div>
-              <span className="device-count">
-                {devices.length} device{devices.length !== 1 ? 's' : ''}
-              </span>
-            </div>
-            <button 
-              onClick={() => window.location.reload()}
-              className="refresh-small"
-            >
-              ↻ Refresh
-            </button>
-          </div>
+        <button 
+          onClick={() => window.location.reload()}
+          className="refresh-small"
+        >
+          ↻ Refresh
+        </button>
+      </div>
 
-          <div className="device-table-container">
-            <table className="device-table">
-              <thead>
-                <tr>
-                  <th>Device</th>
-                  <th>Device EUI</th>
-                  <th>Type</th>
-                  <th>Location</th>
-                  <th>Gateway</th>
-                  <th>Last Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                {devices.map((device) => (
-                  <tr key={device.id}>
-                    <td>
-                      <div className="device-name">
-                        {device.name || 'Unnamed Device'}
-                      </div>
-                      {device.description && (
-                        <div className="device-description">
-                          {device.description}
-                        </div>
-                      )}
-                    </td>
-                    <td>
-                      <code className="device-eui">{device.devEui}</code>
-                    </td>
-                    <td>
-                      <span className={`type-badge type-${device.type?.toLowerCase() || 'default'}`}>
-                        {device.type}
-                      </span>
-                    </td>
-                    <td>
-                      {device.location ? (
-                        <span className="device-location">{device.location}</span>
-                      ) : (
-                        <span className="no-location">Not specified</span>
-                      )}
-                    </td>
-                    <td>
-                      {device.gatewayId ? (
-                        <code className="gateway-id">{device.gatewayId}</code>
-                      ) : (
-                        <span className="no-gateway">N/A</span>
-                      )}
-                    </td>
-                    <td>
-                      <span className="last-updated">
-                        {formatDate(device.updatedAt)}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </>
-      )}
-    </div>
+      <div className="device-table-container">
+        <table className="device-table">
+          <thead>
+            <tr>
+              <th>Device</th>
+              <th>Device EUI</th>
+              <th>Type</th>
+              <th>Location</th>
+              <th>Gateway</th>
+              <th>Last Updated</th>
+            </tr>
+          </thead>
+          <tbody>
+            {devices.map((device) => (
+              <tr key={device.id}>
+                <td>
+                  <div className="device-name">
+                    {device.name || 'Unnamed Device'}
+                  </div>
+                  {device.description && (
+                    <div className="device-description">
+                      {device.description}
+                    </div>
+                  )}
+                </td>
+                <td>
+                  <code className="device-eui">{device.devEui}</code>
+                </td>
+                <td>
+                  <span className={`type-badge type-${device.type?.toLowerCase() || 'default'}`}>
+                    {device.type}
+                  </span>
+                </td>
+                <td>
+                  {device.location ? (
+                    <span className="device-location">{device.location}</span>
+                  ) : (
+                    <span className="no-location">Not specified</span>
+                  )}
+                </td>
+                <td>
+                  {device.gatewayId ? (
+                    <code className="gateway-id">{device.gatewayId}</code>
+                  ) : (
+                    <span className="no-gateway">N/A</span>
+                  )}
+                </td>
+                <td>
+                  <span className="last-updated">
+                    {formatDate(device.updatedAt)}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
   );
 }
 
@@ -179,7 +213,7 @@ function formatDate(dateString: string): string {
   
   if (diffInHours < 24) {
     return `${diffInHours}h ago`;
-  } else if (diffInHours < 168) { // 7 days
+  } else if (diffInHours < 168) {
     return `${Math.floor(diffInHours / 24)}d ago`;
   } else {
     return date.toLocaleDateString('en-US', {
@@ -188,6 +222,87 @@ function formatDate(dateString: string): string {
       year: 'numeric'
     });
   }
+}
+
+// ================ Main DevicePage Component ================
+function DevicePage() {
+  const [devices, setDevices] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [farmId, setFarmId] = useState("farm-001"); // Default farm ID
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function fetchDevices() {
+      if (!farmId || !isMounted) return;
+
+      try {
+        setLoading(true);
+        setError(null);
+        
+        const response = await client.queries.listAllDevices({
+          farmId: farmId
+        });
+        
+        // Handle the response - use nullish coalescing for safety
+        if (response.data) {
+          setDevices(response.data);
+          if (response.data.length === 0) {
+            setError(`No devices found for farm: ${farmId}`);
+          }
+        } else {
+          setError("Failed to load devices");
+          setDevices([]);
+        }
+      } catch (err) {
+        console.error("Error fetching devices:", err);
+        setError(`Failed to load devices for farm: ${farmId}`);
+        setDevices([]);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    fetchDevices();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [farmId]);
+
+  const handleFarmIdChange = (newFarmId: string) => {
+    if (newFarmId !== farmId) {
+      setFarmId(newFarmId);
+    }
+  };
+
+  return (
+    <div className="device-container">
+      <header className="device-header">
+        <h1 className="device-title">IoT Devices</h1>
+        <p className="device-subtitle">Manage and monitor your IoT devices</p>
+      </header>
+      
+      {/* Farm ID Selection Form */}
+      <div className="farm-id-section">
+        <FarmIdForm 
+          currentFarmId={farmId}
+          onFarmIdChange={handleFarmIdChange}
+          isLoading={loading}
+        />
+      </div>
+
+      {/* Device Table */}
+      <DeviceTable 
+        devices={devices}
+        loading={loading}
+        error={error}
+      />
+    </div>
+  );
 }
 
 export default DevicePage;
