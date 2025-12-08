@@ -1,61 +1,28 @@
-import { useEffect, useState } from "react";
-import { generateClient } from "aws-amplify/data";
-import type { Schema } from "../../amplify/data/resource";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchDevices, setFarmId } from "../features/devices/deviceSlice";
 import "./DevicePage.css";
 import DeviceTable from "../components/DeviceTable";
 import FarmIdForm from "../components/FarmIdForm";
-
-const client = generateClient<Schema>();
+import { AppDispatch, RootState } from "../app/store";
 
 // Type for our devices
 // type DeviceType = Schema["IoTDeviceView"]["type"];
 
 function DevicePage() {
-  const [devices, setDevices] = useState<any[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [farmId, setFarmId] = useState("farm-001"); // Default farm ID
+  const dispatch = useDispatch<AppDispatch>();
+  
+  // Get all state from Redux without selectors
+  const { devices, farmId, loading, error } = useSelector((state: RootState) => state.devices);
 
   useEffect(() => {
-    let isMounted = true;
+    // Fetch devices when component mounts or farmId changes
+    dispatch(fetchDevices(farmId));
+  }, [dispatch, farmId]);
 
-    async function fetchDevices() {
-      if (!farmId || !isMounted) return;
-
-      try {
-        setLoading(true);
-        setError(null);
-        
-        const response = await client.queries.listAllDevices({
-          farmId: farmId
-        });
-        
-        if (response.data) {
-          setDevices(response.data);
-          if (response.data.length === 0) {
-            setError(`No devices found for farm: ${farmId}`);
-          }
-        } else {
-          setError("Failed to load devices");
-          setDevices([]);
-        }
-      } catch (err) {
-        console.error("Error fetching devices:", err);
-        setError(`Failed to load devices for farm: ${farmId}`);
-        setDevices([]);
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    }
-
-    fetchDevices();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [farmId]);
+  const handleFarmIdChange = (newFarmId: string) => {
+    dispatch(setFarmId(newFarmId));
+  };
 
   return (
     <div className="device-container">
@@ -68,7 +35,7 @@ function DevicePage() {
       <div className="farm-id-section">
         <FarmIdForm 
           currentFarmId={farmId}
-          onFarmIdChange={setFarmId}
+          onFarmIdChange={handleFarmIdChange}
           isLoading={loading}
         />
       </div>
