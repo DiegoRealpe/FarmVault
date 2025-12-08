@@ -1,12 +1,13 @@
-// import type { Schema } from '../../amplify/data/resource';
+import type { Schema } from '../../amplify/data/resource';
 import '../pages/DevicePage.css';
 
-// type DeviceType = Schema['IoTDeviceView']['type'];
+type Device = Schema['IoTDeviceView']['type'];
 
 interface DeviceTableProps {
-  devices: any[];
+  devices: Device[];
   loading: boolean;
   error: string | null;
+  onRefresh: () => void;
 }
 
 function formatDate(dateString: string): string {
@@ -27,7 +28,7 @@ function formatDate(dateString: string): string {
   }
 }
 
-function DeviceTable({ devices, loading, error }: DeviceTableProps) {
+function DeviceTable({ devices, loading, error, onRefresh }: DeviceTableProps) {
   if (loading) {
     return (
       <div className="loading-container">
@@ -50,7 +51,7 @@ function DeviceTable({ devices, loading, error }: DeviceTableProps) {
       <div className="empty-state">
         <p>No devices found for this farm.</p>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={onRefresh}
           className="refresh-button"
         >
           Refresh
@@ -68,7 +69,7 @@ function DeviceTable({ devices, loading, error }: DeviceTableProps) {
           </span>
         </div>
         <button 
-          onClick={() => window.location.reload()}
+          onClick={onRefresh}
           className="refresh-small"
         >
           ↻ Refresh

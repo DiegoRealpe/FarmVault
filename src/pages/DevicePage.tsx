@@ -16,9 +16,13 @@ function DevicePage() {
   const { devices, farmId, loading, error } = useSelector((state: RootState) => state.devices);
 
   useEffect(() => {
-    // Fetch devices when component mounts or farmId changes
+    if (!farmId) return;
     dispatch(fetchDevices(farmId));
   }, [dispatch, farmId]);
+
+  const handleRefresh = () => {
+    dispatch(fetchDevices(farmId));
+  };
 
   const handleFarmIdChange = (newFarmId: string) => {
     dispatch(setFarmId(newFarmId));
@@ -45,6 +49,7 @@ function DevicePage() {
         devices={devices}
         loading={loading}
         error={error}
+        onRefresh={handleRefresh}
       />
     </div>
   );

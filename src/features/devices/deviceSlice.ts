@@ -4,10 +4,10 @@ import { Schema } from '../../../amplify/data/resource';
 
 const client = generateClient<Schema>();
 
-// type Device = Schema['IoTDeviceView']['type'];
+type Device = Schema['IoTDeviceView']['type'];
 
 interface DeviceState {
-  devices: any[];
+  devices: Device[];
   farmId: string;
   loading: boolean;
   error: string | null;
@@ -21,12 +21,12 @@ const initialState: DeviceState = {
 };
 
 // Async thunk to fetch devices
-export const fetchDevices = createAsyncThunk(
+export const fetchDevices = createAsyncThunk<Device[], string, { rejectValue: string }>(
   'devices/fetchDevices',
   async (farmId: string, { rejectWithValue }) => {
     try {
       const response = await client.queries.listAllDevices({ farmId });
-      return response.data || [];
+      return (response.data ?? []) as Device[];
     } catch (error) {
       return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch devices');
     }

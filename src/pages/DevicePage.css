@@ -83,7 +83,7 @@
 
 .refresh-button {
   padding: 8px 16px;
-  background-color: #007aff;
+  background-color: #007AFF;
   color: white;
   border: none;
   border-radius: 4px;
@@ -122,6 +122,11 @@
   font-size: 0.875rem;
   color: #666;
   transition: all 0.2s;
+}
+
+.refresh-small:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .refresh-small:hover {
