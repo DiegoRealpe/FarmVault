@@ -24,15 +24,16 @@ export const backend = defineBackend({
   getFarmIotDataFn,
 });
 
-const backendStack = backend.stack
+// Only allow administrators to create users
+backend.auth.resources.cfnResources.cfnUserPool.adminCreateUserConfig = {
+  allowAdminCreateUserOnly: true,
+};
 
-// Get the S3 bucket created by Amplify Storage
 const bucket = backend.metricsBucket.resources.bucket;
 
-// Deploy local glue-scripts/ folder into s3://<bucket>/script/
-new s3deploy.BucketDeployment(backendStack, "DeployGlueScripts", {
+new s3deploy.BucketDeployment(backend.stack, "DeployGlueScripts", {
   destinationBucket: bucket,
-  destinationKeyPrefix: "script/", // will result in script/iot_json_to_parquet.py
+  destinationKeyPrefix: "script/",
   sources: [s3deploy.Source.asset(path.join(__dirname, "glue-scripts"))],
 });
 
@@ -45,7 +46,6 @@ const glueStack = backend.createStack("GlueInfra");
 // Glue Catalog account id (same as stack account)
 const catalogId = Stack.of(glueStack).account;
 
-// 1) Glue Database (CfnDatabase)
 const glueDb = new glue.CfnDatabase(glueStack, "IotTelemetryDb", {
   catalogId,
   databaseInput: {
@@ -53,10 +53,9 @@ const glueDb = new glue.CfnDatabase(glueStack, "IotTelemetryDb", {
   },
 });
 
-// 2) Glue Table pointing at Parquet output (CfnTable)
 const glueTable = new glue.CfnTable(glueStack, "IotTelemetryParquetTable", {
   catalogId,
-  databaseName: glueDb.ref, // or 'iot_telemetry'
+  databaseName: glueDb.ref, // 'iot_telemetry'
   tableInput: {
     name: "iot_metrics_parquet",
     tableType: "EXTERNAL_TABLE",
@@ -83,29 +82,21 @@ const glueTable = new glue.CfnTable(glueStack, "IotTelemetryParquetTable", {
     },
   },
 });
-
-// Make sure table is created after database
 glueTable.addDependency(glueDb);
 
-// 3) Glue Job role (IAM)
 const glueJobRole = new iam.Role(glueStack, "GlueJobRole", {
   assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
 });
-
-// Standard Glue service role policy
 glueJobRole.addManagedPolicy(
   iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
 );
-
-// Allow the job to read & write in our data lake bucket
 bucket.grantReadWrite(glueJobRole);
 
-// 4) Glue Job (CfnJob) running test_write_parquet.py
 new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
-  name: "iot-test-write-parquet", // visible name in Glue console
+  name: "iot-test-write-parquet",
   role: glueJobRole.roleArn,
   command: {
-    name: "glueetl", // Spark-based Glue ETL job
+    name: "glueetl",
     pythonVersion: "3",
     scriptLocation: `s3://${bucket.bucketName}/script/iot_json_to_parquet.py`,
   },
@@ -113,24 +104,18 @@ new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
   defaultArguments: {
     "--job-language": "python",
     "--enable-metrics": "true",
-    // Argument your script reads as OUTPUT_S3_PATH
     "--PARQUET_S3_PATH": `s3://${bucket.bucketName}/parquet/`,
   },
 });
 
-// 5) Glue Crawler role (IAM)
 const glueCrawlerRole = new iam.Role(glueStack, "GlueCrawlerRole", {
   assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
 });
-
 glueCrawlerRole.addManagedPolicy(
   iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
 );
-
-// Crawler just needs read access on the bucket
 bucket.grantRead(glueCrawlerRole);
 
-// 6) Glue Crawler (CfnCrawler) to scan Parquet in /parquet/
 const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
   name: "iot-parquet-crawler",
   role: glueCrawlerRole.roleArn,
@@ -144,8 +129,6 @@ const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
     ],
   },
 });
-
-// Optional: ensure crawler sees DB
 crawler.addDependency(glueDb);
 
 // const athenaWorkGroup = new athena.CfnWorkGroup(

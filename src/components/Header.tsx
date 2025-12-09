@@ -1,16 +1,23 @@
-import { useUser } from "../features/user/useUser";
+import { useSelector } from "react-redux";
+import { RootState } from "../app/store";
 
-export function Header() {
-  const { name, role, loggedIn, logout } = useUser();
+interface HeaderProps {
+  onSignOut: () => void
+}
 
-  if (!loggedIn) {
+export function Header({ onSignOut }: HeaderProps) {
+  const { role, email, isAuthenticated } = useSelector(
+    (state: RootState) => state.user
+  );
+
+  if (!isAuthenticated) {
     return <header>FarmVault — Not signed in</header>;
   }
 
   return (
     <header>
-      FarmVault — Signed in as {name} ({role})
-      <button onClick={logout}>Logout</button>
+      FarmVault — Signed in as {email} ({role})
+      <button onClick={onSignOut}>Logout</button>
     </header>
   );
 }

@@ -1,75 +1,52 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-export type UserRole = "admin" | "temp";
+export type UserRole = "admin" | "temporary" | "unknown";
 
 export interface UserState {
-  name: string | null;
-  role: UserRole | null;
-  loggedIn: boolean;
-  loading: boolean;
-  error: string | null;
+  email: string | null;
+  role: UserRole;
+  groups: string[];
+  isAuthenticated: boolean;
 }
 
 const initialState: UserState = {
-  name: null,
-  role: null,
-  loggedIn: false,
-  loading: false,
-  error: null,
+  email: null,
+  role: "unknown",
+  groups: [],
+  isAuthenticated: false,
 };
+
+interface SetUserPayload {
+  email: string;
+  groups: string[];
+}
 
 const userSlice = createSlice({
   name: "user",
   initialState,
   reducers: {
-    loginStart(state) {
-      state.loading = true;
-      state.error = null;
+    setUserFromAuth(state, action: PayloadAction<SetUserPayload>) {
+      const { email, groups } = action.payload;
+      state.email = email;
+      state.groups = groups;
+      state.isAuthenticated = true;
+
+      if (groups.includes("ADMINS")) {
+        state.role = "admin";
+      } else if (groups.includes("TEMPORARY_USERS")) {
+        state.role = "temporary";
+      } else {
+        state.role = "unknown";
+      }
     },
-    loginSuccess(
-      state,
-      action: PayloadAction<{ name: string; role: UserRole }>
-    ) {
-      state.loading = false;
-      state.loggedIn = true;
-      state.name = action.payload.name;
-      state.role = action.payload.role;
-      state.error = null;
-    },
-    loginFailure(state, action: PayloadAction<string>) {
-      state.loading = false;
-      state.error = action.payload;
-      state.loggedIn = false;
-      state.name = null;
-      state.role = null;
-    },
-    logout(state) {
-      state.name = null;
-      state.role = null;
-      state.loggedIn = false;
-      state.loading = false;
-      state.error = null;
-    },
-    hydrateFromStorage(
-      state,
-      action: PayloadAction<{
-        name: string | null;
-        role: UserRole | null;
-      }>
-    ) {
-      state.name = action.payload.name;
-      state.role = action.payload.role;
-      state.loggedIn = !!action.payload.name;
+    clearUser(state) {
+      state.email = null;
+      state.role = "unknown";
+      state.groups = [];
+      state.isAuthenticated = false;
     },
   },
 });
 
-export const {
-  loginStart,
-  loginSuccess,
-  loginFailure,
-  logout,
-  hydrateFromStorage,
-} = userSlice.actions;
-
+export const { setUserFromAuth, clearUser } = userSlice.actions;
 export default userSlice.reducer;
