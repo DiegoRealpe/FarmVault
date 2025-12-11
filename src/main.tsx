@@ -7,21 +7,22 @@ import outputs from "../amplify_outputs.json";
 import { Provider } from "react-redux";
 import { store } from "./app/store";
 import { BrowserRouter } from "react-router-dom";
-import { Authenticator } from "@aws-amplify/ui-react";
+// import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <Authenticator hideSignUp={true}>
-      {({ user, signOut }) => (
+    {/* <Authenticator hideSignUp={true}>
+      {({ user, signOut }) => ( */}
         <Provider store={store}>
           <BrowserRouter>
-            <App user={user} onSignOut={() => signOut?.()} />
+            {/* <App user={user} onSignOut={() => signOut?.()} /> */}
+            <App user={undefined} onSignOut={() => {}} />
           </BrowserRouter>
         </Provider>
-      )}
-    </Authenticator>
+      {/* )}
+    </Authenticator> */}
   </React.StrictMode>
 );

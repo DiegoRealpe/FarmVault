@@ -1,0 +1,8 @@
+node_modules
+build
+dist
+.amplify
+.vscode
+.aws
+coverage
+*.log
