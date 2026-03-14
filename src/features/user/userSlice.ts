@@ -3,6 +3,7 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 export type UserRole = "admin" | "temporary" | "unknown";
 
 export interface UserState {
+  sub: string | null
   email: string | null;
   role: UserRole;
   groups: string[];
@@ -10,6 +11,7 @@ export interface UserState {
 }
 
 const initialState: UserState = {
+  sub: null,
   email: null,
   role: "unknown",
   groups: [],
@@ -17,7 +19,8 @@ const initialState: UserState = {
 };
 
 interface SetUserPayload {
-  email: string;
+  sub: string;
+  email: string | null;
   groups: string[];
 }
 
@@ -26,7 +29,9 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUserFromAuth(state, action: PayloadAction<SetUserPayload>) {
-      const { email, groups } = action.payload;
+      const { sub, email, groups } = action.payload;
+
+      state.sub = sub;
       state.email = email;
       state.groups = groups;
       state.isAuthenticated = true;
@@ -40,6 +45,7 @@ const userSlice = createSlice({
       }
     },
     clearUser(state) {
+      state.sub = null;
       state.email = null;
       state.role = "unknown";
       state.groups = [];

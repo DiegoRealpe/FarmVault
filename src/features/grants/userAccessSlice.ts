@@ -1,4 +1,3 @@
-// features/grants/userAccessSlice.ts
 import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { generateClient } from 'aws-amplify/data';
 import { Schema } from '../../../amplify/data/resource';
