@@ -1,28 +1,32 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import App from "./App.tsx";
-import "./index.css";
 import { Amplify } from "aws-amplify";
-import outputs from "../amplify_outputs.json";
 import { Provider } from "react-redux";
-import { store } from "./app/store";
 import { BrowserRouter } from "react-router-dom";
-// import { Authenticator } from "@aws-amplify/ui-react";
+import { Authenticator } from "@aws-amplify/ui-react";
+
+import App from "./App";
+import { store } from "./app/store";
+import outputs from "../amplify_outputs.json";
+
+import "./index.css";
 import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    {/* <Authenticator hideSignUp={true}>
-      {({ user, signOut }) => ( */}
-        <Provider store={store}>
+    <Provider store={store}>
+      <Authenticator hideSignUp={true}>
+        {({ user, signOut }) => (
           <BrowserRouter>
-            {/* <App user={user} onSignOut={() => signOut?.()} /> */}
-            <App user={undefined} onSignOut={() => {}} />
+            <App
+              user={user}
+              onSignOut={() => signOut?.()}
+            />
           </BrowserRouter>
-        </Provider>
-      {/* )}
-    </Authenticator> */}
+        )}
+      </Authenticator>
+    </Provider>
   </React.StrictMode>
 );
