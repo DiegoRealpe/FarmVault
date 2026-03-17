@@ -10,10 +10,10 @@ import { getAuthenticatedUserInfo  } from "./auth/authUtils";
 import { Header } from "./components/Header";
 import TabFooter from "./components/TabFooter";
 
-import LandingPage from "./pages/LandingPage";
-import DevicePage from "./pages/DevicePage";
-import SettingsPage from "./pages/SettingsPage";
-import GrantsPage from "./pages/GrantsPage";
+import LandingPage from "./pages/LandingPage/LandingPage";
+import DevicePage from "./pages/DevicePage/DevicePage";
+import SettingsPage from "./pages/SettingsPage/SettingsPage";
+import GrantsPage from "./pages/GrantsPage/GrantsPage";
 
 import {
   setUserFromAuth,

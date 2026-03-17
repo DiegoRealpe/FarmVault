@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchDevices, setFarmId } from "../features/devices/deviceSlice";
+import { fetchDevices, setFarmId } from "../../features/devices/deviceSlice";
 import "./DevicePage.css";
-import DeviceTable from "../components/DeviceTable";
-import FarmIdForm from "../components/FarmIdForm";
-import { AppDispatch, RootState } from "../app/store";
+import { AppDispatch, RootState } from "../../app/store";
+import FarmIdForm from "./FarmIdForm";
+import DeviceTable from "./DeviceTable";
 
 function DevicePage() {
   const dispatch = useDispatch<AppDispatch>();

@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import type { RootState } from "../app/store";
+import type { RootState } from "../../app/store";
 
 function LandingPage() {
   const reduxState = useSelector((state: RootState) => state);
