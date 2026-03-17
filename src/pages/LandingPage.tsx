@@ -1,40 +1,39 @@
-import { useEffect, useState } from "react";
-import type { Schema } from "../../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+import { useSelector } from "react-redux";
+import type { RootState } from "../app/store";
 
-const client = generateClient<Schema>();
-
-function App() {
-  const [todos, setTodos] = useState<Array<Schema["Todo"]["type"]>>([]);
-
-  useEffect(() => {
-    client.models.Todo.observeQuery().subscribe({
-      next: (data) => setTodos([...data.items]),
-    });
-  }, []);
-
-  function createTodo() {
-    client.models.Todo.create({ content: window.prompt("Todo content") });
-  }
+function LandingPage() {
+  const reduxState = useSelector((state: RootState) => state);
 
   return (
-    <main>
-      <h1>My todos</h1>
-      <button onClick={createTodo}>+ new</button>
-      <ul>
-        {todos.map((todo) => (
-          <li key={todo.id}>{todo.content}</li>
-        ))}
-      </ul>
-      <div>
-        🥳 App successfully hosted. Try creating a new todo.
-        <br />
-        <a href="https://docs.amplify.aws/react/start/quickstart/#make-frontend-updates">
-          Review next step of this tutorial. Also, Diego is awesome
-        </a>
-      </div>
+    <main style={{ padding: "1.5rem" }}>
+      <h1>Dev Landing Page</h1>
+      <p>Current Redux state</p>
+
+      <button
+        type="button"
+        onClick={() =>
+          navigator.clipboard.writeText(JSON.stringify(reduxState, null, 2))
+        }
+        style={{ marginBottom: "1rem" }}
+      >
+        Copy state
+      </button>
+
+      <pre
+        style={{
+          backgroundColor: "#111",
+          color: "#f5f5f5",
+          padding: "1rem",
+          borderRadius: "8px",
+          overflowX: "auto",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word",
+        }}
+      >
+        {JSON.stringify(reduxState, null, 2)}
+      </pre>
     </main>
   );
 }
 
-export default App;
+export default LandingPage;
