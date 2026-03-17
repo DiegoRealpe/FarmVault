@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import '../pages/DevicePage.css';
+import './DevicePage.css';
 
 interface FarmIdFormProps {
   currentFarmId: string;

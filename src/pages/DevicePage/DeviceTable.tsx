@@ -1,5 +1,5 @@
 import type { Schema } from '../../../amplify/data/resource';
-import '../pages/DevicePage.css';
+import './DevicePage.css';
 import { formatDate } from '../../utils/utils';
 
 type Device = Schema['IoTDeviceView']['type'];
