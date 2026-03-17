@@ -38,7 +38,7 @@ new BucketDeployment(backend.stack, "DeployGlueScripts", {
 });
 
 backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
-  iam.ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
+  ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
 )
 
 const glueStack = backend.createStack("GlueInfra");
@@ -84,11 +84,11 @@ const glueTable = new CfnTable(glueStack, "IotTelemetryParquetTable", {
 });
 glueTable.addDependency(glueDb);
 
-const glueJobRole = new iam.Role(glueStack, "GlueJobRole", {
-  assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
+const glueJobRole = new Role(glueStack, "GlueJobRole", {
+  assumedBy: new ServicePrincipal("glue.amazonaws.com"),
 });
 glueJobRole.addManagedPolicy(
-  iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
+  ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
 );
 bucket.grantReadWrite(glueJobRole);
 
@@ -108,11 +108,11 @@ new CfnJob(glueStack, "IotTestWriteParquetJob", {
   },
 });
 
-const glueCrawlerRole = new iam.Role(glueStack, "GlueCrawlerRole", {
-  assumedBy: new iam.ServicePrincipal("glue.amazonaws.com"),
+const glueCrawlerRole = new Role(glueStack, "GlueCrawlerRole", {
+  assumedBy: new ServicePrincipal("glue.amazonaws.com"),
 });
 glueCrawlerRole.addManagedPolicy(
-  iam.ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
+  ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
 );
 bucket.grantRead(glueCrawlerRole);
 
