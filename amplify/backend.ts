@@ -4,17 +4,17 @@ import { data } from "./data/resource";
 import { metricsBucket } from "./storage/resource";
 import { listAllDevicesFn } from "./functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
-import * as s3deploy from "aws-cdk-lib/aws-s3-deployment";
-import * as glue from "aws-cdk-lib/aws-glue";
-import * as iam from "aws-cdk-lib/aws-iam";
+import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
+import { CfnDatabase, CfnTable, CfnJob, CfnCrawler } from "aws-cdk-lib/aws-glue";
+import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
 // import * as athena from "aws-cdk-lib/aws-athena";
-import * as path from "path";
+import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { Stack } from "aws-cdk-lib";
 
 // ESM-compatible __dirname / __filename
 const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = dirname(__filename);
 
 export const backend = defineBackend({
   auth,
@@ -31,10 +31,10 @@ backend.auth.resources.cfnResources.cfnUserPool.adminCreateUserConfig = {
 
 const bucket = backend.metricsBucket.resources.bucket;
 
-new s3deploy.BucketDeployment(backend.stack, "DeployGlueScripts", {
+new BucketDeployment(backend.stack, "DeployGlueScripts", {
   destinationBucket: bucket,
   destinationKeyPrefix: "script/",
-  sources: [s3deploy.Source.asset(path.join(__dirname, "glue-scripts"))],
+  sources: [Source.asset(join(__dirname, "glue-scripts"))],
 });
 
 backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
@@ -46,14 +46,14 @@ const glueStack = backend.createStack("GlueInfra");
 // Glue Catalog account id (same as stack account)
 const catalogId = Stack.of(glueStack).account;
 
-const glueDb = new glue.CfnDatabase(glueStack, "IotTelemetryDb", {
+const glueDb = new CfnDatabase(glueStack, "IotTelemetryDb", {
   catalogId,
   databaseInput: {
     name: "iot_telemetry", // name in Glue Data Catalog
   },
 });
 
-const glueTable = new glue.CfnTable(glueStack, "IotTelemetryParquetTable", {
+const glueTable = new CfnTable(glueStack, "IotTelemetryParquetTable", {
   catalogId,
   databaseName: glueDb.ref, // 'iot_telemetry'
   tableInput: {
@@ -92,7 +92,7 @@ glueJobRole.addManagedPolicy(
 );
 bucket.grantReadWrite(glueJobRole);
 
-new glue.CfnJob(glueStack, "IotTestWriteParquetJob", {
+new CfnJob(glueStack, "IotTestWriteParquetJob", {
   name: "iot-test-write-parquet",
   role: glueJobRole.roleArn,
   command: {
@@ -116,7 +116,7 @@ glueCrawlerRole.addManagedPolicy(
 );
 bucket.grantRead(glueCrawlerRole);
 
-const crawler = new glue.CfnCrawler(glueStack, "IotParquetCrawler", {
+const crawler = new CfnCrawler(glueStack, "IotParquetCrawler", {
   name: "iot-parquet-crawler",
   role: glueCrawlerRole.roleArn,
   databaseName: glueDb.ref,
