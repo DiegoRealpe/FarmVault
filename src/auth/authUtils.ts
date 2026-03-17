@@ -9,7 +9,7 @@ export interface AuthenticatedUserInfo {
 }
 
 export async function getAuthenticatedUserInfo(
-  user: AuthUser
+  user: AuthUser | undefined
 ): Promise<AuthenticatedUserInfo> {
   const session = await fetchAuthSession();
   const payload = session.tokens?.idToken?.payload;
@@ -22,7 +22,7 @@ export async function getAuthenticatedUserInfo(
   const email =
     typeof payload?.email === "string"
       ? payload.email
-      : user.signInDetails?.loginId ?? user.username ?? null;
+      : user?.signInDetails?.loginId ?? user?.username ?? null;
 
   const groupsClaim = payload?.["cognito:groups"];
   const groups = Array.isArray(groupsClaim)

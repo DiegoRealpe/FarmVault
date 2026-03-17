@@ -1,24 +1,20 @@
-import { useEffect } from "react";
+import { Suspense, lazy, useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { AuthUser } from "aws-amplify/auth";
 
 import "./App.css";
 
-import { AppDispatch } from "./app/store";
-import { getAuthenticatedUserInfo  } from "./auth/authUtils";
+import type { AppDispatch } from "./app/store";
+import { getAuthenticatedUserInfo } from "./auth/authUtils";
 import { Header } from "./components/Header";
 import TabFooter from "./components/TabFooter";
+import { setUserFromAuth, clearUser } from "./features/user/userSlice";
 
-import LandingPage from "./pages/LandingPage/LandingPage";
-import DevicePage from "./pages/DevicePage/DevicePage";
-import SettingsPage from "./pages/SettingsPage/SettingsPage";
-import GrantsPage from "./pages/GrantsPage/GrantsPage";
-
-import {
-  setUserFromAuth,
-  clearUser,
-} from "./features/user/userSlice";
+const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
+const GrantsPage = lazy(() => import("./pages/GrantsPage/GrantsPage"));
+const DevicePage = lazy(() => import("./pages/DevicePage/DevicePage"));
+const SettingsPage = lazy(() => import("./pages/SettingsPage/SettingsPage"));
 
 interface AppProps {
   user: AuthUser | undefined;
@@ -34,7 +30,7 @@ function App({ user, onSignOut }: AppProps) {
       return;
     }
 
-    const loadUser = async () => {
+    async function loadAuthenticatedUser() {
       try {
         const payload = await getAuthenticatedUserInfo(user);
         dispatch(setUserFromAuth(payload));
@@ -42,20 +38,24 @@ function App({ user, onSignOut }: AppProps) {
         console.error("Failed to load authenticated user:", error);
         dispatch(clearUser());
       }
-    };
+    }
 
-    void loadUser();
+    void loadAuthenticatedUser();
   }, [user, dispatch]);
 
   return (
     <div className="app">
       <Header onSignOut={onSignOut} />
+
+      <Suspense fallback={<div className="page-loading">Loading page...</div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/grants" element={<GrantsPage />} />
           <Route path="/devices" element={<DevicePage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
+      </Suspense>
+
       <TabFooter />
     </div>
   );
