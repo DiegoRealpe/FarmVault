@@ -6,7 +6,7 @@ interface HeaderProps {
 }
 
 export function Header({ onSignOut }: HeaderProps) {
-  const { role, email, isAuthenticated } = useSelector(
+  const { groups, email, isAuthenticated } = useSelector(
     (state: RootState) => state.user
   );
 
@@ -16,7 +16,8 @@ export function Header({ onSignOut }: HeaderProps) {
 
   return (
     <header>
-      FarmVault — Signed in as {email} ({role})
+      FarmVault — Signed in as {email} 
+      Groups:({groups.join(", ")})
       <button onClick={onSignOut}>Logout</button>
     </header>
   );
