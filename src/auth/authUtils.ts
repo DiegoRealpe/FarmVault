@@ -4,6 +4,8 @@ export interface AuthenticatedUserInfo {
   sub: string;
   email: string | null;
   groups: string[];
+  isAuthenticated: boolean;
+  isAdmin: boolean;
 }
 
 export async function getAuthenticatedUserInfo(
@@ -27,9 +29,13 @@ export async function getAuthenticatedUserInfo(
     ? groupsClaim.filter((g): g is string => typeof g === "string")
     : [];
 
+  const isAdmin = groups.includes("Admin");
+
   return {
     sub,
     email,
     groups,
+    isAdmin,
+    isAuthenticated: true,
   };
 }
