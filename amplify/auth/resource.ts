@@ -1,18 +1,15 @@
 import { defineAuth } from "@aws-amplify/backend";
+import { createFarmUserFn } from "../functions/create-farm-user/resource";
 
 export const auth = defineAuth({
   loginWith: {
     email: true,
   },
-  // userAttributes: {
-  //   email: { required: true },
-  // },
-  // groups: ['farmAdmin', 'tempViewer'],
-  // access: (allow) => [
-  //   allow.resource("grantTempUserAccessFn").to([
-  //     "createUser",
-  //     "manageGroups",
-  //     "addUserToGroup"
-  //   ])
-  // ]
+
+  groups: ["admin", "farmuser"],
+
+  access: (allow) => [
+    // Grants the function Cognito user-management permissions
+    allow.resource(createFarmUserFn).to(["manageUsers"]),
+  ],
 });
