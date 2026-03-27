@@ -2,6 +2,7 @@ import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { listAllDevicesFn } from "../functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
+import { getMyUserAccessFn } from "../functions/get-my-user-access/resource";
 
 const schema = a
   .schema({
@@ -22,6 +23,7 @@ const schema = a
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
+      .identifier(["name"])
       .authorization((allow) => [
         allow.publicApiKey(),
         // allow.group('farmAdmin'),
@@ -61,6 +63,7 @@ const schema = a
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
+      .identifier(["userSub"])
       .authorization((allow) => [
         allow.publicApiKey(),
         // allow.group('farmAdmin'),
@@ -99,6 +102,16 @@ const schema = a
       assignedGroup: a.string().required(),
     }),
 
+    MyUserAccess: a.customType({
+      userSub: a.string().required(),
+      farmId: a.string().required(),
+      datasetKeys: a.string().array().required(),
+      deviceIds: a.string().array(),
+      expiresAt: a.datetime().required(),
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
+    }),
+
     // ---- Lambda Backed Queries ----
     getFarmIotData: a
       .query()
@@ -133,6 +146,14 @@ const schema = a
         allow.publicApiKey(),
       ])
       .handler(a.handler.function(listAllDevicesFn)),
+
+    getMyUserAccess: a
+      .query()
+      .returns(a.ref("MyUserAccess"))
+      .authorization((allow) => [
+        allow.authenticated()
+      ])
+      .handler(a.handler.function(getMyUserAccessFn)),
 
     // ---- Admin Mutations ----
      createFarmUser: a
@@ -170,6 +191,7 @@ const schema = a
     // or iotDataFetcher to read from TempAccessGrant.
     allow.resource(listAllDevicesFn),
     allow.resource(getFarmIotDataFn),
+    allow.resource(getMyUserAccessFn),
   ]);
 
 // 2) Export Schema type for typed clients
