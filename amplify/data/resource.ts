@@ -1,6 +1,7 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { listAllDevicesFn } from "../functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
+import { createFarmUserFn } from "../functions/create-farm-user/resource";
 
 const schema = a
   .schema({
@@ -66,6 +67,7 @@ const schema = a
       ]),
 
     // -- Custom Types --
+    // For API responses that don't map 1:1 with a single model, we can define custom types.
     IoTDeviceView: a.customType({
       id: a.string().required(),
       name: a.string(),
@@ -88,6 +90,13 @@ const schema = a
     DeviceTimeSeries: a.customType({
       deviceId: a.string().required(),
       points: a.ref("TimeSeriesPoint").array(),
+    }),
+
+    CreateFarmUserResult: a.customType({
+      success: a.boolean().required(),
+      username: a.string().required(),
+      userSub: a.string(),
+      assignedGroup: a.string().required(),
     }),
 
     // ---- Lambda Backed Queries ----
@@ -126,6 +135,15 @@ const schema = a
       .handler(a.handler.function(listAllDevicesFn)),
 
     // ---- Admin Mutations ----
+     createFarmUser: a
+      .mutation()
+      .arguments({
+        email: a.string().required(),
+        temporaryPassword: a.string().required(),
+      })
+      .returns(a.ref("CreateFarmUserResult").required())
+      .authorization((allow) => [allow.group("admin")])
+      .handler(a.handler.function(createFarmUserFn)),
     // grantUserAccess: a
     //   .mutation()
     //   .arguments({
