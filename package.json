@@ -23,6 +23,7 @@
     "@aws-amplify/backend": "^1.18.0",
     "@aws-amplify/backend-cli": "^1.8.0",
     "@aws-sdk/client-athena": "^3.943.0",
+    "@aws-sdk/client-cognito-identity-provider": "^3.1013.0",
     "@trivago/prettier-plugin-sort-imports": "^6.0.0",
     "@types/node": "^24.10.1",
     "@types/react": "^19.2.7",
