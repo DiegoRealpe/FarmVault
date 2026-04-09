@@ -5,11 +5,8 @@ export const auth = defineAuth({
   loginWith: {
     email: true,
   },
-
   groups: ["admin", "farmuser"],
-
   access: (allow) => [
-    // Grants the function Cognito user-management permissions
     allow.resource(createFarmUserFn).to(["manageUsers"]),
   ],
 });

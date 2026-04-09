@@ -56,6 +56,7 @@ export const createGrant = createAsyncThunk(
     ttl: number;
   }, { rejectWithValue }) => {
     try {
+      // TODO this should be changed to the createfarmuser lambda which will handle both creating the user in Cognito and the UserAccess record in DynamoDB
       const response = await client.models.UserAccess.create({
         ...grantData,
         createdBySub: 'current-user-sub', // This should come from auth

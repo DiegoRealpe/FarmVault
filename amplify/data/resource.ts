@@ -6,7 +6,7 @@ import { getMyUserAccessFn } from "../functions/get-my-user-access/resource";
 
 const schema = a
   .schema({
-    // Models stored in Dynamo
+    // TODO: Remove 
     Todo: a
       .model({
         content: a.string(),
@@ -24,6 +24,7 @@ const schema = a
         updatedAt: a.datetime().required(),
       })
       .identifier(["name"])
+      // TODO: Remove 
       .authorization((allow) => [
         allow.publicApiKey(),
         // allow.group('farmAdmin'),
@@ -45,6 +46,7 @@ const schema = a
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
+      // TODO: Remove 
       .authorization((allow) => [
         allow.publicApiKey(),
         // allow.group('farmAdmin'),
@@ -64,6 +66,9 @@ const schema = a
         updatedAt: a.datetime().required(),
       })
       .identifier(["userSub"])
+      // TODO: Remove These authorization rules should be removed
+      // Lambdas will be the only way to read data
+      // Users must go through authorization verification
       .authorization((allow) => [
         allow.publicApiKey(),
         // allow.group('farmAdmin'),
