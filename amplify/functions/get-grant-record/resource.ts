@@ -1,6 +1,6 @@
 import { defineFunction } from "@aws-amplify/backend";
 
-export const getMyUserAccessFn = defineFunction({
-  name: "get-my-user-access",
+export const getGrantRecordFn = defineFunction({
+  name: "get-grant-record",
   entry: "./handler.ts",
 });

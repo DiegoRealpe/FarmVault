@@ -1,26 +1,73 @@
 import type { Schema } from "../../../amplify/data/resource";
 
-type UserAccess = Schema["UserAccess"]["type"];
+type GrantRecord = Schema["GrantRecord"]["type"];
 
 interface GrantsStatsProps {
-  grants: UserAccess[];
+  grantRecord: GrantRecord | null;
+  createdGrantRecords: GrantRecord[];
+  isAdmin: boolean;
 }
 
-function GrantsStats({ grants }: GrantsStatsProps) {
+function GrantsStats({
+  grantRecord,
+  createdGrantRecords,
+  isAdmin,
+}: GrantsStatsProps) {
+  const now = Date.now();
+
+  // ---- Admin View ----
+  if (isAdmin) {
+    const total = createdGrantRecords.length;
+
+    const active = createdGrantRecords.filter(
+      (record) => new Date(record.expiresAt).getTime() > now,
+    ).length;
+
+    const expired = total - active;
+
+    return (
+      <div className="grants-stats">
+        <div className="stat-card">
+          <span className="stat-number">{total}</span>
+          <span className="stat-label">Total Grant Records</span>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-number">{active}</span>
+          <span className="stat-label">Active</span>
+        </div>
+
+        <div className="stat-card">
+          <span className="stat-number">{expired}</span>
+          <span className="stat-label">Expired</span>
+        </div>
+      </div>
+    );
+  }
+
+  // ---- User View ----
+  const hasGrant = !!grantRecord;
+
+  const isActive =
+    grantRecord &&
+    new Date(grantRecord.expiresAt).getTime() > now;
+
   return (
     <div className="grants-stats">
       <div className="stat-card">
-        <span className="stat-number">{grants.length}</span>
-        <span className="stat-label">Total Grants</span>
+        <span className="stat-number">{hasGrant ? 1 : 0}</span>
+        <span className="stat-label">Your Grant</span>
       </div>
 
       <div className="stat-card">
-        <span className="stat-number">--</span>
+        <span className="stat-number">{isActive ? 1 : 0}</span>
         <span className="stat-label">Active</span>
       </div>
 
       <div className="stat-card">
-        <span className="stat-number">--</span>
+        <span className="stat-number">
+          {hasGrant && !isActive ? 1 : 0}
+        </span>
         <span className="stat-label">Expired</span>
       </div>
     </div>

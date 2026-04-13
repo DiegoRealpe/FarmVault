@@ -1,13 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
 import userReducer from "../features/user/userSlice";
 import deviceReducer from "../features/devices/deviceSlice";
-import userAccessReducer from "../features/grants/userAccessSlice";
+import grantRecordReducer from "../features/grants/grantRecordSlice";
 
 export const store = configureStore({
   reducer: {
     user: userReducer,
     devices: deviceReducer,
-    userAccess: userAccessReducer
+    grantRecord: grantRecordReducer
   },
 });
 

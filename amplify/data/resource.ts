@@ -2,7 +2,10 @@ import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { listAllDevicesFn } from "../functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
-import { getMyUserAccessFn } from "../functions/get-my-user-access/resource";
+import { getGrantRecordFn } from "../functions/get-grant-record/resource";
+import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
+import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
+
 
 const schema = a
   .schema({
@@ -52,27 +55,20 @@ const schema = a
         // allow.group('farmAdmin'),
       ]),
 
-    UserAccess: a
+    
+    GrantRecord: a
       .model({
         userSub: a.string().required(),
-        farmId: a.string().required(), //Maybe not needed?
-        datasetKeys: a.string().array().required(),
-        // Optional: restrict to certain devices only (future-ready)
-        deviceIds: a.string().array(),
-        expiresAt: a.datetime().required(), // ISO string for app logic/UI
-        ttl: a.integer().required(), // epoch seconds for Dynamo TTL
+        grants: a.ref("GrantEntry").array().required(),
+        expiresAt: a.datetime().required(),
+        ttl: a.integer().required(),
         createdBySub: a.string().required(),
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
       .identifier(["userSub"])
-      // TODO: Remove These authorization rules should be removed
-      // Lambdas will be the only way to read data
-      // Users must go through authorization verification
-      .authorization((allow) => [
-        allow.publicApiKey(),
-        // allow.group('farmAdmin'),
-      ]),
+      // TODO: remove direct client access later
+      .authorization((allow) => [allow.publicApiKey()]),
 
     // -- Custom Types --
     // For API responses that don't map 1:1 with a single model, we can define custom types.
@@ -94,10 +90,20 @@ const schema = a
       timestamp: a.datetime().required(),
       value: a.float().required(),
     }),
+    
+    GrantType: a.enum(["farm", "device"]),
 
-    DeviceTimeSeries: a.customType({
-      deviceId: a.string().required(),
-      points: a.ref("TimeSeriesPoint").array(),
+    GrantEntry: a.customType({
+      grantType: a.ref("GrantType").required(),
+      ids: a.string().array().required(),
+    }),
+
+    MyGrantRecord: a.customType({
+      userSub: a.string().required(),
+      grants: a.ref("GrantEntry").array().required(),
+      expiresAt: a.datetime().required(),
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
     }),
 
     CreateFarmUserResult: a.customType({
@@ -107,14 +113,17 @@ const schema = a
       assignedGroup: a.string().required(),
     }),
 
-    MyUserAccess: a.customType({
+    UpsertGrantRecordResult: a.customType({
       userSub: a.string().required(),
-      farmId: a.string().required(),
-      datasetKeys: a.string().array().required(),
-      deviceIds: a.string().array(),
+      grants: a.ref("GrantEntry").array().required(),
       expiresAt: a.datetime().required(),
       createdAt: a.datetime().required(),
       updatedAt: a.datetime().required(),
+    }),
+    
+    DeviceTimeSeries: a.customType({
+      deviceId: a.string().required(),
+      points: a.ref("TimeSeriesPoint").array(),
     }),
 
     // ---- Lambda Backed Queries ----
@@ -152,51 +161,53 @@ const schema = a
       ])
       .handler(a.handler.function(listAllDevicesFn)),
 
-    getMyUserAccess: a
+    // ---- User Queries ----
+    getGrantRecord: a
       .query()
-      .returns(a.ref("MyUserAccess"))
-      .authorization((allow) => [
-        allow.authenticated()
-      ])
-      .handler(a.handler.function(getMyUserAccessFn)),
+      .returns(a.ref("MyGrantRecord"))
+      // .authorization((allow) => [allow.authenticated()])
+      .authorization((allow) => [allow.publicApiKey()])
+      .handler(a.handler.function(getGrantRecordFn)),
+
+    // ---- Admin Queries ----
+    listCreatedGrantRecords: a
+      .query()
+      .returns(a.ref("GrantRecord").array().required())
+      // .authorization((allow) => [allow.group("admin")])
+      .authorization((allow) => [allow.publicApiKey()])
+      .handler(a.handler.function(listCreatedGrantRecordsFn)),
 
     // ---- Admin Mutations ----
-     createFarmUser: a
+    createFarmUser: a
       .mutation()
       .arguments({
         email: a.string().required(),
         temporaryPassword: a.string().required(),
       })
       .returns(a.ref("CreateFarmUserResult").required())
-      .authorization((allow) => [allow.group("admin")])
+      // .authorization((allow) => [allow.group("admin")])
+      .authorization((allow) => [allow.publicApiKey()])
       .handler(a.handler.function(createFarmUserFn)),
-    // grantUserAccess: a
-    //   .mutation()
-    //   .arguments({
-    //     farmId: a.string().required(),
-    //     // The email of the user you’re granting access to.
-    //     // Lambda will:
-    //     //  - look up or create the Cognito user
-    //     //  - ensure they’re in tempViewer group (for now)
-    //     userEmail: a.string().required(),
-    //     datasetKeys: a.string().array().required(),
-    //     // Optional: restrict to certain devices
-    //     deviceIds: a.string().array(),
-    //     expiresAt: a.datetime().required(),
-    //   })
-    //   .returns(a.ref('UserAccess'))
-    //   .authorization((allow) => [
-    // allow.group('farmAdmin'),
-    //   ])
-    // .handler(a.handler.function(grantUserAccessFn)),
+
+    upsertGrantRecord: a
+      .mutation()
+      .arguments({
+        userSub: a.string().required(),
+        grants: a.ref("GrantEntry").array().required(),
+        expiresAt: a.datetime().required(),
+      })
+      .returns(a.ref("UpsertGrantRecordResult").required())
+      // .authorization((allow) => [allow.group("admin")])
+      .authorization((allow) => [allow.publicApiKey()])
+      .handler(a.handler.function(upsertGrantRecordFn)),
   })
   // (optional) let specific functions use the Data client with proper auth
   .authorization((allow) => [
-    // For example: allow the grantTempUserAccessFn to write TempAccessGrant,
-    // or iotDataFetcher to read from TempAccessGrant.
-    allow.resource(listAllDevicesFn),
-    allow.resource(getFarmIotDataFn),
-    allow.resource(getMyUserAccessFn),
+    allow.resource(listAllDevicesFn).to(["query"]),
+    allow.resource(getFarmIotDataFn).to(["query"]),
+    allow.resource(getGrantRecordFn).to(["query"]),
+    allow.resource(listCreatedGrantRecordsFn).to(["query"]),
+    allow.resource(upsertGrantRecordFn).to(["query", "mutate"]),
   ]);
 
 // 2) Export Schema type for typed clients

@@ -1,134 +1,209 @@
-import type { Schema } from "../../data/resource";
-import { Amplify } from "aws-amplify";
-import { generateClient } from "aws-amplify/data";
-import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/list-all-devices";
+// // amplify/functions/list-all-devices/handler.ts
+// import type { Schema } from "../../data/resource";
+// import { Amplify } from "aws-amplify";
+// import { generateClient } from "aws-amplify/data";
+// import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+// import { env } from "$amplify/env/list-all-devices";
 
-const { resourceConfig, libraryOptions } =
-  await getAmplifyDataClientConfig(env);
-Amplify.configure(resourceConfig, libraryOptions);
-
-const client = generateClient<Schema>();
-
-// Mock returned when an item is unexpectedly null
-const MOCK_DEVICE_VIEW: Schema["IoTDeviceView"]["type"] = {
-  id: "mock-device",
-  type: "TEMPERATURE",
-  farmId: "mock-farm",
-  devEui: "0000000000000000",
-  applicationId: "mock-app",
-  gatewayId: null,
-  name: "Mock Device (data was null)",
-  description:
-    "This entry was returned because the lambda received a null or malformed item.",
-  location: "Unknown",
-  createdAt: "2025-11-29T09:00:00.000Z",
-  updatedAt: "2025-11-29T09:00:00.000Z",
-};
-
-export const handler: Schema["listAllDevices"]["functionHandler"] = async (
-  event,
-) => {
-  console.log("listAllDevices event:", JSON.stringify(event, null, 2));
-
-  try {
-    const { farmId } = event.arguments;
-
-    const result = await client.models.IoTDevice.list({
-      filter: { farmId: { eq: farmId } },
-    });
-
-    console.log("raw result:", JSON.stringify(result, null, 2));
-
-    const devices = result.data ?? [];
-
-    const views: Schema["IoTDeviceView"]["type"][] = devices.map((d, index) => {
-      if (!d) {
-        console.warn(
-          `Null entry encountered at index ${index}. Returning mock device.`,
-        );
-        return MOCK_DEVICE_VIEW;
-      }
-
-      return {
-        id: d.id ?? "missing-id",
-        type: d.type ?? "TEMPERATURE",
-        farmId: d.farmId ?? "missing-farm",
-        devEui: d.devEui ?? "missing-eui",
-        applicationId: d.applicationId ?? "missing-app",
-        gatewayId: d.gatewayId ?? null,
-        name: d.name ?? null,
-        description: d.description ?? null,
-        location: d.location ?? null,
-        createdAt: d.createdAt ?? "2025-11-29T09:00:00.000Z",
-        updatedAt: d.updatedAt ?? "2025-11-29T09:00:00.000Z",
-      };
-    });
-
-    console.log("views to return:", JSON.stringify(views, null, 2));
-    return views;
-  } catch (err: any) {
-    console.error("listAllDevices ERROR:", err);
-
-    throw new Error(
-      "listAllDevices failed → " +
-        JSON.stringify(
-          {
-            message: err?.message ?? String(err),
-            stack: err?.stack,
-            event,
-          },
-          null,
-          2,
-        ),
-    );
-  }
-};
-
-// import type { Schema } from '../../data/resource';
-// import { Amplify } from 'aws-amplify';
-// import { generateClient } from 'aws-amplify/data';
-// import { getAmplifyDataClientConfig } from '@aws-amplify/backend/function/runtime';
-// import { env } from '$amplify/env/list-all-devices';
-
-// const { resourceConfig, libraryOptions } = await getAmplifyDataClientConfig(env);
+// const { resourceConfig, libraryOptions } =
+//   await getAmplifyDataClientConfig(env);
 // Amplify.configure(resourceConfig, libraryOptions);
 
 // const client = generateClient<Schema>();
 
-// export const handler: Schema['listAllDevices']['functionHandler'] = async (event) => {
-//   try {
-//     const { farmId } = event.arguments;
+// const DEV_BYPASS = false;
 
-//     const response = await client.models.IoTDevice.list({
-//       filter: { farmId: { eq: farmId } },
-//     });
+// type ListAllDevicesHandler = Schema["listAllDevices"]["functionHandler"];
+// type IoTDeviceView = Schema["IoTDeviceView"]["type"];
 
-//     // Throw an error containing the entire IoTDevice.list() response
-//     throw new Error(
-//       "IoTDevice.list() raw response → " +
-//         JSON.stringify(
-//           {
-//             event,
-//             response
-//           },
-//           null,
-//           2
-//         )
-//     );
-//   } catch (err: any) {
-//     // If something else goes wrong, also throw it with detail
-//     throw new Error(
-//       "listAllDevices failed → " +
-//         JSON.stringify(
-//           {
-//             message: err?.message ?? String(err),
-//             stack: err?.stack,
-//             event
-//           },
-//           null,
-//           2
-//         )
+// const MOCK_DEVICE_VIEW: IoTDeviceView = {
+//   id: "mock-device",
+//   type: "TEMPERATURE",
+//   farmId: "mock-farm",
+//   devEui: "0000000000000000",
+//   applicationId: "mock-app",
+//   gatewayId: null,
+//   name: "Mock Device",
+//   description: "Returned by DEV_BYPASS in listAllDevicesFn.",
+//   location: "Unknown",
+//   createdAt: "2026-01-01T00:00:00.000Z",
+//   updatedAt: "2026-01-01T00:00:00.000Z",
+// };
+
+// type Identity = Parameters<ListAllDevicesHandler>[0]["identity"];
+// type UserAccess = Schema["UserAccess"]["type"];
+// type IoTDeviceRecord = NonNullable<
+//   Awaited<ReturnType<typeof client.models.IoTDevice.get>>["data"]
+// >;
+
+// function getCallerSub(identity: Identity): string | null {
+//   if (!identity) {
+//     return null;
+//   }
+
+//   if ("sub" in identity && typeof identity.sub === "string") {
+//     return identity.sub;
+//   }
+
+//   if (
+//     "claims" in identity &&
+//     identity.claims &&
+//     typeof identity.claims === "object" &&
+//     "sub" in identity.claims &&
+//     typeof identity.claims.sub === "string"
+//   ) {
+//     return identity.claims.sub;
+//   }
+
+//   return null;
+// }
+
+// function getCallerGroups(identity: Identity): string[] {
+//   if (!identity) {
+//     return [];
+//   }
+
+//   if ("groups" in identity && Array.isArray(identity.groups)) {
+//     return identity.groups.filter(
+//       (group): group is string => typeof group === "string",
 //     );
 //   }
+
+//   if (
+//     "claims" in identity &&
+//     identity.claims &&
+//     typeof identity.claims === "object" &&
+//     "cognito:groups" in identity.claims
+//   ) {
+//     const rawGroups = identity.claims["cognito:groups"];
+
+//     if (Array.isArray(rawGroups)) {
+//       return rawGroups.filter(
+//         (group): group is string => typeof group === "string",
+//       );
+//     }
+
+//     if (typeof rawGroups === "string") {
+//       return rawGroups
+//         .split(",")
+//         .map((group) => group.trim())
+//         .filter(Boolean);
+//     }
+//   }
+
+//   return [];
+// }
+
+// function isExpired(expiresAt: string): boolean {
+//   return new Date(expiresAt).getTime() <= Date.now();
+// }
+
+// function toDeviceView(device: IoTDeviceRecord): IoTDeviceView {
+//   return {
+//     id: device.id,
+//     type: device.type,
+//     farmId: device.farmId,
+//     devEui: device.devEui,
+//     applicationId: device.applicationId,
+//     gatewayId: device.gatewayId ?? null,
+//     name: device.name ?? null,
+//     description: device.description ?? null,
+//     location: device.location ?? null,
+//     createdAt: device.createdAt,
+//     updatedAt: device.updatedAt,
+//   };
+// }
+
+// export const handler: ListAllDevicesHandler = async (event) => {
+//   if (DEV_BYPASS) {
+//     return [MOCK_DEVICE_VIEW];
+//   }
+
+//   // Authentication retrieval
+//   const callerSub = getCallerSub(event.identity);
+//   if (!callerSub) {
+//     throw new Error("This endpoint requires Cognito userPool auth.");
+//   }
+
+//   const callerGroups = getCallerGroups(event.identity);
+//   const callerIsAdmin = callerGroups.includes("admin");
+
+//   // Admin behavior, return all
+//   if (callerIsAdmin) {
+//     const { data, errors } = await client.models.IoTDevice.list();
+
+//     if (errors?.length) {
+//       throw new Error(errors.map((error) => error.message).join("; "));
+//     }
+
+//     const devices = (data ?? []).filter((device) => device != null);
+
+//     return devices.map(toDeviceView);
+//   }
+
+//   const userAccessResponse = await client.models.UserAccess.get({
+//     userSub: callerSub,
+//   });
+
+//   if (userAccessResponse.errors?.length) {
+//     throw new Error(
+//       userAccessResponse.errors.map((error) => error.message).join("; "),
+//     );
+//   }
+
+//   const userAccessRecord: UserAccess | null | undefined = userAccessResponse.data;
+
+//   if (userAccessRecord == null) {
+//     return [];
+//   }
+
+//   if (isExpired(userAccessRecord.expiresAt)) {
+//     return [];
+//   }
+
+//   const allowedDeviceIds = (userAccessRecord.deviceIds ?? []).filter(
+//     (deviceId): deviceId is string =>
+//       typeof deviceId === "string" && deviceId.length > 0,
+//   );
+
+//   if (allowedDeviceIds.length > 0) {
+//     const allDeviceResponses = await Promise.all(
+//       allowedDeviceIds.map((deviceId) =>
+//         client.models.IoTDevice.get({ id: deviceId }),
+//       ),
+//     );
+
+//     const responseErrors = allDeviceResponses.flatMap(
+//       (response) => response.errors ?? [],
+//     );
+
+//     if (responseErrors.length) {
+//       throw new Error(responseErrors.map((error) => error.message).join("; "));
+//     }
+
+//     const visibleDevices = allDeviceResponses
+//       .map((response) => response.data)
+//       .filter((device) => device != null)
+//       .filter((device) => device.farmId === userAccessRecord.farmId);
+
+//     return visibleDevices.map(toDeviceView);
+//   }
+
+//   const farmDevicesResponse = await client.models.IoTDevice.list({
+//     filter: {
+//       farmId: { eq: userAccessRecord.farmId },
+//     },
+//   });
+
+//   if (farmDevicesResponse.errors?.length) {
+//     throw new Error(
+//       farmDevicesResponse.errors.map((error) => error.message).join("; "),
+//     );
+//   }
+
+//   const visibleDevices = (farmDevicesResponse.data ?? []).filter(
+//     (device) => device != null,
+//   );
+
+//   return visibleDevices.map(toDeviceView);
 // };

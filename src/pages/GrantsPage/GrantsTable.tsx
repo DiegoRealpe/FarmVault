@@ -1,28 +1,46 @@
 import type { Schema } from "../../../amplify/data/resource";
 
-type UserAccess = Schema["UserAccess"]["type"];
+type GrantRecord = Schema["GrantRecord"]["type"];
 
 interface GrantsTableProps {
-  grants: UserAccess[];
-  loading: boolean;
+  grantRecord: GrantRecord | null;
+  createdGrantRecords: GrantRecord[];
+  loadingGrantRecord: boolean;
+  loadingCreatedGrantRecords: boolean;
   error: string | null;
   isAdmin: boolean;
   currentUserSub: string | null;
   onRefresh: () => void;
 }
 
+function formatGrantSummary(grantRecord: GrantRecord): string {
+  return (grantRecord.grants ?? [])
+    .filter((grant): grant is NonNullable<typeof grant> => grant != null)
+    .map((grant) => {
+      const ids = grant.ids ?? [];
+      return `${grant.grantType}: ${ids.join(", ")}`;
+    })
+    .join(" | ");
+}
+
 function GrantsTable({
-  grants,
-  loading,
+  grantRecord,
+  createdGrantRecords,
+  loadingGrantRecord,
+  loadingCreatedGrantRecords,
   error,
   isAdmin,
   currentUserSub,
   onRefresh,
 }: GrantsTableProps) {
+  const loading = isAdmin
+    ? loadingGrantRecord || loadingCreatedGrantRecords
+    : loadingGrantRecord;
+
   if (loading) {
     return (
       <div className="loading-container">
-        <p>Loading grants...</p>
+        <p>Loading grant records...</p>
       </div>
     );
   }
@@ -44,17 +62,45 @@ function GrantsTable({
     );
   }
 
-  if (grants.length === 0) {
+  if (isAdmin) {
+    if (createdGrantRecords.length === 0) {
+      return (
+        <div className="empty-state">
+          <p>No grant records yet.</p>
+          <button>+ Create Grant</button>
+        </div>
+      );
+    }
+
+    return (
+      <div className="grants-table-container">
+        <table className="grants-table">
+          <thead>
+            <tr>
+              <th>User</th>
+              <th>Grants</th>
+              <th>Expires</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {createdGrantRecords.map((record) => (
+              <tr key={record.userSub}>
+                <td>{record.userSub === currentUserSub ? "You" : record.userSub}</td>
+                <td>{formatGrantSummary(record)}</td>
+                <td>{record.expiresAt}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  if (!grantRecord) {
     return (
       <div className="empty-state">
-        {isAdmin ? (
-          <>
-            <p>No grants yet.</p>
-            <button>+ Create Grant</button>
-          </>
-        ) : (
-          <p>No access assigned.</p>
-        )}
+        <p>No access assigned.</p>
       </div>
     );
   }
@@ -65,19 +111,17 @@ function GrantsTable({
         <thead>
           <tr>
             <th>User</th>
+            <th>Grants</th>
             <th>Expires</th>
           </tr>
         </thead>
 
         <tbody>
-          {grants.map((grant) => (
-            <tr key={`${grant.userSub}-${grant.createdAt}`}>
-              <td>
-                {grant.userSub === currentUserSub ? "You" : grant.userSub}
-              </td>
-              <td>{grant.expiresAt}</td>
-            </tr>
-          ))}
+          <tr key={grantRecord.userSub}>
+            <td>You</td>
+            <td>{formatGrantSummary(grantRecord)}</td>
+            <td>{grantRecord.expiresAt}</td>
+          </tr>
         </tbody>
       </table>
     </div>
