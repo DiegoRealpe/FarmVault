@@ -1,10 +1,18 @@
 import type { Schema } from "../../data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+import { env } from "$amplify/env/get-personal-grant-record";
 
-type GetGrantRecordHandler =
-  Schema["getGrantRecord"]["functionHandler"];
+const { resourceConfig, libraryOptions } =
+  await getAmplifyDataClientConfig(env);
+Amplify.configure(resourceConfig, libraryOptions);
 
-export const handler: GetGrantRecordHandler = async (event) => {
-  console.log("getGrantRecord event:", JSON.stringify(event, null, 2));
+type GetPersonalGrantRecordHandler =
+  Schema["getPersonalGrantRecord"]["functionHandler"];
+
+export const handler: GetPersonalGrantRecordHandler = async (event) => {
+  console.log("getPersonalGrantRecord event:", JSON.stringify(event, null, 2));
 
   return null;
 };

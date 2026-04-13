@@ -2,7 +2,7 @@ import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { listAllDevicesFn } from "../functions/list-all-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
-import { getGrantRecordFn } from "../functions/get-grant-record/resource";
+import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
 import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
 import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
 
@@ -162,12 +162,12 @@ const schema = a
       .handler(a.handler.function(listAllDevicesFn)),
 
     // ---- User Queries ----
-    getGrantRecord: a
+    getPersonalGrantRecord: a
       .query()
       .returns(a.ref("MyGrantRecord"))
       // .authorization((allow) => [allow.authenticated()])
       .authorization((allow) => [allow.publicApiKey()])
-      .handler(a.handler.function(getGrantRecordFn)),
+      .handler(a.handler.function(getPersonalGrantRecordFn)),
 
     // ---- Admin Queries ----
     listCreatedGrantRecords: a
@@ -205,7 +205,7 @@ const schema = a
   .authorization((allow) => [
     allow.resource(listAllDevicesFn).to(["query"]),
     allow.resource(getFarmIotDataFn).to(["query"]),
-    allow.resource(getGrantRecordFn).to(["query"]),
+    allow.resource(getPersonalGrantRecordFn).to(["query"]),
     allow.resource(listCreatedGrantRecordsFn).to(["query"]),
     allow.resource(upsertGrantRecordFn).to(["query", "mutate"]),
   ]);

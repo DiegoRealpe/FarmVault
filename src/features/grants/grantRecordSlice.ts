@@ -66,7 +66,7 @@ export const fetchGrantRecord = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
-    const { data, errors } = await userPoolClient.queries.getGrantRecord({});
+    const { data, errors } = await userPoolClient.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
       return rejectWithValue(errors.map((e) => e.message).join("; "));
