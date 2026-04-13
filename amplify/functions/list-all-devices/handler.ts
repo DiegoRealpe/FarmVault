@@ -1,3 +1,22 @@
+import type { Schema } from "../../data/resource";
+
+import { Amplify } from "aws-amplify";
+import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+import { env } from "$amplify/env/list-all-devices";
+
+const { resourceConfig, libraryOptions } =
+  await getAmplifyDataClientConfig(env);
+Amplify.configure(resourceConfig, libraryOptions);
+
+type ListAllDevicesHandler =
+  Schema["listAllDevices"]["functionHandler"];
+
+export const handler: ListAllDevicesHandler = async (event) => {
+  console.log("listAllDevices event:", JSON.stringify(event, null, 2));
+
+  throw new Error("listAllDevicesFn not implemented yet.");
+};
+
 // // amplify/functions/list-all-devices/handler.ts
 // import type { Schema } from "../../data/resource";
 // import { Amplify } from "aws-amplify";
