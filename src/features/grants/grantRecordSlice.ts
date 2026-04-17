@@ -71,6 +71,7 @@ export const fetchGrantRecord = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
+    const userPoolClient = getUserPoolClient();
     const { data, errors } = await userPoolClient.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
@@ -149,13 +150,14 @@ export const createFarmUserThunk = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/createFarmUser", async (input, { rejectWithValue }) => {
   try {
+    const userPoolClient = getUserPoolClient();
     const { data, errors } = await userPoolClient.mutations.createFarmUser({
       email: input.email,
       temporaryPassword: input.temporaryPassword,
     });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
     }
 
     if (!data) {
@@ -176,6 +178,7 @@ export const upsertGrantRecordThunk = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/upsertGrantRecord", async (input, { rejectWithValue }) => {
   try {
+    const userPoolClient = getUserPoolClient();
     const { data, errors } = await userPoolClient.mutations.upsertGrantRecord({
       userSub: input.userSub,
       grants: input.grants,
@@ -183,7 +186,7 @@ export const upsertGrantRecordThunk = createAsyncThunk<
     });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
     }
 
     if (!data) {
