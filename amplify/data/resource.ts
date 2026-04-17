@@ -68,11 +68,7 @@ const schema = a
       })
       .identifier(["userSub"])
       // TODO: remove direct client access later
-      .authorization((allow) => [
-        // allow.authenticated(),
-        allow.group("admin").to(["read"]),
-        allow.ownerDefinedIn("userSub").to(["read"]),
-      ]),
+      .authorization((allow) => [allow.publicApiKey()]),
 
     // -- Custom Types --
     // For API responses that don't map 1:1 with a single model, we can define custom types.
@@ -173,7 +169,6 @@ const schema = a
     listCreatedGrantRecords: a
       .query()
       .returns(a.ref("GrantRecord").array().required())
-      // .authorization((allow) => [allow.group("admin")])
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(listCreatedGrantRecordsFn)),
 
