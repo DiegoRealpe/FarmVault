@@ -1,55 +1,183 @@
-
 import {
-    AthenaClient,
-    StartQueryExecutionCommand,
-    GetQueryExecutionCommand,
-    GetQueryResultsCommand,
-    QueryExecutionState,
-  } from '@aws-sdk/client-athena';
-  import type { Schema } from "../../data/resource";
-  // import { Amplify } from "aws-amplify";
-  // import { generateClient } from "aws-amplify/data";
-  // import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-  // import { env } from "$amplify/env/list-all-devices";
-  
-  const athena = new AthenaClient({});
+  AthenaClient,
+  StartQueryExecutionCommand,
+  GetQueryExecutionCommand,
+  GetQueryResultsCommand,
+  QueryExecutionState,
+} from "@aws-sdk/client-athena";
+import type { Schema } from "../../data/resource";
+import { Amplify } from "aws-amplify";
+import { generateClient } from "aws-amplify/data";
+import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
+import { env } from "$amplify/env/get-farm-iot-data";
 
-  // export const handler = async (_event) => {
-  //   return "Hello from my second function!";
-  // };
+const athena = new AthenaClient({});
+
+const { resourceConfig, libraryOptions } =
+  await getAmplifyDataClientConfig(env);
+
+Amplify.configure(resourceConfig, libraryOptions);
+
+const client = generateClient<Schema>();
+
+type GetFarmIotDataHandler = Schema["getFarmIotData"]["functionHandler"];
+type Identity = Parameters<GetFarmIotDataHandler>[0]["identity"];
+type GrantRecord = Schema["GrantRecord"]["type"];
+type IoTDevice = Schema["IoTDevice"]["type"];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 type AthenaRow = Record<string, string | null>;
 
-export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event: any) => {
-  console.log('[getIotDeviceData] Event:', JSON.stringify(event));
-
-  // GraphQL args are typically under event.arguments
-  const deviceIdArg: string | undefined = event?.arguments?.deviceId;
-  if (!deviceIdArg) {
-    throw new Error('deviceId argument is required');
+function getCallerSub(identity: Identity): string | null {
+  if (!identity || typeof identity !== "object") {
+    return null;
   }
 
-  const workGroup = process.env.ATHENA_WORKGROUP ?? 'farmvault-wg';
-  const db = process.env.ATHENA_DATABASE ?? 'iot_telemetry';
-  const table = process.env.ATHENA_TABLE ?? 'iot_parquet';
+  if ("sub" in identity && typeof identity.sub === "string") {
+    return identity.sub;
+  }
 
-  // Basic deviceId filter. We assume deviceIdArg is well-formed; if you
-  // want to be extra safe, you can validate/escape quotes.
+  return null;
+}
+
+function getGroups(identity: Identity): string[] {
+  if (!identity || typeof identity !== "object") {
+    return [];
+  }
+
+  if ("groups" in identity && Array.isArray(identity.groups)) {
+    return identity.groups.filter(
+      (group): group is string => typeof group === "string",
+    );
+  }
+
+  return [];
+}
+
+function isAdmin(identity: Identity): boolean {
+  return getGroups(identity).includes("admin");
+}
+
+function isGrantActive(grantRecord: GrantRecord | null | undefined): boolean {
+  if (!grantRecord) {
+    return false;
+  }
+
+  const now = Date.now();
+
+  if (typeof grantRecord.ttl === "number") {
+    return grantRecord.ttl > Math.floor(now / 1000);
+  }
+
+  if (typeof grantRecord.expiresAt === "string") {
+    return new Date(grantRecord.expiresAt).getTime() > now;
+  }
+
+  return false;
+}
+
+function userHasDeviceAccess(
+  grantRecord: GrantRecord,
+  device: IoTDevice,
+): boolean {
+  for (const entry of grantRecord.grants ?? []) {
+    if (!entry) {
+      continue;
+    }
+
+    const ids = (entry.ids ?? []).filter(
+      (id): id is string => typeof id === "string",
+    );
+
+    if (entry.grantType === "device" && ids.includes(device.id)) {
+      return true;
+    }
+
+    if (entry.grantType === "farm" && ids.includes(device.farmId)) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+export const handler: GetFarmIotDataHandler = async (event) => {
+  console.log("[getFarmIotData] Event:", JSON.stringify(event, null, 2));
+
+  const callerSub = getCallerSub(event.identity);
+  if (!callerSub) {
+    throw new Error("This endpoint requires Cognito userPool auth.");
+  }
+
+  const deviceIdArg = event.arguments.deviceId;
+  if (!deviceIdArg) {
+    throw new Error("deviceId argument is required");
+  }
+
+  const { data: device, errors: deviceErrors } = await client.models.IoTDevice.get(
+    { id: deviceIdArg },
+  );
+
+  if (deviceErrors?.length) {
+    throw new Error(
+      `Failed to load device: ${deviceErrors.map((e) => e.message).join("; ")}`,
+    );
+  }
+
+  if (!device) {
+    throw new Error("Requested device does not exist.");
+  }
+
+  if (!isAdmin(event.identity)) {
+    const { data: grantRecord, errors: grantErrors } =
+      await client.models.GrantRecord.get({
+        userSub: callerSub,
+      });
+
+    if (grantErrors?.length) {
+      throw new Error(
+        `Failed to load grant record: ${grantErrors
+          .map((e) => e.message)
+          .join("; ")}`,
+      );
+    }
+
+    if (!grantRecord || !isGrantActive(grantRecord)) {
+      throw new Error("Not authorized.");
+    }
+
+    if (!userHasDeviceAccess(grantRecord, device)) {
+      throw new Error("Not authorized.");
+    }
+  }
+
+  const workGroup = process.env.ATHENA_WORKGROUP ?? "farmvault-wg";
+  const db = process.env.ATHENA_DATABASE ?? "iot_telemetry";
+  const table = process.env.ATHENA_TABLE ?? "iot_parquet";
+
   const safeDeviceId = deviceIdArg.replace(/'/g, "''");
+
+  const fromClause = event.arguments.from
+    ? `AND event_ts >= TIMESTAMP '${event.arguments.from.replace(/'/g, "''")}'`
+    : "";
+
+  const toClause = event.arguments.to
+    ? `AND event_ts <= TIMESTAMP '${event.arguments.to.replace(/'/g, "''")}'`
+    : "";
 
   const query = `
     SELECT *
     FROM "${db}"."${table}"
     WHERE device_id = '${safeDeviceId}'
+    ${fromClause}
+    ${toClause}
     ORDER BY event_ts
     LIMIT 1000;
   `;
 
-  console.log('[getIotDeviceData] Running Athena query:', query);
+  console.log("[getFarmIotData] Running Athena query:", query);
 
-  // 1) Start query
   const startResp = await athena.send(
     new StartQueryExecutionCommand({
       QueryString: query,
@@ -59,12 +187,9 @@ export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event
 
   const queryExecutionId = startResp.QueryExecutionId;
   if (!queryExecutionId) {
-    throw new Error('Failed to start Athena query: no QueryExecutionId returned');
+    throw new Error("Failed to start Athena query: no QueryExecutionId returned");
   }
 
-  console.log('[getIotDeviceData] QueryExecutionId:', queryExecutionId);
-
-  // 2) Poll for completion
   let state: QueryExecutionState | undefined;
   let attempts = 0;
   const maxAttempts = 30;
@@ -79,10 +204,13 @@ export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event
     );
 
     state = exec.QueryExecution?.Status?.State as QueryExecutionState | undefined;
-    console.log(`[getIotDeviceData] Attempt ${attempts}, state:`, state);
+    console.log(`[getFarmIotData] Attempt ${attempts}, state:`, state);
 
-    if (state === 'SUCCEEDED') break;
-    if (state === 'FAILED' || state === 'CANCELLED') {
+    if (state === "SUCCEEDED") {
+      break;
+    }
+
+    if (state === "FAILED" || state === "CANCELLED") {
       const reason = exec.QueryExecution?.Status?.StateChangeReason;
       throw new Error(`Athena query failed: ${state} - ${reason}`);
     }
@@ -90,11 +218,10 @@ export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event
     await sleep(1000);
   }
 
-  if (state !== 'SUCCEEDED') {
+  if (state !== "SUCCEEDED") {
     throw new Error(`Athena query did not complete in time. Last state: ${state}`);
   }
 
-  // 3) Fetch results
   const resultsResp = await athena.send(
     new GetQueryResultsCommand({
       QueryExecutionId: queryExecutionId,
@@ -104,14 +231,16 @@ export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event
 
   const rows = resultsResp.ResultSet?.Rows ?? [];
   if (rows.length === 0) {
-    return [{
-      deviceId: deviceIdArg,
-      points: [],
-    }];
+    return [
+      {
+        deviceId: deviceIdArg,
+        points: [],
+      },
+    ];
   }
 
   const headerCells = rows[0].Data ?? [];
-  const columnNames = headerCells.map((cell) => cell.VarCharValue ?? '');
+  const columnNames = headerCells.map((cell) => cell.VarCharValue ?? "");
 
   const dataRows: AthenaRow[] = rows.slice(1).map((row) => {
     const obj: AthenaRow = {};
@@ -121,27 +250,31 @@ export const handler: Schema["getFarmIotData"]["functionHandler"] = async (event
     return obj;
   });
 
-  console.log('[getIotDeviceData] Raw rows:', JSON.stringify(dataRows, null, 2));
+  console.log("[getFarmIotData] Raw rows:", JSON.stringify(dataRows, null, 2));
 
-  // Build time-series points from moisture + timestamp for this device
+  const valueColumn =
+    device.type === "TEMPERATURE" ? "temperature" : "moisture";
+
   const points = dataRows
-    .filter((r) => r['timestamp'] != null && r['moisture'] != null)
+    .filter((r) => r["event_ts"] != null && r[valueColumn] != null)
     .map((r) => ({
-      timestamp: r['timestamp'] as string,           // ISO8601 string
-      value: parseFloat(r['moisture'] as string),    // moisture -> float
-    }));
+      timestamp: r["event_ts"] as string,
+      value: parseFloat(r[valueColumn] as string),
+    }))
+    .filter((point) => !Number.isNaN(point.value));
 
   console.log(
-    '[getIotDeviceData] Returning deviceId',
+    "[getFarmIotData] Returning deviceId",
     deviceIdArg,
-    'with',
+    "with",
     points.length,
-    'points',
+    "points",
   );
 
-  // Matches DeviceTimeSeries type
-  return [{
-    deviceId: deviceIdArg,
-    points,
-  }];
+  return [
+    {
+      deviceId: deviceIdArg,
+      points,
+    },
+  ];
 };

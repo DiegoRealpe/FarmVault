@@ -130,19 +130,15 @@ const schema = a
     getFarmIotData: a
       .query()
       .arguments({
-        // farmId: a.string().required(),
         deviceId: a.string().required(),
-        // datasetKey: a.string().required(), // e.g. "temperature" | "moisture"
-        // from: a.datetime(),                // optional
-        // to: a.datetime(),                  // optional
+        from: a.datetime(),                // optional
+        to: a.datetime(),                  // optional
       })
       .returns(a.ref("DeviceTimeSeries").array())
       .authorization((allow) => [
         // Both admins and temp viewers can call this,
         // but the Lambda enforces TempAccessGrant and device visibility.
-        allow.publicApiKey(),
-        // allow.group('farmAdmin'),
-        // allow.group('tempViewer'),
+        allow.authenticated(),
       ])
       .handler(a.handler.function(getFarmIotDataFn)),
 
@@ -157,7 +153,7 @@ const schema = a
         // Lambda decides what each caller actually sees.
         // allow.group('farmAdmin'),
         // allow.group('tempViewer'),
-        allow.publicApiKey(),
+        allow.authenticated(),
       ])
       .handler(a.handler.function(listAllDevicesFn)),
 
