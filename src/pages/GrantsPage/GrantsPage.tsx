@@ -46,6 +46,7 @@ function GrantsPage() {
       dispatch(fetchCreatedGrantRecords());
     }
     else {
+      console.log("[GrantsPage] non-admin calling fetchGrantRecord only for their own record");
       dispatch(fetchGrantRecord());
     }
   }, [dispatch, userSub, isAdmin]);
