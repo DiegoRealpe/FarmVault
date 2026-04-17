@@ -1,0 +1,187 @@
+// Testing Data for DynamoDB
+[
+// Farm Records
+{
+  "id": { "S": "farm-001" },
+  "name": { "S": "Farm Without Devices" },
+  "ownerSub": { "S": "11111111-1111-1111-1111-111111111111" },
+  "description": { "S": "Test farm with no registered IoT devices." },
+  "region": { "S": "us-central-1" },
+  "createdAt": { "S": "2026-04-16T18:30:00Z" },
+  "updatedAt": { "S": "2026-04-16T18:30:00Z" }
+},
+{
+  "id": { "S": "farm-002" },
+  "name": { "S": "Temperature Monitoring Farm" },
+  "ownerSub": { "S": "22222222-2222-2222-2222-222222222222" },
+  "description": { "S": "Farm equipped with temperature sensors for environmental monitoring." },
+  "region": { "S": "us-central-1" },
+  "createdAt": { "S": "2026-04-16T18:35:00Z" },
+  "updatedAt": { "S": "2026-04-16T18:35:00Z" }
+},
+{
+  "id": { "S": "farm-003" },
+  "name": { "S": "Multi Sensor Crop Farm" },
+  "ownerSub": { "S": "33333333-3333-3333-3333-333333333333" },
+  "description": { "S": "Farm with temperature and soil moisture sensors for crop management." },
+  "region": { "S": "us-central-1" },
+  "createdAt": { "S": "2026-04-16T18:40:00Z" },
+  "updatedAt": { "S": "2026-04-16T18:40:00Z" }
+},
+
+// IoT Devices
+
+{
+  "id": { "S": "device-002-1" },
+  "type": { "S": "TEMPERATURE" },
+  "farmId": { "S": "farm-002" },
+  "devEui": { "S": "70B3D57ED0000001" },
+  "applicationId": { "S": "app-temp-1" },
+  "gatewayId": { "S": "gw-01" },
+  "name": { "S": "Temp Sensor 1" },
+  "description": { "S": "Ambient temperature sensor." },
+  "location": { "S": "Field A" },
+  "createdAt": { "S": "2026-04-16T19:00:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:00:00Z" }
+},
+{
+  "id": { "S": "device-002-2" },
+  "type": { "S": "TEMPERATURE" },
+  "farmId": { "S": "farm-002" },
+  "devEui": { "S": "70B3D57ED0000002" },
+  "applicationId": { "S": "app-temp-1" },
+  "gatewayId": { "S": "gw-01" },
+  "name": { "S": "Temp Sensor 2" },
+  "description": { "S": "Ambient temperature sensor." },
+  "location": { "S": "Field B" },
+  "createdAt": { "S": "2026-04-16T19:01:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:01:00Z" }
+},
+{
+  "id": { "S": "device-003-1" },
+  "type": { "S": "TEMPERATURE" },
+  "farmId": { "S": "farm-003" },
+  "devEui": { "S": "70B3D57ED0000011" },
+  "applicationId": { "S": "app-multi-1" },
+  "gatewayId": { "S": "gw-02" },
+  "name": { "S": "Temp Sensor North" },
+  "description": { "S": "Temperature sensor for crop monitoring." },
+  "location": { "S": "North field" },
+  "createdAt": { "S": "2026-04-16T19:05:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:05:00Z" }
+},
+{
+  "id": { "S": "device-003-2" },
+  "type": { "S": "TEMPERATURE" },
+  "farmId": { "S": "farm-003" },
+  "devEui": { "S": "70B3D57ED0000012" },
+  "applicationId": { "S": "app-multi-1" },
+  "gatewayId": { "S": "gw-02" },
+  "name": { "S": "Temp Sensor South" },
+  "description": { "S": "Temperature sensor for crop monitoring." },
+  "location": { "S": "South field" },
+  "createdAt": { "S": "2026-04-16T19:06:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:06:00Z" }
+},
+{
+  "id": { "S": "device-003-3" },
+  "type": { "S": "MOISTURE" },
+  "farmId": { "S": "farm-003" },
+  "devEui": { "S": "70B3D57ED0000021" },
+  "applicationId": { "S": "app-multi-1" },
+  "gatewayId": { "S": "gw-02" },
+  "name": { "S": "Moisture Sensor North" },
+  "description": { "S": "Soil moisture sensor." },
+  "location": { "S": "North field" },
+  "createdAt": { "S": "2026-04-16T19:07:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:07:00Z" }
+},
+{
+  "id": { "S": "device-003-4" },
+  "type": { "S": "MOISTURE" },
+  "farmId": { "S": "farm-003" },
+  "devEui": { "S": "70B3D57ED0000022" },
+  "applicationId": { "S": "app-multi-1" },
+  "gatewayId": { "S": "gw-02" },
+  "name": { "S": "Moisture Sensor South" },
+  "description": { "S": "Soil moisture sensor." },
+  "location": { "S": "South field" },
+  "createdAt": { "S": "2026-04-16T19:08:00Z" },
+  "updatedAt": { "S": "2026-04-16T19:08:00Z" }
+},
+
+// User Grants
+
+// Technician
+{
+  "userSub": { "S": "413b75b0-60b1-70e6-a428-1bfe69516779" },
+  "grants": {
+    "L": [
+      {
+        "M": {
+          "grantType": { "S": "device" },
+          "ids": {
+            "L": [
+              { "S": "device-002-1" }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expiresAt": { "S": "2026-05-16T00:00:00Z" },
+  "ttl": { "N": "1778889600" },
+  "createdBySub": { "S": "219ba520-4011-701a-b98f-85b5d7b2cc3e" },
+  "createdAt": { "S": "2026-04-16T00:00:00Z" },
+  "updatedAt": { "S": "2026-04-16T00:00:00Z" }
+},
+
+// Botanist
+{
+  "userSub": { "S": "018b7590-80e1-7064-0c86-dd5902537ece" },
+  "grants": {
+    "L": [
+      {
+        "M": {
+          "grantType": { "S": "farm" },
+          "ids": {
+            "L": [
+              { "S": "farm-002" }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expiresAt": { "S": "2026-05-16T00:00:00Z" },
+  "ttl": { "N": "1778889600" },
+  "createdBySub": { "S": "219ba520-4011-701a-b98f-85b5d7b2cc3e" },
+  "createdAt": { "S": "2026-04-16T00:00:00Z" },
+  "updatedAt": { "S": "2026-04-16T00:00:00Z" }
+},
+
+// Farmhand
+{
+  "userSub": { "S": "e10bc590-f081-70d5-927a-bcbe514c78f3" },
+  "grants": {
+    "L": [
+      {
+        "M": {
+          "grantType": { "S": "farm" },
+          "ids": {
+            "L": [
+              { "S": "farm-003" }
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "expiresAt": { "S": "2026-05-16T00:00:00Z" },
+  "ttl": { "N": "1778889600" },
+  "createdBySub": { "S": "219ba520-4011-701a-b98f-85b5d7b2cc3e" },
+  "createdAt": { "S": "2026-04-16T00:00:00Z" },
+  "updatedAt": { "S": "2026-04-16T00:00:00Z" }
+}
+
+]
