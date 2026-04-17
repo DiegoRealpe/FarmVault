@@ -1,0 +1,242 @@
+/* =========================
+   Loading State
+========================= */
+.grants-table-loading {
+  display: flex;
+  align-items: center;
+  margin-top: 20px;
+}
+
+.grants-table-spinner {
+  display: inline-block;
+  width: 20px;
+  height: 20px;
+  border: 3px solid #f3f3f3;
+  border-top: 3px solid #007aff;
+  border-radius: 50%;
+  animation: grants-spin 1s linear infinite;
+  margin-right: 12px;
+}
+
+@keyframes grants-spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* =========================
+   Error State
+========================= */
+.grants-table-error {
+  padding: 20px;
+  background-color: #ffebee;
+  border-radius: 8px;
+  margin-top: 20px;
+}
+
+.grants-table-error-message {
+  color: #c62828;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.grants-table-error-message::before {
+  content: "⚠️";
+}
+
+/* =========================
+   Empty State
+========================= */
+.grants-table-empty-state {
+  padding: 40px;
+  text-align: center;
+  background-color: #f5f5f5;
+  border-radius: 8px;
+}
+
+.grants-table-empty-state p {
+  margin: 0 0 16px 0;
+  color: #666;
+}
+
+/* =========================
+   Controls
+========================= */
+.grants-table-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.grants-table-count {
+  background-color: #007aff;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.grants-refresh-small {
+  padding: 8px 16px;
+  background-color: #f0f0f0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  color: #666;
+  transition: all 0.2s;
+}
+
+.grants-refresh-small:hover {
+  background-color: #e0e0e0;
+}
+
+.grants-refresh-button {
+  padding: 8px 16px;
+  background-color: #007aff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.875rem;
+  transition: background-color 0.2s;
+}
+
+.grants-refresh-button:hover {
+  background-color: #0056cc;
+}
+
+/* =========================
+   Table Container
+========================= */
+.grants-table-wrapper {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+/* =========================
+   Table
+========================= */
+.grants-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 900px;
+}
+
+.grants-table thead {
+  background-color: #fafafa;
+}
+
+.grants-table th {
+  padding: 16px;
+  text-align: left;
+  border-bottom: 1px solid #e0e0e0;
+  font-weight: 600;
+  color: #333;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.grants-table td {
+  padding: 16px;
+  font-size: 0.875rem;
+  vertical-align: top;
+}
+
+.grants-table tbody tr {
+  border-bottom: 1px solid #f0f0f0;
+  transition: background-color 0.2s;
+}
+
+.grants-table tbody tr:hover {
+  background-color: #f9f9f9;
+}
+
+/* =========================
+   User Column
+========================= */
+.grants-user-value {
+  font-weight: 500;
+  color: #1a1a1a;
+  word-break: break-word;
+}
+
+.grants-user-subtext {
+  font-size: 0.875rem;
+  color: #666;
+  margin-top: 4px;
+}
+
+/* =========================
+   Grant Chips
+========================= */
+.grants-chip-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.grants-chip {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 4px;
+  background-color: #f5f5f5;
+  color: #333;
+  border: 1px solid #e0e0e0;
+  font-family: "Menlo", "Monaco", "Courier New", monospace;
+  font-size: 0.8125rem;
+}
+
+.grants-table-empty-value {
+  color: #999;
+  font-style: italic;
+  font-size: 0.875rem;
+}
+
+/* =========================
+   Dates
+========================= */
+.grants-date-value {
+  color: #333;
+  font-size: 0.875rem;
+}
+
+.grants-date-muted {
+  color: #666;
+  font-size: 0.875rem;
+}
+
+/* =========================
+   Responsive
+========================= */
+@media (max-width: 768px) {
+  .grants-table-controls {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .grants-refresh-small {
+    align-self: flex-start;
+  }
+
+  .grants-table th,
+  .grants-table td {
+    padding: 12px 8px;
+  }
+}
+
+.grants-sortable-header {
+  cursor: pointer;
+  user-select: none;
+}
+
+.grants-sortable-header:hover {
+  color: #007aff;
+}

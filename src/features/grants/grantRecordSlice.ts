@@ -7,12 +7,22 @@ console.log("[grantRecordSlice] module loaded");
 function getUserPoolClient() {
   console.log("[grantRecordSlice] creating userPool client");
   return generateClient<Schema>({
-  authMode: "userPool",
-});
+    authMode: "userPool",
+  });
 }
 
 type GrantRecord = Schema["GrantRecord"]["type"];
 type GrantType = "farm" | "device";
+
+export type GrantRecordSortBy =
+  | "userSub"
+  | "expiresAt"
+  | "ttl"
+  | "createdBySub"
+  | "createdAt"
+  | "updatedAt";
+
+export type GrantRecordSortDirection = "asc" | "desc";
 
 export interface GrantEntry {
   grantType: GrantType;
@@ -47,7 +57,8 @@ interface GrantRecordState {
   error: string | null;
   filters: {
     showExpired: boolean;
-    sortBy: "createdAt" | "expiresAt";
+    sortBy: GrantRecordSortBy;
+    sortDirection: GrantRecordSortDirection;
   };
 }
 
@@ -62,6 +73,7 @@ const initialState: GrantRecordState = {
   filters: {
     showExpired: false,
     sortBy: "createdAt",
+    sortDirection: "desc",
   },
 };
 
@@ -72,7 +84,8 @@ export const fetchGrantRecord = createAsyncThunk<
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
     const userPoolClient = getUserPoolClient();
-    const { data, errors } = await userPoolClient.queries.getPersonalGrantRecord({});
+    const { data, errors } =
+      await userPoolClient.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
       return rejectWithValue(errors.map((e) => e.message).join("; "));
@@ -157,7 +170,7 @@ export const createFarmUserThunk = createAsyncThunk<
     });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any }) => e.message).join("; "));
     }
 
     if (!data) {
@@ -186,7 +199,7 @@ export const upsertGrantRecordThunk = createAsyncThunk<
     });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any }) => e.message).join("; "));
     }
 
     if (!data) {
@@ -210,19 +223,39 @@ const grantRecordSlice = createSlice({
     setShowExpired: (state, action: PayloadAction<boolean>) => {
       state.filters.showExpired = action.payload;
     },
-    setSortBy: (
-      state,
-      action: PayloadAction<"createdAt" | "expiresAt">,
-    ) => {
+
+    setSortBy: (state, action: PayloadAction<GrantRecordSortBy>) => {
       state.filters.sortBy = action.payload;
     },
+
+    setSortDirection: (
+      state,
+      action: PayloadAction<GrantRecordSortDirection>,
+    ) => {
+      state.filters.sortDirection = action.payload;
+    },
+
+    toggleSort: (state, action: PayloadAction<GrantRecordSortBy>) => {
+      const nextSortBy = action.payload;
+
+      if (state.filters.sortBy === nextSortBy) {
+        state.filters.sortDirection =
+          state.filters.sortDirection === "asc" ? "desc" : "asc";
+      } else {
+        state.filters.sortBy = nextSortBy;
+        state.filters.sortDirection = "asc";
+      }
+    },
+
     clearError: (state) => {
       state.error = null;
     },
+
     clearGrantRecord: (state) => {
       state.grantRecord = null;
     },
   },
+
   extraReducers: (builder) => {
     builder
       .addCase(fetchGrantRecord.pending, (state) => {
@@ -291,6 +324,8 @@ const grantRecordSlice = createSlice({
 export const {
   setShowExpired,
   setSortBy,
+  setSortDirection,
+  toggleSort,
   clearError,
   clearGrantRecord,
 } = grantRecordSlice.actions;

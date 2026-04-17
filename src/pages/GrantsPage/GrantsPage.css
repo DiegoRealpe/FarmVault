@@ -94,3 +94,17 @@
 .modal-error {
   color: #b00020;
 }
+
+.grants-page-filters {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 16px;
+}
+
+.grants-page-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #333;
+  font-size: 0.875rem;
+}
