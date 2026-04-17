@@ -29,7 +29,8 @@ export async function getAuthenticatedUserInfo(
     ? groupsClaim.filter((g): g is string => typeof g === "string")
     : [];
 
-  const isAdmin = groups.includes("Admin");
+  const normalizedGroups = groups.map((group) => group.toLowerCase());
+  const isAdmin = normalizedGroups.includes("admin");
 
   return {
     sub,
