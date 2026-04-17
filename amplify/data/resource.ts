@@ -165,8 +165,8 @@ const schema = a
     getPersonalGrantRecord: a
       .query()
       .returns(a.ref("MyGrantRecord"))
-      // .authorization((allow) => [allow.authenticated()])
-      .authorization((allow) => [allow.publicApiKey()])
+      .authorization((allow) => [allow.authenticated()])
+      // .authorization((allow) => [allow.publicApiKey()])
       .handler(a.handler.function(getPersonalGrantRecordFn)),
 
     // ---- Admin Queries ----
@@ -203,11 +203,11 @@ const schema = a
   })
   // (optional) let specific functions use the Data client with proper auth
   .authorization((allow) => [
-    allow.resource(listAllDevicesFn).to(["query"]),
-    allow.resource(getFarmIotDataFn).to(["query"]),
-    allow.resource(getPersonalGrantRecordFn).to(["query"]),
-    allow.resource(listCreatedGrantRecordsFn).to(["query"]),
-    allow.resource(upsertGrantRecordFn).to(["query", "mutate"]),
+    allow.resource(listAllDevicesFn),
+    allow.resource(getFarmIotDataFn),
+    allow.resource(getPersonalGrantRecordFn),
+    allow.resource(listCreatedGrantRecordsFn),
+    allow.resource(upsertGrantRecordFn)
   ]);
 
 // 2) Export Schema type for typed clients
