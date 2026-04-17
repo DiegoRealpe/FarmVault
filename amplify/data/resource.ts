@@ -170,7 +170,7 @@ const schema = a
       .query()
       .returns(a.ref("GrantRecord").array().required())
       // .authorization((allow) => [allow.group("admin")])
-      .authorization((allow) => [allow.publicApiKey()])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(listCreatedGrantRecordsFn)),
 
     // ---- Admin Mutations ----
@@ -182,7 +182,7 @@ const schema = a
       })
       .returns(a.ref("CreateFarmUserResult").required())
       // .authorization((allow) => [allow.group("admin")])
-      .authorization((allow) => [allow.publicApiKey()])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(createFarmUserFn)),
 
     upsertGrantRecord: a
@@ -194,7 +194,7 @@ const schema = a
       })
       .returns(a.ref("UpsertGrantRecordResult").required())
       // .authorization((allow) => [allow.group("admin")])
-      .authorization((allow) => [allow.publicApiKey()])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(upsertGrantRecordFn)),
   })
   // (optional) let specific functions use the Data client with proper auth
