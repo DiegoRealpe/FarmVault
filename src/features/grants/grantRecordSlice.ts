@@ -2,9 +2,14 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 
-const userPoolClient = generateClient<Schema>({
+console.log("[grantRecordSlice] module loaded");
+
+function getUserPoolClient() {
+  console.log("[grantRecordSlice] creating userPool client");
+  return generateClient<Schema>({
   authMode: "userPool",
 });
+}
 
 type GrantRecord = Schema["GrantRecord"]["type"];
 type GrantType = "farm" | "device";
@@ -88,6 +93,8 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   console.log("[fetchCreatedGrantRecords] thunk started");
 
   try {
+    const userPoolClient = getUserPoolClient();
+
     console.log("[fetchCreatedGrantRecords] calling listCreatedGrantRecords");
 
     const response = await userPoolClient.queries.listCreatedGrantRecords({});
