@@ -85,16 +85,49 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   void,
   { rejectValue: string }
 >("grantRecord/fetchCreatedGrantRecords", async (_, { rejectWithValue }) => {
+  console.log("[fetchCreatedGrantRecords] thunk started");
+
   try {
-    const { data, errors } =
-      await userPoolClient.queries.listCreatedGrantRecords({});
+    console.log("[fetchCreatedGrantRecords] calling listCreatedGrantRecords");
+
+    const response = await userPoolClient.queries.listCreatedGrantRecords({});
+
+    console.log("[fetchCreatedGrantRecords] raw response:", response);
+
+    const { data, errors } = response;
+
+    console.log("[fetchCreatedGrantRecords] data:", data);
+    console.log("[fetchCreatedGrantRecords] errors:", errors);
+    console.log(
+      "[fetchCreatedGrantRecords] data is array:",
+      Array.isArray(data),
+    );
+    console.log(
+      "[fetchCreatedGrantRecords] data length:",
+      Array.isArray(data) ? data.length : "not an array",
+    );
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e) => e.message).join("; "));
+      const errorMessage = errors.map((e) => e.message).join("; ");
+      console.error(
+        "[fetchCreatedGrantRecords] GraphQL errors encountered:",
+        errorMessage,
+      );
+      return rejectWithValue(errorMessage);
     }
 
-    return (data as GrantRecord[] | null) ?? [];
+    const result = (data as GrantRecord[] | null) ?? [];
+
+    console.log("[fetchCreatedGrantRecords] returning result:", result);
+    console.log(
+      "[fetchCreatedGrantRecords] returning result length:",
+      result.length,
+    );
+
+    return result;
   } catch (error) {
+    console.error("[fetchCreatedGrantRecords] caught exception:", error);
+
     return rejectWithValue(
       error instanceof Error
         ? error.message

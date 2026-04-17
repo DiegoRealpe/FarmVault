@@ -169,7 +169,6 @@ const schema = a
     listCreatedGrantRecords: a
       .query()
       .returns(a.ref("GrantRecord").array().required())
-      // .authorization((allow) => [allow.group("admin")])
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(listCreatedGrantRecordsFn)),
 
