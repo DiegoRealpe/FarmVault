@@ -32,13 +32,20 @@ function GrantsPage() {
   const userSub = user.sub;
   const isAdmin = user.isAdmin;
 
+  console.log("[GrantsPage] loaded with userSub:", userSub, "isAdmin:", isAdmin);
+
   useEffect(() => {
     if (!userSub) return;
 
-    dispatch(fetchGrantRecord());
-
+    
+    console.log("[GrantsPage] useEffect invoked");
     if (isAdmin) {
+      
+      console.log("[GrantsPage] admin calling fetchCreatedGrantRecords");
       dispatch(fetchCreatedGrantRecords());
+    }
+    else {
+      dispatch(fetchGrantRecord());
     }
   }, [dispatch, userSub, isAdmin]);
 
