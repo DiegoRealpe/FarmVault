@@ -1,72 +1,128 @@
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
-import { generateClient } from 'aws-amplify/data';
-import { Schema } from '../../../amplify/data/resource';
+import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import type { Schema } from "../../../amplify/data/resource";
+// import { generateClient } from "aws-amplify/data";
 
-const client = generateClient<Schema>();
+// const client = generateClient<Schema>({
+//   authMode: "userPool",
+// });
 
-type Device = Schema['IoTDeviceView']['type'];
+type IoTDevice = Schema["IoTDevice"]["type"];
+type Farm = Schema["Farm"]["type"];
 
 interface DeviceState {
-  devices: Device[];
-  farmId: string;
-  loading: boolean;
-  error: string | null;
+  visibleDevices: IoTDevice[];
+  visibleFarms: Farm[];
+  loadingVisibleDevices: boolean;
+  loadingVisibleFarms: boolean;
+  visibleDevicesError: string | null;
+  visibleFarmsError: string | null;
 }
-
 const initialState: DeviceState = {
-  devices: [],
-  farmId: 'farm-001', // Default farm ID
-  loading: false,
-  error: null,
+  visibleDevices: [],
+  visibleFarms: [],
+  loadingVisibleDevices: false,
+  loadingVisibleFarms: false,
+  visibleDevicesError: null,
+  visibleFarmsError: null,
 };
 
-export const fetchDevices = createAsyncThunk<Device[], string, { rejectValue: string }>(
-  'devices/fetchDevices',
-  async (farmId: string, { rejectWithValue }) => {
-    try {
-      const response = await client.queries.listAllDevices({ farmId });
-      return (response.data ?? []) as Device[];
-    } catch (error) {
-      return rejectWithValue(error instanceof Error ? error.message : 'Failed to fetch devices');
+export const fetchVisibleDevices = createAsyncThunk<
+  IoTDevice[],
+  void,
+  { rejectValue: string }
+>("devices/fetchVisibleDevices", async (_, { rejectWithValue }) => {
+  try {
+    const response = {errors:[{message:"Failed to fetch visible devices"}], data:[]} //await client.queries.listVisibleDevices({});
+
+    if (response.errors?.length) {
+      throw new Error(response.errors[0].message);
     }
+
+    const devices = (response.data ?? []) as IoTDevice[];
+
+    return devices.filter(
+      (device): device is IoTDevice =>
+        device != null && typeof device === "object",
+    );
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error ? error.message : "Failed to fetch visible devices",
+    );
   }
-);
+});
+
+export const fetchVisibleFarms = createAsyncThunk<
+  Farm[],
+  void,
+  { rejectValue: string }
+>("devices/fetchVisibleFarms", async (_, { rejectWithValue }) => {
+  try {
+    const response = {errors:[{message:"Failed to fetch visible farms"}], data:[]} //await client.queries.listVisibleFarms({});
+
+    if (response.errors?.length) {
+      throw new Error(response.errors[0].message);
+    }
+
+    const farms = (response.data ?? []) as Farm[];
+
+    return farms.filter(
+      (farm): farm is Farm =>
+        farm != null && typeof farm === "object",
+    );
+  } catch (error) {
+    return rejectWithValue(
+      error instanceof Error ? error.message : "Failed to fetch visible farms",
+    );
+  }
+});
 
 const deviceSlice = createSlice({
-  name: 'devices',
+  name: "devices",
   initialState,
   reducers: {
-    setFarmId: (state, action: PayloadAction<string>) => {
-      state.farmId = action.payload;
+    clearVisibleResourceErrors: (state) => {
+      state.visibleDevicesError = null;
+      state.visibleFarmsError = null;
     },
-    clearError: (state) => {
-      state.error = null;
-    },
-    resetDevices: () => initialState,
+    resetVisibleResourcesState: () => initialState,
   },
   extraReducers: (builder) => {
     builder
-      // Handle fetchDevices pending
-      .addCase(fetchDevices.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(fetchVisibleDevices.pending, (state) => {
+        state.loadingVisibleDevices = true;
+        state.visibleDevicesError = null;
       })
-      // Handle fetchDevices fulfilled
-      .addCase(fetchDevices.fulfilled, (state, action) => {
-        state.loading = false;
-        state.devices = action.payload;
-        if (action.payload.length === 0) {
-          state.error = `No devices found for farm: ${state.farmId}`;
-        }
+      .addCase(fetchVisibleDevices.fulfilled, (state, action) => {
+        state.loadingVisibleDevices = false;
+        state.visibleDevices = action.payload;
       })
-      // Handle fetchDevices rejected
-      .addCase(fetchDevices.rejected, (state, action) => {
-        state.loading = false;
-        state.devices = [];
-        state.error = action.payload as string || 'Failed to fetch devices';
+      .addCase(fetchVisibleDevices.rejected, (state, action) => {
+        state.loadingVisibleDevices = false;
+        state.visibleDevices = [];
+        state.visibleDevicesError =
+          action.payload ?? "Failed to fetch visible devices";
+      })
+
+      .addCase(fetchVisibleFarms.pending, (state) => {
+        state.loadingVisibleFarms = true;
+        state.visibleFarmsError = null;
+      })
+      .addCase(fetchVisibleFarms.fulfilled, (state, action) => {
+        state.loadingVisibleFarms = false;
+        state.visibleFarms = action.payload;
+      })
+      .addCase(fetchVisibleFarms.rejected, (state, action) => {
+        state.loadingVisibleFarms = false;
+        state.visibleFarms = [];
+        state.visibleFarmsError =
+          action.payload ?? "Failed to fetch visible farms";
       });
   },
 });
 
-export const { setFarmId, clearError, resetDevices } = deviceSlice.actions;
+export const {
+  clearVisibleResourceErrors,
+  resetVisibleResourcesState,
+} = deviceSlice.actions;
+
 export default deviceSlice.reducer;

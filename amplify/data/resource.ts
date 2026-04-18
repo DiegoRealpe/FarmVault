@@ -14,22 +14,22 @@ const schema = a
       .model({
         content: a.string(),
       })
-      .authorization((allow) => [allow.publicApiKey()]),
+      .authorization((allow) => [allow.authenticated()]),
 
     Farm: a
       .model({
+        id: a.string().required(),
         name: a.string().required(),
-        // Cognito sub of the primary farm owner/admin
         ownerSub: a.string().required(),
         description: a.string().required(),
-        region: a.string(), // optional by default
+        region: a.string(),
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
-      .identifier(["name"])
+      .identifier(["id"])
       // TODO: Remove 
       .authorization((allow) => [
-        allow.publicApiKey(),
+        allow.authenticated(),
         // allow.group('farmAdmin'),
       ]),
 
@@ -51,7 +51,7 @@ const schema = a
       })
       // TODO: Remove 
       .authorization((allow) => [
-        allow.publicApiKey(),
+        allow.authenticated(),
         // allow.group('farmAdmin'),
       ]),
 
@@ -75,21 +75,6 @@ const schema = a
       ]),
 
     // -- Custom Types --
-    // For API responses that don't map 1:1 with a single model, we can define custom types.
-    IoTDeviceView: a.customType({
-      id: a.string().required(),
-      name: a.string(),
-      devEui: a.string().required(),
-      type: a.ref("DeviceType").required(),
-      farmId: a.string().required(), // references Farm.id
-      applicationId: a.string().required(),
-      gatewayId: a.string(), // optional: device might talk via different gateways
-      description: a.string(),
-      location: a.string(), // "North field, row 3"
-      createdAt: a.datetime().required(),
-      updatedAt: a.datetime().required(),
-    }),
-
     TimeSeriesPoint: a.customType({
       timestamp: a.datetime().required(),
       value: a.float().required(),
@@ -151,7 +136,7 @@ const schema = a
       .arguments({
         farmId: a.string().required(),
       })
-      .returns(a.ref("IoTDeviceView").array().required())
+      .returns(a.ref("IoTDevice").array().required())
       .authorization((allow) => [
         // Same idea: admins & temps can call it,
         // Lambda decides what each caller actually sees.
@@ -166,7 +151,7 @@ const schema = a
       .query()
       .returns(a.ref("MyGrantRecord"))
       .authorization((allow) => [allow.authenticated()])
-      // .authorization((allow) => [allow.publicApiKey()])
+      // .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(getPersonalGrantRecordFn)),
 
     // ---- Admin Queries ----
