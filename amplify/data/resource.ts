@@ -69,9 +69,9 @@ const schema = a
       .identifier(["userSub"])
       // TODO: remove direct client access later
       .authorization((allow) => [
-        // allow.authenticated(),
-        allow.group("admin").to(["read"]),
-        allow.ownerDefinedIn("userSub").to(["read"]),
+        allow.authenticated(),
+        // allow.group("admin").to(["read"]),
+        // allow.ownerDefinedIn("userSub").to(["read"]),
       ]),
 
     // -- Custom Types --
