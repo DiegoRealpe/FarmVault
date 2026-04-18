@@ -6,7 +6,7 @@ import { metricsBucket } from "./storage/resource";
 import { createFarmUserFn } from "./functions/create-farm-user/resource";
 import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "./functions/get-personal-grant-record/resource";
-import { listAllDevicesFn } from "./functions/list-all-devices/resource";
+import { listVisibleDevicesFn } from "./functions/list-visible-devices/resource";
 import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
 import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
 // CDK Imports
@@ -29,7 +29,7 @@ export const backend = defineBackend({
   createFarmUserFn,
   getFarmIotDataFn,
   getPersonalGrantRecordFn,
-  listAllDevicesFn,
+  listVisibleDevicesFn,
   listCreatedGrantRecordsFn,
   upsertGrantRecordFn,
 });

@@ -1,5 +1,5 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-import { listAllDevicesFn } from "../functions/list-all-devices/resource";
+import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
 import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
@@ -131,20 +131,13 @@ const schema = a
       ])
       .handler(a.handler.function(getFarmIotDataFn)),
 
-    listAllDevices: a
+    listVisibleDevices: a
       .query()
-      .arguments({
-        farmId: a.string().required(),
-      })
       .returns(a.ref("IoTDevice").array().required())
       .authorization((allow) => [
-        // Same idea: admins & temps can call it,
-        // Lambda decides what each caller actually sees.
-        // allow.group('farmAdmin'),
-        // allow.group('tempViewer'),
         allow.authenticated(),
       ])
-      .handler(a.handler.function(listAllDevicesFn)),
+      .handler(a.handler.function(listVisibleDevicesFn)),
 
     // ---- User Queries ----
     getPersonalGrantRecord: a
@@ -188,7 +181,7 @@ const schema = a
   })
   // (optional) let specific functions use the Data client with proper auth
   .authorization((allow) => [
-    allow.resource(listAllDevicesFn),
+    allow.resource(listVisibleDevicesFn),
     allow.resource(getFarmIotDataFn),
     allow.resource(getPersonalGrantRecordFn),
     allow.resource(listCreatedGrantRecordsFn),
