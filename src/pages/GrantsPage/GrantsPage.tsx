@@ -11,18 +11,34 @@ import {
   type GrantEntry,
   type GrantRecordSortBy,
 } from "../../features/grants/grantRecordSlice";
+import type { Schema } from "../../../amplify/data/resource";
+import {
+  fetchVisibleDevices,
+  fetchVisibleFarms,
+} from "../../features/devices/deviceSlice";
 import GrantsStats from "./GrantsStats";
 import GrantsTable from "./GrantsTable";
-import CreateUserGrantModal, {
-  CreateUserGrantFormValues,
-} from "./CreateUserGrantModal";
+import GrantEditorModal, {
+  GrantEditorFormValues,
+  GrantEditorInitialValues,
+  GrantEditorMode,
+} from "./GrantEditorModal";
 import "./GrantsPage.css";
+
+type GrantRecord = Schema["GrantRecord"]["type"];
 
 function GrantsPage() {
   const dispatch = useDispatch<AppDispatch>();
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+
+  const [isGrantEditorOpen, setIsGrantEditorOpen] = useState(false);
+  const [grantEditorMode, setGrantEditorMode] =
+    useState<GrantEditorMode>("create");
+  const [grantEditorInitialValues, setGrantEditorInitialValues] =
+    useState<GrantEditorInitialValues | null>(null);
+  const [editingUserSub, setEditingUserSub] = useState<string | null>(null);
 
   const user = useSelector((state: RootState) => state.user);
+
   const {
     grantRecord,
     createdGrantRecords,
@@ -34,25 +50,24 @@ function GrantsPage() {
     filters,
   } = useSelector((state: RootState) => state.grantRecord);
 
+  const {
+    visibleDevices,
+    visibleFarms,
+    loadingVisibleDevices,
+    loadingVisibleFarms,
+    visibleDevicesError,
+    visibleFarmsError,
+  } = useSelector((state: RootState) => state.devices);
+
   const userSub = user.sub;
   const isAdmin = user.isAdmin;
 
-  console.log("[GrantsPage] loaded with userSub:", userSub, "isAdmin:", isAdmin);
-  console.log("[GrantsPage] filters:", filters);
-
   useEffect(() => {
-    console.log("[GrantsPage] useEffect invoked");
     if (!userSub) return;
 
-    console.log("[GrantsPage] userSub is available:", userSub);
-
     if (isAdmin) {
-      console.log("[GrantsPage] admin calling fetchCreatedGrantRecords");
       dispatch(fetchCreatedGrantRecords());
     } else {
-      console.log(
-        "[GrantsPage] non-admin calling fetchGrantRecord only for their own record",
-      );
       dispatch(fetchGrantRecord());
     }
   }, [dispatch, userSub, isAdmin]);
@@ -60,23 +75,65 @@ function GrantsPage() {
   const handleRefresh = () => {
     if (!userSub) return;
 
-    dispatch(fetchGrantRecord());
-
     if (isAdmin) {
       dispatch(fetchCreatedGrantRecords());
+    } else {
+      dispatch(fetchGrantRecord());
     }
   };
 
-  const handleOpenCreateModal = () => {
-    setIsCreateModalOpen(true);
+  const ensureGrantEditorOptionsLoaded = () => {
+    dispatch(fetchVisibleDevices());
+    dispatch(fetchVisibleFarms());
   };
 
-  const handleCloseCreateModal = () => {
-    setIsCreateModalOpen(false);
+  const handleOpenCreateGrantEditor = () => {
+    if (!isAdmin) return;
+
+    ensureGrantEditorOptionsLoaded();
+    setGrantEditorMode("create");
+    setGrantEditorInitialValues(null);
+    setEditingUserSub(null);
+    setIsGrantEditorOpen(true);
   };
 
-  const handleCreateUserAndGrant = async (
-    values: CreateUserGrantFormValues,
+  const handleOpenEditGrantEditor = (record: GrantRecord) => {
+    if (!isAdmin) return;
+
+    ensureGrantEditorOptionsLoaded();
+
+    const normalizedGrants = (record.grants ?? []).filter(
+      (grant): grant is NonNullable<typeof grant> => grant != null,
+    );
+
+    const farmGrantIds = normalizedGrants
+      .filter((grant) => grant.grantType === "farm")
+      .flatMap((grant) => (grant.ids ?? []).filter((id): id is string => id != null));
+
+    const deviceGrantIds = normalizedGrants
+      .filter((grant) => grant.grantType === "device")
+      .flatMap((grant) => (grant.ids ?? []).filter((id): id is string => id != null));
+
+    setGrantEditorMode("edit");
+    setEditingUserSub(record.userSub);
+    setGrantEditorInitialValues({
+      userSub: record.userSub,
+      expiresAt: record.expiresAt,
+      selectedFarmIds: farmGrantIds,
+      selectedDeviceIds: deviceGrantIds,
+    });
+    setIsGrantEditorOpen(true);
+  };
+
+  const handleCloseGrantEditor = () => {
+    setIsGrantEditorOpen(false);
+    setGrantEditorMode("create");
+    setGrantEditorInitialValues(null);
+    setEditingUserSub(null);
+  };
+
+  const handleSubmitGrantEditor = async (
+    values: GrantEditorFormValues,
   ) => {
     const grants: GrantEntry[] = [];
 
@@ -94,31 +151,44 @@ function GrantsPage() {
       });
     }
 
-    const createdUser = await dispatch(
-      createFarmUserThunk({
-        email: values.email,
-        temporaryPassword: values.temporaryPassword,
-      }),
-    ).unwrap();
+    if (grantEditorMode === "create") {
+      const createdUser = await dispatch(
+        createFarmUserThunk({
+          email: values.email,
+          temporaryPassword: values.temporaryPassword,
+        }),
+      ).unwrap();
 
-    if (!createdUser.userSub) {
-      throw new Error("Created user did not return a userSub.");
+      if (!createdUser.userSub) {
+        throw new Error("Created user did not return a userSub.");
+      }
+
+      await dispatch(
+        upsertGrantRecordThunk({
+          userSub: createdUser.userSub,
+          grants,
+          expiresAt: values.expiresAt,
+        }),
+      ).unwrap();
+    } else {
+      if (!editingUserSub) {
+        throw new Error("No user selected for grant editing.");
+      }
+
+      await dispatch(
+        upsertGrantRecordThunk({
+          userSub: editingUserSub,
+          grants,
+          expiresAt: values.expiresAt,
+        }),
+      ).unwrap();
     }
 
-    await dispatch(
-      upsertGrantRecordThunk({
-        userSub: createdUser.userSub,
-        grants,
-        expiresAt: values.expiresAt,
-      }),
-    ).unwrap();
-
     handleRefresh();
-    handleCloseCreateModal();
+    handleCloseGrantEditor();
   };
 
   const handleToggleSort = (sortBy: GrantRecordSortBy) => {
-    console.log("[GrantsPage] toggling sort for:", sortBy);
     dispatch(toggleSort(sortBy));
   };
 
@@ -130,68 +200,84 @@ function GrantsPage() {
 
   const isSubmitting = creatingUser || upsertingGrantRecord;
 
+  const availableFarmOptions = visibleFarms
+    .filter((farm) => farm?.id && farm?.name)
+    .map((farm) => ({
+      id: farm.id,
+      label: farm.name,
+    }));
+
+  const availableDeviceOptions = visibleDevices
+    .filter((device) => device?.id)
+    .map((device) => ({
+      id: device.id,
+      label: device.name ?? device.id,
+    }));
+
   return (
     <div className="grants-container">
       {!isAdmin && (
-        <div className="info-banner">
-          <p>ℹ️ You are viewing your grant record as a temporary user.</p>
-        </div>
-      )}
+        <>
+          <div className="info-banner">
+            <p>ℹ️ You are viewing your grant record as a temporary user.</p>
+          </div>
 
-      {isAdmin && (
-        <div className="grants-page-actions">
-          <button onClick={handleOpenCreateModal}>+ New User</button>
-        </div>
-      )}
-
-      <GrantsStats
-        grantRecord={grantRecord}
-        createdGrantRecords={createdGrantRecords}
-        isAdmin={isAdmin}
-      />
-
-      <div className="grants-page-filters">
-        <label className="grants-page-checkbox">
-          <input
-            type="checkbox"
-            checked={filters.showExpired}
-            onChange={handleShowExpiredChange}
+          <GrantsStats
+            grantRecord={grantRecord}
+            isAdmin={isAdmin}
+            loading={loadingGrantRecord}
+            error={error}
           />
-          Show expired grants
-        </label>
-      </div>
-
-      <GrantsTable
-        grantRecord={grantRecord}
-        createdGrantRecords={createdGrantRecords}
-        loadingGrantRecord={loadingGrantRecord}
-        loadingCreatedGrantRecords={loadingCreatedGrantRecords}
-        error={error}
-        isAdmin={isAdmin}
-        currentUserSub={userSub}
-        onRefresh={handleRefresh}
-        sortBy={filters.sortBy}
-        sortDirection={filters.sortDirection}
-        showExpired={filters.showExpired}
-        onToggleSort={handleToggleSort}
-      />
+        </>
+      )}
 
       {isAdmin && (
-        <CreateUserGrantModal
-          isOpen={isCreateModalOpen}
-          isSubmitting={isSubmitting}
-          onClose={handleCloseCreateModal}
-          onSubmit={handleCreateUserAndGrant}
-          availableFarmOptions={[
-            { id: "farm-1", label: "farm-1" },
-            { id: "farm-2", label: "farm-2" },
-          ]}
-          availableDeviceOptions={[
-            { id: "device-1", label: "device-1" },
-            { id: "device-2", label: "device-2" },
-            { id: "device-3", label: "device-3" },
-          ]}
-        />
+        <>
+          <div className="grants-page-actions">
+            <button onClick={handleOpenCreateGrantEditor}>+ New User</button>
+          </div>
+
+          <div className="grants-page-filters">
+            <label className="grants-page-checkbox">
+              <input
+                type="checkbox"
+                checked={filters.showExpired}
+                onChange={handleShowExpiredChange}
+              />
+              Show expired grants
+            </label>
+          </div>
+
+          <GrantsTable
+            grantRecord={grantRecord}
+            createdGrantRecords={createdGrantRecords}
+            loadingGrantRecord={loadingGrantRecord}
+            loadingCreatedGrantRecords={loadingCreatedGrantRecords}
+            error={error}
+            isAdmin={isAdmin}
+            currentUserSub={userSub}
+            onRefresh={handleRefresh}
+            sortBy={filters.sortBy}
+            sortDirection={filters.sortDirection}
+            showExpired={filters.showExpired}
+            onToggleSort={handleToggleSort}
+            onSelectGrantRecord={handleOpenEditGrantEditor}
+          />
+
+          <GrantEditorModal
+            isOpen={isGrantEditorOpen}
+            mode={grantEditorMode}
+            isSubmitting={isSubmitting}
+            onClose={handleCloseGrantEditor}
+            onSubmit={handleSubmitGrantEditor}
+            initialValues={grantEditorInitialValues}
+            availableFarmOptions={availableFarmOptions}
+            availableDeviceOptions={availableDeviceOptions}
+            loadingFarmOptions={loadingVisibleFarms}
+            loadingDeviceOptions={loadingVisibleDevices}
+            optionsError={visibleFarmsError || visibleDevicesError}
+          />
+        </>
       )}
     </div>
   );
