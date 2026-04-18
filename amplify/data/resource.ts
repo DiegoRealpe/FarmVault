@@ -5,6 +5,7 @@ import { createFarmUserFn } from "../functions/create-farm-user/resource";
 import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
 import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
 import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
+import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
 
 
 const schema = a
@@ -115,7 +116,8 @@ const schema = a
       points: a.ref("TimeSeriesPoint").array(),
     }),
 
-    // ---- Lambda Backed Queries ----
+    //// ---- Lambda Backed Queries ----
+    // ---- User Agnostic Queries ----
     getFarmIotData: a
       .query()
       .arguments({
@@ -131,6 +133,14 @@ const schema = a
       ])
       .handler(a.handler.function(getFarmIotDataFn)),
 
+    listVisibleFarms: a
+      .query()
+      .returns(a.ref("Farm").array().required())
+      .authorization((allow) => [
+        allow.authenticated(),
+      ])
+      .handler(a.handler.function(listVisibleFarmsFn)),
+
     listVisibleDevices: a
       .query()
       .returns(a.ref("IoTDevice").array().required())
@@ -139,7 +149,7 @@ const schema = a
       ])
       .handler(a.handler.function(listVisibleDevicesFn)),
 
-    // ---- User Queries ----
+    // ---- User Specific Queries ----
     getPersonalGrantRecord: a
       .query()
       .returns(a.ref("MyGrantRecord"))
@@ -147,7 +157,7 @@ const schema = a
       // .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(getPersonalGrantRecordFn)),
 
-    // ---- Admin Queries ----
+    // ---- Admin Specific Queries ----
     listCreatedGrantRecords: a
       .query()
       .returns(a.ref("GrantRecord").array().required())
@@ -181,10 +191,11 @@ const schema = a
   })
   // (optional) let specific functions use the Data client with proper auth
   .authorization((allow) => [
+    allow.resource(listCreatedGrantRecordsFn),
     allow.resource(listVisibleDevicesFn),
+    allow.resource(listVisibleFarmsFn),
     allow.resource(getFarmIotDataFn),
     allow.resource(getPersonalGrantRecordFn),
-    allow.resource(listCreatedGrantRecordsFn),
     allow.resource(upsertGrantRecordFn)
   ]);
 
