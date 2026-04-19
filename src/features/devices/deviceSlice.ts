@@ -1,7 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { Schema } from "../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
-import { fetchAuthSession } from "aws-amplify/auth";
 
 const client = generateClient<Schema>({
   authMode: "userPool",
@@ -51,17 +50,14 @@ export const fetchVisibleDevices = createAsyncThunk<
     );
   }
 });
+
 export const fetchVisibleFarms = createAsyncThunk<
   Farm[],
   void,
   { rejectValue: string }
 >("devices/fetchVisibleFarms", async (_, { rejectWithValue }) => {
   try {
-    const session = await fetchAuthSession();
-    console.log("[fetchVisibleFarms] session tokens:", session.tokens);
-
     const response = await client.queries.listVisibleFarms({});
-    console.log("[fetchVisibleFarms] response:", response);
 
     if (response.errors?.length) {
       throw new Error(response.errors[0].message);
@@ -73,7 +69,6 @@ export const fetchVisibleFarms = createAsyncThunk<
       (farm): farm is Farm => farm != null && typeof farm === "object",
     );
   } catch (error) {
-    console.error("[fetchVisibleFarms] error:", error);
     return rejectWithValue(
       error instanceof Error ? error.message : "Failed to fetch visible farms",
     );

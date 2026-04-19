@@ -8,9 +8,7 @@ const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
 Amplify.configure(resourceConfig, libraryOptions);
 
-const client = generateClient<Schema>({
-  authMode: "userPool",
-});
+const client = generateClient<Schema>();
 
 const DEV_BYPASS = false;
 
