@@ -94,7 +94,11 @@ function getCallerGroups(identity: Identity): string[] {
   return [];
 }
 
-function isExpired(expiresAt: string): boolean {
+function isExpired(expiresAt: string | null | undefined): boolean {
+  if (!expiresAt) {
+    return true;
+  }
+
   return new Date(expiresAt).getTime() <= Date.now();
 }
 
@@ -197,5 +201,5 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
 
   return (allFarms ?? [])
     .filter((farm): farm is ListedFarm => farm != null)
-    .filter((farm) => visibleFarmIds.has(farm.id));
+    .filter((farm) => farm.id && visibleFarmIds.has(farm.id));
 };

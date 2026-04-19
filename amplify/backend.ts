@@ -29,11 +29,11 @@ export const backend = defineBackend({
   metricsBucket,
   createFarmUserFn,
   getFarmIotDataFn,
-  getPersonalGrantRecordFn,
-  listVisibleDevicesFn,
-  listVisibleFarmsFn,
-  listCreatedGrantRecordsFn,
-  upsertGrantRecordFn,
+  // getPersonalGrantRecordFn,
+  // listVisibleDevicesFn,
+  // listVisibleFarmsFn,
+  // listCreatedGrantRecordsFn,
+  // upsertGrantRecordFn,
 });
 
 // Only allow administrators to create users

@@ -1,11 +1,32 @@
-import type { Schema } from "../../amplify/data/resource";
+// import type { Schema } from "../../amplify/data/resource";
 import type {
   GrantRecordSortBy,
   GrantRecordSortDirection,
 } from "../features/grants/grantRecordSlice";
 
-type GrantRecord = Schema["GrantRecord"]["type"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+// type GrantRecord = Schema["GrantRecord"]["type"];
+// type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+
+type GrantType = "farm" | "device";
+
+type GrantEntry = {
+  grantType: GrantType;
+  ids: (string | null | undefined)[];
+};
+
+type GrantRecord = {
+  userSub: string;
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  ttl?: number;
+  createdBySub?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // keep these optional while schema is unstable
+  username?: string | null;
+  email?: string | null;
+};
 
 export function getGrantIdsByType(
   grantRecord: GrantRecord,

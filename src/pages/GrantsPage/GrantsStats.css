@@ -103,3 +103,17 @@
   background: #fcfcfd;
   color: #667085;
 }
+
+.grant-user-summary {
+  margin-top: 6px;
+  font-size: 0.9rem;
+  color: #667085;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.grant-user-summary-separator {
+  color: #98a2b3;
+}

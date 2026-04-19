@@ -1,19 +1,31 @@
-import type { Schema } from "../../../amplify/data/resource";
 import "./GrantsStats.css";
 
-type GrantRecord = Schema["GrantRecord"]["type"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+type GrantType = "farm" | "device";
+
+type GrantEntry = {
+  grantType: GrantType;
+  ids: (string | null | undefined)[];
+};
+
+type MyGrantRecord = {
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+  username?: string | null;
+  email?: string | null;
+};
 
 interface GrantsStatsProps {
-  grantRecord: GrantRecord | null;
+  grantRecord: MyGrantRecord | null;
   isAdmin: boolean;
   loading?: boolean;
   error?: string | null;
 }
 
 function getGrantIdsByType(
-  grantRecord: GrantRecord,
-  grantType: "farm" | "device",
+  grantRecord: MyGrantRecord,
+  grantType: GrantType,
 ): string[] {
   return (grantRecord.grants ?? [])
     .filter((grant): grant is GrantEntry => grant != null)
@@ -68,17 +80,32 @@ function GrantsStats({
     );
   }
 
-  const now = Date.now();
-  const expiresAtMs = new Date(grantRecord.expiresAt).getTime();
-  const isActive = expiresAtMs > now;
+  const expiresAtMs = grantRecord.expiresAt
+    ? new Date(grantRecord.expiresAt).getTime()
+    : 0;
+  const isActive = expiresAtMs > Date.now();
 
   const farmIds = getGrantIdsByType(grantRecord, "farm");
   const deviceIds = getGrantIdsByType(grantRecord, "device");
 
+  const displayEmail = grantRecord.email ?? "Email unavailable";
+  const displayUsername = grantRecord.username ?? "Username unavailable";
+  const displayExpiresAt = grantRecord.expiresAt
+    ? new Date(grantRecord.expiresAt).toLocaleString()
+    : "Unknown";
+
   return (
     <section className="grants-stats-panel">
       <div className="grants-stats-header">
-        <h2>Your Access Grants</h2>
+        <div>
+          <h2>Your Access Grants</h2>
+          <div className="grant-user-summary">
+            <span>{displayEmail}</span>
+            <span className="grant-user-summary-separator">•</span>
+            <span>{displayUsername}</span>
+          </div>
+        </div>
+
         <span
           className={`grant-status-badge ${isActive ? "active" : "expired"}`}
         >
@@ -89,9 +116,7 @@ function GrantsStats({
       <div className="grants-stats-grid">
         <div className="grant-info-card">
           <span className="grant-info-label">Expires At</span>
-          <span className="grant-info-value">
-            {new Date(grantRecord.expiresAt).toLocaleString()}
-          </span>
+          <span className="grant-info-value">{displayExpiresAt}</span>
         </div>
 
         <div className="grant-info-card">

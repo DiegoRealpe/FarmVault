@@ -13,6 +13,7 @@ export type GrantEditorMode = "create" | "edit";
 
 export interface GrantEditorInitialValues {
   userSub?: string;
+  username?: string;
   email?: string;
   expiresAt?: string;
   selectedFarmIds?: string[];
@@ -21,7 +22,7 @@ export interface GrantEditorInitialValues {
 
 export interface GrantEditorFormValues {
   email: string;
-  temporaryPassword: string;
+  temporaryPassword?: string;
   expiresAt: string;
   selectedFarmIds: string[];
   selectedDeviceIds: string[];
@@ -101,7 +102,7 @@ function GrantEditorModal({
       return;
     }
 
-    if (!email.trim()) {
+    if (isCreateMode && !email.trim()) {
       setLocalError("Email is required.");
       return;
     }
@@ -119,7 +120,7 @@ function GrantEditorModal({
     try {
       await onSubmit({
         email: email.trim(),
-        temporaryPassword: temporaryPassword.trim(),
+        temporaryPassword: isCreateMode ? temporaryPassword.trim() : undefined,
         expiresAt: new Date(expiresAt).toISOString(),
         selectedFarmIds,
         selectedDeviceIds,
@@ -138,34 +139,60 @@ function GrantEditorModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="modal-header">
-          <h2>{isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}</h2>
+          <h2>
+            {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
+          </h2>
           <button type="button" onClick={onClose} disabled={isSubmitting}>
             ×
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="modal-form">
-          <label>
-            Email
-            <input
-              type="email"
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              disabled={isBusy || !isCreateMode}
-              readOnly={!isCreateMode}
-            />
-          </label>
+          {isCreateMode ? (
+            <>
+              <label>
+                Email
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(event) => setEmail(event.target.value)}
+                  disabled={isBusy}
+                />
+              </label>
 
-          {isCreateMode && (
-            <label>
-              Temporary Password
-              <input
-                type="text"
-                value={temporaryPassword}
-                onChange={(event) => setTemporaryPassword(event.target.value)}
-                disabled={isBusy}
-              />
-            </label>
+              <label>
+                Temporary Password
+                <input
+                  type="text"
+                  value={temporaryPassword}
+                  onChange={(event) => setTemporaryPassword(event.target.value)}
+                  disabled={isBusy}
+                />
+              </label>
+            </>
+          ) : (
+            <div className="modal-user-summary">
+              <div className="modal-user-summary-row">
+                <span className="modal-user-summary-label">Email</span>
+                <span className="modal-user-summary-value">
+                  {initialValues?.email || "Unknown"}
+                </span>
+              </div>
+
+              <div className="modal-user-summary-row">
+                <span className="modal-user-summary-label">Username</span>
+                <span className="modal-user-summary-value">
+                  {initialValues?.username || "Unknown"}
+                </span>
+              </div>
+
+              <div className="modal-user-summary-row">
+                <span className="modal-user-summary-label">User Sub</span>
+                <span className="modal-user-summary-value">
+                  {initialValues?.userSub || "Unknown"}
+                </span>
+              </div>
+            </div>
           )}
 
           <label>

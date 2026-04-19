@@ -8,10 +8,8 @@ import {
   upsertGrantRecordThunk,
   toggleSort,
   setShowExpired,
-  type GrantEntry,
-  type GrantRecordSortBy,
 } from "../../features/grants/grantRecordSlice";
-import type { Schema } from "../../../amplify/data/resource";
+// import type { Schema } from "../../../amplify/data/resource";
 import {
   fetchVisibleDevices,
   fetchVisibleFarms,
@@ -25,7 +23,33 @@ import GrantEditorModal, {
 } from "./GrantEditorModal";
 import "./GrantsPage.css";
 
-type GrantRecord = Schema["GrantRecord"]["type"];
+type GrantType = "farm" | "device";
+type GrantRecordSortBy =
+  | "userSub"
+  | "expiresAt"
+  | "ttl"
+  | "createdBySub"
+  | "createdAt"
+  | "updatedAt";
+
+type GrantEntry = {
+  grantType: GrantType;
+  ids: (string | null | undefined)[];
+};
+
+type GrantRecord = {
+  userSub: string;
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  ttl?: number;
+  createdBySub?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // keep these optional while schema is unstable
+  username?: string | null;
+  email?: string | null;
+};
 
 function GrantsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -108,17 +132,23 @@ function GrantsPage() {
 
     const farmGrantIds = normalizedGrants
       .filter((grant) => grant.grantType === "farm")
-      .flatMap((grant) => (grant.ids ?? []).filter((id): id is string => id != null));
+      .flatMap((grant) =>
+        (grant.ids ?? []).filter((id): id is string => id != null),
+      );
 
     const deviceGrantIds = normalizedGrants
       .filter((grant) => grant.grantType === "device")
-      .flatMap((grant) => (grant.ids ?? []).filter((id): id is string => id != null));
+      .flatMap((grant) =>
+        (grant.ids ?? []).filter((id): id is string => id != null),
+      );
 
     setGrantEditorMode("edit");
     setEditingUserSub(record.userSub);
     setGrantEditorInitialValues({
-      userSub: record.userSub,
-      expiresAt: record.expiresAt,
+      userSub: record.userSub ?? undefined,
+      username: record.username ?? undefined,
+      email: record.email ?? undefined,
+      expiresAt: record.expiresAt ?? undefined,
       selectedFarmIds: farmGrantIds,
       selectedDeviceIds: deviceGrantIds,
     });
@@ -152,6 +182,14 @@ function GrantsPage() {
     }
 
     if (grantEditorMode === "create") {
+      if (!values.email.trim()) {
+        throw new Error("Email is required.");
+      }
+
+      if (!values.temporaryPassword?.trim()) {
+        throw new Error("Temporary password is required.");
+      }
+
       const createdUser = await dispatch(
         createFarmUserThunk({
           email: values.email,
@@ -166,6 +204,8 @@ function GrantsPage() {
       await dispatch(
         upsertGrantRecordThunk({
           userSub: createdUser.userSub,
+          username: createdUser.username,
+          email: values.email.trim(),
           grants,
           expiresAt: values.expiresAt,
         }),
@@ -175,9 +215,19 @@ function GrantsPage() {
         throw new Error("No user selected for grant editing.");
       }
 
+      if (!grantEditorInitialValues?.username?.trim()) {
+        throw new Error("Missing username for grant update.");
+      }
+
+      if (!grantEditorInitialValues?.email?.trim()) {
+        throw new Error("Missing email for grant update.");
+      }
+
       await dispatch(
         upsertGrantRecordThunk({
           userSub: editingUserSub,
+          username: grantEditorInitialValues.username,
+          email: grantEditorInitialValues.email,
           grants,
           expiresAt: values.expiresAt,
         }),
@@ -247,14 +297,10 @@ function GrantsPage() {
               Show expired grants
             </label>
           </div>
-
           <GrantsTable
-            grantRecord={grantRecord}
             createdGrantRecords={createdGrantRecords}
-            loadingGrantRecord={loadingGrantRecord}
             loadingCreatedGrantRecords={loadingCreatedGrantRecords}
             error={error}
-            isAdmin={isAdmin}
             currentUserSub={userSub}
             onRefresh={handleRefresh}
             sortBy={filters.sortBy}

@@ -1,10 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import type { Schema } from "../../../amplify/data/resource";
-import { generateClient } from "aws-amplify/data";
+// import { generateClient } from "aws-amplify/data";
 
-const client = generateClient<Schema>({
-  authMode: "userPool",
-});
+// const client = generateClient<Schema>({
+//   authMode: "userPool",
+// });
 
 type IoTDevice = Schema["IoTDevice"]["type"];
 type Farm = Schema["Farm"]["type"];
@@ -32,7 +32,7 @@ export const fetchVisibleDevices = createAsyncThunk<
   { rejectValue: string }
 >("devices/fetchVisibleDevices", async (_, { rejectWithValue }) => {
   try {
-    const response = await client.queries.listVisibleDevices({});
+    const response = {} as any; //await client.queries.listVisibleDevices({});
 
     if (response.errors?.length) {
       throw new Error(response.errors[0].message);
@@ -56,7 +56,7 @@ export const fetchVisibleFarms = createAsyncThunk<
   { rejectValue: string }
 >("devices/fetchVisibleFarms", async (_, { rejectWithValue }) => {
   try {
-    const response = await client.queries.listVisibleFarms({});
+    const response = {} as any; //await client.queries.listVisibleFarms({});
     console.log("[fetchVisibleFarms] response:", response);
 
     if (response.errors?.length) {

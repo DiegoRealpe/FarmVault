@@ -6,8 +6,40 @@ const client = generateClient<Schema>({
   authMode: "userPool",
 });
 
-type GrantRecord = Schema["GrantRecord"]["type"];
+// type GrantRecord = Schema["GrantRecord"]["type"];
+// type MyGrantRecord = Schema["MyGrantRecord"]["type"];
+// type GrantType = "farm" | "device";
 type GrantType = "farm" | "device";
+
+type GrantEntry = {
+  grantType: GrantType;
+  ids: (string | null | undefined)[];
+};
+
+type GrantRecord = {
+  userSub: string;
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  ttl?: number;
+  createdBySub?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // keep these optional while schema is unstable
+  username?: string | null;
+  email?: string | null;
+};
+
+type MyGrantRecord = {
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // optional for now
+  username?: string | null;
+  email?: string | null;
+};
 
 export type GrantRecordSortBy =
   | "userSub"
@@ -18,11 +50,6 @@ export type GrantRecordSortBy =
   | "updatedAt";
 
 export type GrantRecordSortDirection = "asc" | "desc";
-
-export interface GrantEntry {
-  grantType: GrantType;
-  ids: string[];
-}
 
 export interface CreateFarmUserInput {
   email: string;
@@ -38,12 +65,14 @@ export interface CreateFarmUserResult {
 
 export interface UpsertGrantRecordInput {
   userSub: string;
+  username: string;
+  email: string;
   grants: GrantEntry[];
   expiresAt: string;
 }
 
 interface GrantRecordState {
-  grantRecord: GrantRecord | null;
+  grantRecord: MyGrantRecord | null;
   createdGrantRecords: GrantRecord[];
   loadingGrantRecord: boolean;
   loadingCreatedGrantRecords: boolean;
@@ -73,19 +102,19 @@ const initialState: GrantRecordState = {
 };
 
 export const fetchGrantRecord = createAsyncThunk<
-  GrantRecord | null,
+  MyGrantRecord | null,
   void,
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
-    const { data, errors } =
-      await client.queries.getPersonalGrantRecord({});
+    const { data, errors } = {} as any;
+      //await client.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
     }
 
-    return (data as GrantRecord | null) ?? null;
+    return (data as MyGrantRecord | null) ?? null;
   } catch (error) {
     return rejectWithValue(
       error instanceof Error ? error.message : "Failed to fetch grant record",
@@ -99,16 +128,14 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchCreatedGrantRecords", async (_, { rejectWithValue }) => {
   try {
-    const response = await client.queries.listCreatedGrantRecords({});
-    const { data, errors } = response;
+    const { data, errors } = {} as any;
+      //await client.queries.listCreatedGrantRecords({});
 
     if (errors?.length) {
-      const errorMessage = errors.map((e) => e.message).join("; ");
-      return rejectWithValue(errorMessage);
+      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
     }
-    const result = (data as GrantRecord[] | null) ?? [];
 
-    return result;
+    return (data as GrantRecord[] | null) ?? [];
   } catch (error) {
     return rejectWithValue(
       error instanceof Error
@@ -130,7 +157,7 @@ export const createFarmUserThunk = createAsyncThunk<
     });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any }) => e.message).join("; "));
+      return rejectWithValue(errors.map((e) => e.message).join("; "));
     }
 
     if (!data) {
@@ -149,16 +176,17 @@ export const upsertGrantRecordThunk = createAsyncThunk<
   GrantRecord,
   UpsertGrantRecordInput,
   { rejectValue: string }
->("grantRecord/upsertGrantRecord", async (input, { rejectWithValue }) => {
+>("grantRecord/upsertGrantRecord", async (_input, { rejectWithValue }) => {
   try {
-    const { data, errors } = await client.mutations.upsertGrantRecord({
-      userSub: input.userSub,
-      grants: input.grants,
-      expiresAt: input.expiresAt,
-    });
+    const { data, errors } = {} as any;
+      //await client.mutations.upsertGrantRecord({
+      //  userSub: input.userSub,
+      //  grants: input.grants,
+      //  expiresAt: input.expiresAt,
+      //});
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any }) => e.message).join("; "));
+      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
     }
 
     if (!data) {
@@ -261,7 +289,6 @@ const grantRecordSlice = createSlice({
       })
       .addCase(upsertGrantRecordThunk.fulfilled, (state, action) => {
         state.upsertingGrantRecord = false;
-        state.grantRecord = action.payload;
 
         const existingIndex = state.createdGrantRecords.findIndex(
           (record) => record.userSub === action.payload.userSub,
@@ -272,6 +299,13 @@ const grantRecordSlice = createSlice({
         } else {
           state.createdGrantRecords.unshift(action.payload);
         }
+
+        /**
+         * Do not overwrite `grantRecord` here.
+         * `grantRecord` is the personal user-facing MyGrantRecord shape,
+         * while this thunk returns the admin-facing GrantRecord shape.
+         * Refresh personal data separately with fetchGrantRecord() when needed.
+         */
       })
       .addCase(upsertGrantRecordThunk.rejected, (state, action) => {
         state.upsertingGrantRecord = false;

@@ -1,4 +1,4 @@
-import type { Schema } from "../../../amplify/data/resource";
+// import type { Schema } from "../../../amplify/data/resource";
 import "./GrantsTable.css";
 import {
   formatDate,
@@ -11,15 +11,33 @@ import type {
   GrantRecordSortDirection,
 } from "../../features/grants/grantRecordSlice";
 
-type GrantRecord = Schema["GrantRecord"]["type"];
+// type GrantRecord = Schema["GrantRecord"]["type"];
+
+type GrantType = "farm" | "device";
+
+type GrantEntry = {
+  grantType: GrantType;
+  ids: (string | null | undefined)[];
+};
+
+type GrantRecord = {
+  userSub: string;
+  grants: (GrantEntry | null | undefined)[];
+  expiresAt?: string | null;
+  ttl?: number;
+  createdBySub?: string;
+  createdAt?: string | null;
+  updatedAt?: string | null;
+
+  // keep these optional while schema is unstable
+  username?: string | null;
+  email?: string | null;
+};
 
 interface GrantsTableProps {
-  grantRecord: GrantRecord | null;
   createdGrantRecords: GrantRecord[];
-  loadingGrantRecord: boolean;
   loadingCreatedGrantRecords: boolean;
   error: string | null;
-  isAdmin: boolean;
   currentUserSub: string | null;
   onRefresh: () => void;
   sortBy: GrantRecordSortBy;
@@ -46,12 +64,9 @@ function renderGrantList(ids: string[], emptyLabel: string) {
 }
 
 function GrantsTable({
-  grantRecord,
   createdGrantRecords,
-  loadingGrantRecord,
   loadingCreatedGrantRecords,
   error,
-  isAdmin,
   currentUserSub,
   onRefresh,
   sortBy,
@@ -60,21 +75,15 @@ function GrantsTable({
   onToggleSort,
   onSelectGrantRecord,
 }: GrantsTableProps) {
-  const loading = isAdmin
-    ? loadingGrantRecord || loadingCreatedGrantRecords
-    : loadingGrantRecord;
-
-  const baseRecords = isAdmin
-    ? createdGrantRecords
-    : grantRecord
-      ? [grantRecord]
-      : [];
-
   const now = Date.now();
 
-  const filteredRecords = baseRecords.filter((record) => {
+  const filteredRecords = createdGrantRecords.filter((record) => {
     if (showExpired) {
       return true;
+    }
+
+    if (!record.expiresAt) {
+      return false;
     }
 
     return new Date(record.expiresAt).getTime() >= now;
@@ -84,7 +93,7 @@ function GrantsTable({
     compareGrantRecords(a, b, sortBy, sortDirection),
   );
 
-  if (loading) {
+  if (loadingCreatedGrantRecords) {
     return (
       <div className="grants-table-loading">
         <div className="grants-table-spinner"></div>
@@ -113,13 +122,9 @@ function GrantsTable({
     return (
       <div className="grants-table-empty-state">
         <p>
-          {isAdmin
-            ? showExpired
-              ? "No grant records yet."
-              : "No active grant records found."
-            : showExpired
-              ? "No access assigned."
-              : "No active access assigned."}
+          {showExpired
+            ? "No grant records yet."
+            : "No active grant records found."}
         </p>
         <button onClick={onRefresh} className="grants-refresh-button">
           Refresh
@@ -175,26 +180,20 @@ function GrantsTable({
               const deviceIds = getGrantIdsByType(record, "device");
               const isCurrentUser = record.userSub === currentUserSub;
 
-              const handleSelect = () => {
-                if (!isAdmin) return;
-                onSelectGrantRecord(record);
-              };
-
               return (
                 <tr
                   key={record.userSub}
-                  className={isAdmin ? "grants-table-row-clickable" : ""}
-                  onClick={handleSelect}
+                  className="grants-table-row-clickable"
+                  onClick={() => onSelectGrantRecord(record)}
                 >
                   <td>
                     <div className="grants-user-value">
-                      {isCurrentUser ? "You" : record.userSub}
+                      {record.email}
                     </div>
-                    {isAdmin && isCurrentUser && (
-                      <div className="grants-user-subtext">
-                        Current signed-in user
-                      </div>
-                    )}
+                    <div className="grants-user-subtext">
+                      {record.username}
+                      {isCurrentUser ? " • Current signed-in user" : ""}
+                    </div>
                   </td>
 
                   <td>{renderGrantList(farmIds, "No farm grants")}</td>
@@ -202,13 +201,13 @@ function GrantsTable({
 
                   <td>
                     <span className="grants-date-value">
-                      {formatDate(record.expiresAt)}
+                      {record.expiresAt ? formatDate(record.expiresAt) : "Unknown"}
                     </span>
                   </td>
 
                   <td>
                     <span className="grants-date-muted">
-                      {formatDate(record.updatedAt)}
+                      {record.updatedAt ? formatDate(record.updatedAt) : "Unknown"}
                     </span>
                   </td>
                 </tr>

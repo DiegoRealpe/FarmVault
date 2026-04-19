@@ -11,10 +11,12 @@ Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
-type GetGrantRecordHandler = Schema["getPersonalGrantRecord"]["functionHandler"];
+type GetGrantRecordHandler =
+  Schema["getPersonalGrantRecord"]["functionHandler"];
 type GrantRecord = Schema["GrantRecord"]["type"];
 type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type Identity = Parameters<GetGrantRecordHandler>[0]["identity"];
+type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
 
 function getCallerSub(identity: Identity): string | null {
   if (!identity) {
@@ -38,12 +40,17 @@ function getCallerSub(identity: Identity): string | null {
   return null;
 }
 
+function normalizeGrantEntries(grants: GrantRecord["grants"]): GrantEntry[] {
+  return (grants ?? []).filter(
+    (grant): grant is GrantEntry => grant != null,
+  );
+}
+
 function toMyGrantRecord(record: GrantRecord): MyGrantRecord {
   return {
-    userSub: record.userSub,
-    grants: (record.grants ?? []).filter(
-      (grant): grant is NonNullable<typeof grant> => grant != null,
-    ),
+    username: record.username,
+    email: record.email,
+    grants: normalizeGrantEntries(record.grants),
     expiresAt: record.expiresAt,
     createdAt: record.createdAt,
     updatedAt: record.updatedAt,
@@ -51,8 +58,6 @@ function toMyGrantRecord(record: GrantRecord): MyGrantRecord {
 }
 
 export const handler: GetGrantRecordHandler = async (event) => {
-  console.log("getGrantRecord event:", JSON.stringify(event, null, 2));
-
   const callerSub = getCallerSub(event.identity);
 
   if (!callerSub) {
@@ -67,11 +72,9 @@ export const handler: GetGrantRecordHandler = async (event) => {
     throw new Error(errors.map((error) => error.message).join("; "));
   }
 
-  const grantRecord: GrantRecord | null | undefined = data;
-
-  if (grantRecord == null) {
+  if (!data) {
     return null;
   }
-  // Mapping to View Model
-  return toMyGrantRecord(grantRecord);
+
+  return toMyGrantRecord(data);
 };

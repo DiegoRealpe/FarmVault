@@ -1,11 +1,11 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
+// import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
-import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
-import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
-import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
-import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
+// import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
+// import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
+// import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
+// import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
 
 
 const schema = a
@@ -55,25 +55,27 @@ const schema = a
         allow.authenticated(),
         // allow.group('farmAdmin'),
       ]),
-
     
-    GrantRecord: a
-      .model({
-        userSub: a.string().required(),
-        grants: a.ref("GrantEntry").array().required(),
-        expiresAt: a.datetime().required(),
-        ttl: a.integer().required(),
-        createdBySub: a.string().required(),
-        createdAt: a.datetime().required(),
-        updatedAt: a.datetime().required(),
-      })
-      .identifier(["userSub"])
-      // TODO: remove direct client access later
-      .authorization((allow) => [
-        allow.authenticated(),
-        // allow.group("admin").to(["read"]),
-        // allow.ownerDefinedIn("userSub").to(["read"]),
-      ]),
+    // TODO: Reinstate required fields
+    // GrantRecord: a
+    //   .model({
+    //     userSub: a.string().required(),
+    //     username: a.string(),
+    //     email: a.string(),
+    //     grants: a.ref("GrantEntry").array(),
+    //     expiresAt: a.datetime(),
+    //     ttl: a.integer(),
+    //     createdBySub: a.string(),
+    //     createdAt: a.datetime(),
+    //     updatedAt: a.datetime(),
+    //   })
+    //   .identifier(["userSub"])
+    //   // TODO: remove direct client access later
+    //   .authorization((allow) => [
+    //     allow.authenticated(),
+    //     // allow.group("admin").to(["read"]),
+    //     // allow.ownerDefinedIn("userSub").to(["read"]),
+    //   ]),
 
     // -- Custom Types --
     TimeSeriesPoint: a.customType({
@@ -81,20 +83,21 @@ const schema = a
       value: a.float().required(),
     }),
     
-    GrantType: a.enum(["farm", "device"]),
+    // GrantType: a.enum(["farm", "device"]),
 
-    GrantEntry: a.customType({
-      grantType: a.ref("GrantType").required(),
-      ids: a.string().array().required(),
-    }),
+    // GrantEntry: a.customType({
+    //   grantType: a.ref("GrantType").required(),
+    //   ids: a.string().array().required(),
+    // }),
 
-    MyGrantRecord: a.customType({
-      userSub: a.string().required(),
-      grants: a.ref("GrantEntry").array().required(),
-      expiresAt: a.datetime().required(),
-      createdAt: a.datetime().required(),
-      updatedAt: a.datetime().required(),
-    }),
+    // MyGrantRecord: a.customType({
+    //   username: a.string().required(),
+    //   email: a.string().required(),
+    //   grants: a.ref("GrantEntry").array().required(),
+    //   expiresAt: a.datetime().required(),
+    //   createdAt: a.datetime().required(),
+    //   updatedAt: a.datetime().required(),
+    // }),
 
     CreateFarmUserResult: a.customType({
       success: a.boolean().required(),
@@ -103,13 +106,13 @@ const schema = a
       assignedGroup: a.string().required(),
     }),
 
-    UpsertGrantRecordResult: a.customType({
-      userSub: a.string().required(),
-      grants: a.ref("GrantEntry").array().required(),
-      expiresAt: a.datetime().required(),
-      createdAt: a.datetime().required(),
-      updatedAt: a.datetime().required(),
-    }),
+    // UpsertGrantRecordResult: a.customType({
+    //   userSub: a.string().required(),
+    //   grants: a.ref("GrantEntry").array().required(),
+    //   expiresAt: a.datetime().required(),
+    //   createdAt: a.datetime().required(),
+    //   updatedAt: a.datetime().required(),
+    // }),
     
     DeviceTimeSeries: a.customType({
       deviceId: a.string().required(),
@@ -133,37 +136,35 @@ const schema = a
       ])
       .handler(a.handler.function(getFarmIotDataFn)),
 
-    listVisibleFarms: a
-      .query()
-      .returns(a.ref("Farm").array().required())
-      .authorization((allow) => [
-        allow.authenticated(),
-      ])
-      .handler(a.handler.function(listVisibleFarmsFn)),
+    // listVisibleFarms: a
+    //   .query()
+    //   .returns(a.ref("Farm").array().required())
+    //   .authorization((allow) => [
+    //     allow.authenticated(),
+    //   ])
+    //   .handler(a.handler.function(listVisibleFarmsFn)),
 
-    listVisibleDevices: a
-      .query()
-      .returns(a.ref("IoTDevice").array().required())
-      .authorization((allow) => [
-        allow.authenticated(),
-      ])
-      .handler(a.handler.function(listVisibleDevicesFn)),
+    // listVisibleDevices: a
+    //   .query()
+    //   .returns(a.ref("IoTDevice").array().required())
+    //   .authorization((allow) => [
+    //     allow.authenticated(),
+    //   ])
+    //   .handler(a.handler.function(listVisibleDevicesFn)),
 
     // ---- User Specific Queries ----
-    getPersonalGrantRecord: a
-      .query()
-      .returns(a.ref("MyGrantRecord"))
-      .authorization((allow) => [allow.authenticated()])
-      // .authorization((allow) => [allow.authenticated()])
-      .handler(a.handler.function(getPersonalGrantRecordFn)),
+    // getPersonalGrantRecord: a
+    //   .query()
+    //   .returns(a.ref("MyGrantRecord"))
+    //   .authorization((allow) => [allow.authenticated()])
+    //   .handler(a.handler.function(getPersonalGrantRecordFn)),
 
     // ---- Admin Specific Queries ----
-    listCreatedGrantRecords: a
-      .query()
-      .returns(a.ref("GrantRecord").array().required())
-      // .authorization((allow) => [allow.group("admin")])
-      .authorization((allow) => [allow.authenticated()])
-      .handler(a.handler.function(listCreatedGrantRecordsFn)),
+    // listCreatedGrantRecords: a
+    //   .query()
+    //   .returns(a.ref("GrantRecord").array().required())
+    //   .authorization((allow) => [allow.authenticated()])
+    //   .handler(a.handler.function(listCreatedGrantRecordsFn)),
 
     // ---- Admin Mutations ----
     createFarmUser: a
@@ -177,26 +178,26 @@ const schema = a
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(createFarmUserFn)),
 
-    upsertGrantRecord: a
-      .mutation()
-      .arguments({
-        userSub: a.string().required(),
-        grants: a.ref("GrantEntry").array().required(),
-        expiresAt: a.datetime().required(),
-      })
-      .returns(a.ref("UpsertGrantRecordResult").required())
-      // .authorization((allow) => [allow.group("admin")])
-      .authorization((allow) => [allow.authenticated()])
-      .handler(a.handler.function(upsertGrantRecordFn)),
+    // upsertGrantRecord: a
+    //   .mutation()
+    //   .arguments({
+    //     userSub: a.string().required(),
+    //     grants: a.ref("GrantEntry").array().required(),
+    //     expiresAt: a.datetime().required(),
+    //   })
+    //   .returns(a.ref("UpsertGrantRecordResult").required())
+    //   // .authorization((allow) => [allow.group("admin")])
+    //   .authorization((allow) => [allow.authenticated()])
+    //   .handler(a.handler.function(upsertGrantRecordFn)),
+    
   })
-  // (optional) let specific functions use the Data client with proper auth
   .authorization((allow) => [
-    allow.resource(listCreatedGrantRecordsFn),
-    allow.resource(listVisibleDevicesFn),
-    allow.resource(listVisibleFarmsFn),
+    // allow.resource(listCreatedGrantRecordsFn),
+    // allow.resource(listVisibleDevicesFn),
+    // allow.resource(listVisibleFarmsFn),
     allow.resource(getFarmIotDataFn),
-    allow.resource(getPersonalGrantRecordFn),
-    allow.resource(upsertGrantRecordFn)
+    // allow.resource(getPersonalGrantRecordFn),
+    // allow.resource(upsertGrantRecordFn)
   ]);
 
 // 2) Export Schema type for typed clients
