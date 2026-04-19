@@ -124,8 +124,7 @@ export const createFarmUserThunk = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/createFarmUser", async (input, { rejectWithValue }) => {
   try {
-    const userPoolClient = getUserPoolClient();
-    const { data, errors } = await userPoolClient.mutations.createFarmUser({
+    const { data, errors } = await client.mutations.createFarmUser({
       email: input.email,
       temporaryPassword: input.temporaryPassword,
     });
@@ -152,8 +151,7 @@ export const upsertGrantRecordThunk = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/upsertGrantRecord", async (input, { rejectWithValue }) => {
   try {
-    const userPoolClient = getUserPoolClient();
-    const { data, errors } = await userPoolClient.mutations.upsertGrantRecord({
+    const { data, errors } = await client.mutations.upsertGrantRecord({
       userSub: input.userSub,
       grants: input.grants,
       expiresAt: input.expiresAt,
