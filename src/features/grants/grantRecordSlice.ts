@@ -2,14 +2,9 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { generateClient } from "aws-amplify/data";
 import type { Schema } from "../../../amplify/data/resource";
 
-console.log("[grantRecordSlice] module loaded");
-
-function getUserPoolClient() {
-  console.log("[grantRecordSlice] creating userPool client");
-  return generateClient<Schema>({
-    authMode: "userPool",
-  });
-}
+const client = generateClient<Schema>({
+  authMode: "userPool",
+});
 
 type GrantRecord = Schema["GrantRecord"]["type"];
 type GrantType = "farm" | "device";
@@ -83,9 +78,8 @@ export const fetchGrantRecord = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
-    const userPoolClient = getUserPoolClient();
     const { data, errors } =
-      await userPoolClient.queries.getPersonalGrantRecord({});
+      await client.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
       return rejectWithValue(errors.map((e) => e.message).join("; "));
@@ -104,51 +98,18 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   void,
   { rejectValue: string }
 >("grantRecord/fetchCreatedGrantRecords", async (_, { rejectWithValue }) => {
-  console.log("[fetchCreatedGrantRecords] thunk started");
-
   try {
-    const userPoolClient = getUserPoolClient();
-
-    console.log("[fetchCreatedGrantRecords] calling listCreatedGrantRecords");
-
-    const response = await userPoolClient.queries.listCreatedGrantRecords({});
-
-    console.log("[fetchCreatedGrantRecords] raw response:", response);
-
+    const response = await client.queries.listCreatedGrantRecords({});
     const { data, errors } = response;
-
-    console.log("[fetchCreatedGrantRecords] data:", data);
-    console.log("[fetchCreatedGrantRecords] errors:", errors);
-    console.log(
-      "[fetchCreatedGrantRecords] data is array:",
-      Array.isArray(data),
-    );
-    console.log(
-      "[fetchCreatedGrantRecords] data length:",
-      Array.isArray(data) ? data.length : "not an array",
-    );
 
     if (errors?.length) {
       const errorMessage = errors.map((e) => e.message).join("; ");
-      console.error(
-        "[fetchCreatedGrantRecords] GraphQL errors encountered:",
-        errorMessage,
-      );
       return rejectWithValue(errorMessage);
     }
-
     const result = (data as GrantRecord[] | null) ?? [];
-
-    console.log("[fetchCreatedGrantRecords] returning result:", result);
-    console.log(
-      "[fetchCreatedGrantRecords] returning result length:",
-      result.length,
-    );
 
     return result;
   } catch (error) {
-    console.error("[fetchCreatedGrantRecords] caught exception:", error);
-
     return rejectWithValue(
       error instanceof Error
         ? error.message
