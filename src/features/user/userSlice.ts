@@ -36,15 +36,6 @@ const userSlice = createSlice({
       state.groups = Array.isArray(groups) ? groups : [];
       state.isAuthenticated = isAuthenticated;
       state.isAdmin = isAdmin;
-      
-      console.log("[userSlice] setUserFromAuth");
-      console.log("[userSlice] updated state:", {
-        sub: state.sub,
-        email: state.email,
-        groups: state.groups,
-        isAuthenticated: state.isAuthenticated,
-        isAdmin: state.isAdmin,
-      });
     },
 
     clearUser(state) {

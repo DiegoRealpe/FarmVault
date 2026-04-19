@@ -50,7 +50,6 @@ export const fetchVisibleDevices = createAsyncThunk<
     );
   }
 });
-
 export const fetchVisibleFarms = createAsyncThunk<
   Farm[],
   void,
@@ -58,6 +57,7 @@ export const fetchVisibleFarms = createAsyncThunk<
 >("devices/fetchVisibleFarms", async (_, { rejectWithValue }) => {
   try {
     const response = await client.queries.listVisibleFarms({});
+    console.log("[fetchVisibleFarms] response:", response);
 
     if (response.errors?.length) {
       throw new Error(response.errors[0].message);
@@ -69,6 +69,7 @@ export const fetchVisibleFarms = createAsyncThunk<
       (farm): farm is Farm => farm != null && typeof farm === "object",
     );
   } catch (error) {
+    console.error("[fetchVisibleFarms] error:", error);
     return rejectWithValue(
       error instanceof Error ? error.message : "Failed to fetch visible farms",
     );
