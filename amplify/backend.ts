@@ -28,7 +28,7 @@ export const backend = defineBackend({
   data,
   metricsBucket,
   createFarmUserFn,
-  getFarmIotDataFn,
+  // getFarmIotDataFn,
   // getPersonalGrantRecordFn,
   // listVisibleDevicesFn,
   // listVisibleFarmsFn,
@@ -49,9 +49,9 @@ new BucketDeployment(backend.stack, "DeployGlueScripts", {
   sources: [Source.asset(join(__dirname, "glue-scripts"))],
 });
 
-backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
-  ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
-)
+// backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
+//   ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
+// )
 
 const glueStack = backend.createStack("GlueInfra");
 
