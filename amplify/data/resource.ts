@@ -190,7 +190,7 @@ const schema = a
     // allow.resource(listVisibleDevicesFn),
     // allow.resource(listVisibleFarmsFn),
     // allow.resource(getFarmIotDataFn),
-    // allow.resource(getPersonalGrantRecordFn),
+    allow.resource(getPersonalGrantRecordFn),
     // allow.resource(upsertGrantRecordFn)
   ]);
 
