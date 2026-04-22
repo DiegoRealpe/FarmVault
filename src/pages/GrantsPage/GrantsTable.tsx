@@ -1,4 +1,4 @@
-// import type { Schema } from "../../../amplify/data/resource";
+import type { Schema } from "../../../amplify/data/resource";
 import "./GrantsTable.css";
 import {
   formatDate,
@@ -11,28 +11,7 @@ import type {
   GrantRecordSortDirection,
 } from "../../features/grants/grantRecordSlice";
 
-// type GrantRecord = Schema["GrantRecord"]["type"];
-
-type GrantType = "farm" | "device";
-
-type GrantEntry = {
-  grantType: GrantType;
-  ids: (string | null | undefined)[];
-};
-
-type GrantRecord = {
-  userSub: string;
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  ttl?: number;
-  createdBySub?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-
-  // keep these optional while schema is unstable
-  username?: string | null;
-  email?: string | null;
-};
+type GrantRecord = Schema["GrantRecord"]["type"];
 
 interface GrantsTableProps {
   createdGrantRecords: GrantRecord[];
@@ -188,10 +167,10 @@ function GrantsTable({
                 >
                   <td>
                     <div className="grants-user-value">
-                      {record.email}
+                      {record.email ?? record.userSub}
                     </div>
                     <div className="grants-user-subtext">
-                      {record.username}
+                      {record.username ?? "No username"}
                       {isCurrentUser ? " • Current signed-in user" : ""}
                     </div>
                   </td>

@@ -56,26 +56,22 @@ const schema = a
         // allow.group('farmAdmin'),
       ]),
     
-    // TODO: Reinstate required fields
-    // GrantRecord: a
-    //   .model({
-    //     userSub: a.string().required(),
-    //     username: a.string(),
-    //     email: a.string(),
-    //     grants: a.ref("GrantEntry").array(),
-    //     expiresAt: a.datetime(),
-    //     ttl: a.integer(),
-    //     createdBySub: a.string(),
-    //     createdAt: a.datetime(),
-    //     updatedAt: a.datetime(),
-    //   })
-    //   .identifier(["userSub"])
-    //   // TODO: remove direct client access later
-    //   .authorization((allow) => [
-    //     allow.authenticated(),
-    //     // allow.group("admin").to(["read"]),
-    //     // allow.ownerDefinedIn("userSub").to(["read"]),
-    //   ]),
+    GrantRecord: a
+      .model({
+        userSub: a.string().required(),
+        username: a.string(),
+        email: a.string(),
+        grants: a.ref("GrantEntry").array(),
+        expiresAt: a.datetime(),
+        ttl: a.integer(),
+        createdBySub: a.string(),
+        createdAt: a.datetime(),
+        updatedAt: a.datetime(),
+      })
+      .identifier(["userSub"])
+      .authorization((allow) => [
+        allow.authenticated(),
+      ]),
 
     // -- Custom Types --
     TimeSeriesPoint: a.customType({
@@ -83,21 +79,21 @@ const schema = a
       value: a.float().required(),
     }),
     
-    // GrantType: a.enum(["farm", "device"]),
+    GrantType: a.enum(["farm", "device"]),
 
-    // GrantEntry: a.customType({
-    //   grantType: a.ref("GrantType").required(),
-    //   ids: a.string().array().required(),
-    // }),
+    GrantEntry: a.customType({
+      grantType: a.ref("GrantType").required(),
+      ids: a.string().array().required(),
+    }),
 
-    // MyGrantRecord: a.customType({
-    //   username: a.string().required(),
-    //   email: a.string().required(),
-    //   grants: a.ref("GrantEntry").array().required(),
-    //   expiresAt: a.datetime().required(),
-    //   createdAt: a.datetime().required(),
-    //   updatedAt: a.datetime().required(),
-    // }),
+    MyGrantRecord: a.customType({
+      username: a.string().required(),
+      email: a.string(),
+      grants: a.ref("GrantEntry").array(),
+      expiresAt: a.datetime(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+    }),
 
     CreateFarmUserResult: a.customType({
       success: a.boolean().required(),
@@ -106,13 +102,13 @@ const schema = a
       assignedGroup: a.string().required(),
     }),
 
-    // UpsertGrantRecordResult: a.customType({
-    //   userSub: a.string().required(),
-    //   grants: a.ref("GrantEntry").array().required(),
-    //   expiresAt: a.datetime().required(),
-    //   createdAt: a.datetime().required(),
-    //   updatedAt: a.datetime().required(),
-    // }),
+    UpsertGrantRecordResult: a.customType({
+      userSub: a.string().required(),
+      grants: a.ref("GrantEntry").array().required(),
+      expiresAt: a.datetime().required(),
+      createdAt: a.datetime().required(),
+      updatedAt: a.datetime().required(),
+    }),
     
     DeviceTimeSeries: a.customType({
       deviceId: a.string().required(),

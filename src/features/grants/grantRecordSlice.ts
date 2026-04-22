@@ -6,40 +6,9 @@ const client = generateClient<Schema>({
   authMode: "userPool",
 });
 
-// type GrantRecord = Schema["GrantRecord"]["type"];
-// type MyGrantRecord = Schema["MyGrantRecord"]["type"];
-// type GrantType = "farm" | "device";
-type GrantType = "farm" | "device";
-
-type GrantEntry = {
-  grantType: GrantType;
-  ids: (string | null | undefined)[];
-};
-
-type GrantRecord = {
-  userSub: string;
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  ttl?: number;
-  createdBySub?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-
-  // keep these optional while schema is unstable
-  username?: string | null;
-  email?: string | null;
-};
-
-type MyGrantRecord = {
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-
-  // optional for now
-  username?: string | null;
-  email?: string | null;
-};
+type GrantRecord = Schema["GrantRecord"]["type"];
+type GrantEntry = Schema["GrantEntry"]["type"];
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 
 export type GrantRecordSortBy =
   | "userSub"

@@ -9,7 +9,7 @@ import {
   toggleSort,
   setShowExpired,
 } from "../../features/grants/grantRecordSlice";
-// import type { Schema } from "../../../amplify/data/resource";
+import type { Schema } from "../../../amplify/data/resource";
 import {
   fetchVisibleDevices,
   fetchVisibleFarms,
@@ -31,25 +31,8 @@ type GrantRecordSortBy =
   | "createdAt"
   | "updatedAt";
 
-type GrantType = "farm" | "device";
-type GrantEntry = {
-  grantType: GrantType;
-  ids: (string | null | undefined)[];
-};
-
-type GrantRecord = {
-  userSub: string;
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  ttl?: number;
-  createdBySub?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-
-  // keep these optional while schema is unstable
-  username?: string | null;
-  email?: string | null;
-};
+type GrantRecord = Schema["GrantRecord"]["type"];
+type GrantEntry = Schema["GrantEntry"]["type"];
 
 function GrantsPage() {
   const dispatch = useDispatch<AppDispatch>();
@@ -273,7 +256,7 @@ function GrantsPage() {
           </div>
 
           <GrantsStats
-            grantRecord={grantRecord}
+            givenGrantRecord={grantRecord}
             isAdmin={isAdmin}
             loading={loadingGrantRecord}
             error={error}

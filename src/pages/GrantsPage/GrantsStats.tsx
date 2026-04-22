@@ -1,42 +1,19 @@
+import type { Schema } from "../../../amplify/data/resource";
 import "./GrantsStats.css";
+import { getGrantIdsByType } from "../../utils/utils";
 
-type GrantType = "farm" | "device";
-
-type GrantEntry = {
-  grantType: GrantType;
-  ids: (string | null | undefined)[];
-};
-
-type MyGrantRecord = {
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-  username?: string | null;
-  email?: string | null;
-};
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
+type GrantRecord = Schema["GrantRecord"]["type"];
 
 interface GrantsStatsProps {
-  grantRecord: MyGrantRecord | null;
+  givenGrantRecord: GrantRecord | MyGrantRecord | null;
   isAdmin: boolean;
   loading?: boolean;
   error?: string | null;
 }
 
-function getGrantIdsByType(
-  grantRecord: MyGrantRecord,
-  grantType: GrantType,
-): string[] {
-  return (grantRecord.grants ?? [])
-    .filter((grant): grant is GrantEntry => grant != null)
-    .filter((grant) => grant.grantType === grantType)
-    .flatMap((grant) =>
-      (grant.ids ?? []).filter((id): id is string => typeof id === "string"),
-    );
-}
-
 function GrantsStats({
-  grantRecord,
+  givenGrantRecord,
   isAdmin,
   loading = false,
   error = null,
@@ -67,7 +44,7 @@ function GrantsStats({
     );
   }
 
-  if (!grantRecord) {
+  if (!givenGrantRecord) {
     return (
       <section className="grants-stats-panel">
         <div className="grants-stats-header">
@@ -80,18 +57,18 @@ function GrantsStats({
     );
   }
 
-  const expiresAtMs = grantRecord.expiresAt
-    ? new Date(grantRecord.expiresAt).getTime()
+  const expiresAtMs = givenGrantRecord.expiresAt
+    ? new Date(givenGrantRecord.expiresAt).getTime()
     : 0;
   const isActive = expiresAtMs > Date.now();
 
-  const farmIds = getGrantIdsByType(grantRecord, "farm");
-  const deviceIds = getGrantIdsByType(grantRecord, "device");
+  const farmIds = getGrantIdsByType(givenGrantRecord, "farm");
+  const deviceIds = getGrantIdsByType(givenGrantRecord, "device");
 
-  const displayEmail = grantRecord.email ?? "Email unavailable";
-  const displayUsername = grantRecord.username ?? "Username unavailable";
-  const displayExpiresAt = grantRecord.expiresAt
-    ? new Date(grantRecord.expiresAt).toLocaleString()
+  const displayEmail = givenGrantRecord.email ?? "Email unavailable";
+  const displayUsername = givenGrantRecord.username ?? "Username unavailable";
+  const displayExpiresAt = givenGrantRecord.expiresAt
+    ? new Date(givenGrantRecord.expiresAt).toLocaleString()
     : "Unknown";
 
   return (

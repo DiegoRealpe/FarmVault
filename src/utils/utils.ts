@@ -1,42 +1,25 @@
-// import type { Schema } from "../../amplify/data/resource";
+import type { Schema } from "../../amplify/data/resource";
 import type {
   GrantRecordSortBy,
   GrantRecordSortDirection,
 } from "../features/grants/grantRecordSlice";
 
-// type GrantRecord = Schema["GrantRecord"]["type"];
-// type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
-
+type GrantRecord = Schema["GrantRecord"]["type"];
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type GrantType = "farm" | "device";
 
-type GrantEntry = {
-  grantType: GrantType;
-  ids: (string | null | undefined)[];
-};
-
-type GrantRecord = {
-  userSub: string;
-  grants: (GrantEntry | null | undefined)[];
-  expiresAt?: string | null;
-  ttl?: number;
-  createdBySub?: string;
-  createdAt?: string | null;
-  updatedAt?: string | null;
-
-  // keep these optional while schema is unstable
-  username?: string | null;
-  email?: string | null;
-};
-
 export function getGrantIdsByType(
-  grantRecord: GrantRecord,
-  grantType: "farm" | "device",
+  givenGrantRecord: GrantRecord | MyGrantRecord | null,
+  grantType: GrantType,
 ): string[] {
-  return (grantRecord.grants ?? [])
-    .filter((grant): grant is GrantEntry => grant != null)
-    .filter((grant) => grant.grantType === grantType)
+  if (!givenGrantRecord) {
+    return [];
+  }
+
+  return (givenGrantRecord.grants ?? [])
+    .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
-      (grant.ids ?? []).filter((id): id is string => typeof id === "string"),
+      (grant?.ids ?? []).filter((id): id is string => typeof id === "string"),
     );
 }
 
@@ -97,20 +80,22 @@ export function getSortIndicator(
 export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
-  const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-  
+  const diffInHours = Math.floor(
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+  );
+
   if (diffInHours < 24) {
     return `${diffInHours}h ago`;
   } else if (diffInHours < 168) {
     return `${Math.floor(diffInHours / 24)}d ago`;
   } else {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   }
-} 
+}
 
 export function toDateTimeLocalValue(value: string): string {
   const date = new Date(value);
@@ -138,4 +123,3 @@ export function toggleStringSelection(
 
   return [...currentValues, value];
 }
-
