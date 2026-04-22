@@ -1,0 +1,258 @@
+.grant-editor-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 1000;
+}
+
+.grant-editor-modal {
+  width: min(920px, 100%);
+  max-height: 90vh;
+  overflow: auto;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
+  padding: 22px 22px 18px;
+}
+
+.grant-editor-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.grant-editor-title {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 700;
+}
+
+.grant-editor-subtitle {
+  margin: 6px 0 0;
+  color: #64748b;
+  font-size: 0.95rem;
+}
+
+.grant-editor-close {
+  border: none;
+  background: transparent;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  color: #475569;
+  padding: 0 4px;
+}
+
+.grant-editor-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.grant-editor-top-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.grant-editor-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.grant-editor-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #334155;
+}
+
+.grant-editor-input {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+  background: #fff;
+}
+
+.grant-editor-input:focus {
+  outline: none;
+  border-color: #64748b;
+  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+}
+
+.grant-editor-identity-card {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.grant-editor-identity-email {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.grant-editor-identity-username {
+  font-size: 0.92rem;
+  color: #475569;
+  margin-top: 2px;
+}
+
+.grant-editor-identity-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.grant-editor-meta-pill {
+  display: inline-flex;
+  align-items: center;
+  background: #e2e8f0;
+  color: #334155;
+  border-radius: 999px;
+  padding: 6px 10px;
+  font-size: 0.82rem;
+}
+
+.grant-editor-section {
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px 16px;
+  background: #ffffff;
+}
+
+.grant-editor-section-compact {
+  padding-bottom: 12px;
+}
+
+.grant-editor-date-field {
+  max-width: 280px;
+}
+
+.grant-editor-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.grant-editor-section-header h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.grant-editor-count {
+  font-size: 0.82rem;
+  color: #64748b;
+}
+
+.grant-editor-grants-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.grant-editor-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  max-height: 260px;
+  overflow: auto;
+  padding-right: 4px;
+}
+
+.grant-editor-option-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.grant-editor-option-row:hover {
+  background: #f1f5f9;
+}
+
+.grant-editor-helper-text {
+  margin: 0;
+  font-size: 0.84rem;
+  color: #64748b;
+}
+
+.grant-editor-error {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+}
+
+.grant-editor-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.grant-editor-button {
+  border: none;
+  border-radius: 10px;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.grant-editor-button-secondary {
+  background: #e2e8f0;
+  color: #1e293b;
+}
+
+.grant-editor-button-primary {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.grant-editor-button:disabled,
+.grant-editor-close:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+  .grant-editor-modal {
+    width: 100%;
+    max-height: 95vh;
+    padding: 18px 16px 16px;
+  }
+
+  .grant-editor-top-grid,
+  .grant-editor-grants-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .grant-editor-date-field {
+    max-width: 100%;
+  }
+
+  .grant-editor-actions {
+    flex-direction: column-reverse;
+  }
+
+  .grant-editor-button {
+    width: 100%;
+  }
+}

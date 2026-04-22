@@ -1,8 +1,6 @@
 import { useEffect, useState } from "react";
-import {
-  toDateTimeLocalValue,
-  toggleStringSelection,
-} from "../../utils/utils";
+import "./GrantEditorModal.css";
+import { toggleStringSelection } from "../../utils/utils";
 
 export interface SelectOption {
   id: string;
@@ -42,6 +40,20 @@ interface GrantEditorModalProps {
   optionsError?: string | null;
 }
 
+function toDateInputValue(value?: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
 function GrantEditorModal({
   isOpen,
   mode,
@@ -57,7 +69,7 @@ function GrantEditorModal({
 }: GrantEditorModalProps) {
   const [email, setEmail] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
+  const [expiresDate, setExpiresDate] = useState("");
   const [selectedFarmIds, setSelectedFarmIds] = useState<string[]>([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -70,7 +82,7 @@ function GrantEditorModal({
     if (!isOpen) {
       setEmail("");
       setTemporaryPassword("");
-      setExpiresAt("");
+      setExpiresDate("");
       setSelectedFarmIds([]);
       setSelectedDeviceIds([]);
       setLocalError(null);
@@ -79,11 +91,7 @@ function GrantEditorModal({
 
     setEmail(initialValues?.email ?? "");
     setTemporaryPassword("");
-    setExpiresAt(
-      initialValues?.expiresAt
-        ? toDateTimeLocalValue(initialValues.expiresAt)
-        : "",
-    );
+    setExpiresDate(toDateInputValue(initialValues?.expiresAt));
     setSelectedFarmIds(initialValues?.selectedFarmIds ?? []);
     setSelectedDeviceIds(initialValues?.selectedDeviceIds ?? []);
     setLocalError(null);
@@ -112,8 +120,8 @@ function GrantEditorModal({
       return;
     }
 
-    if (!expiresAt) {
-      setLocalError("Expiration time is required.");
+    if (!expiresDate) {
+      setLocalError("Expiration date is required.");
       return;
     }
 
@@ -121,7 +129,7 @@ function GrantEditorModal({
       await onSubmit({
         email: email.trim(),
         temporaryPassword: isCreateMode ? temporaryPassword.trim() : undefined,
-        expiresAt: new Date(expiresAt).toISOString(),
+        expiresAt: new Date(`${expiresDate}T00:00:00.000Z`).toISOString(),
         selectedFarmIds,
         selectedDeviceIds,
       });
@@ -133,138 +141,181 @@ function GrantEditorModal({
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="grant-editor-backdrop" onClick={onClose}>
       <div
-        className="modal-panel"
+        className="grant-editor-modal"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="modal-header">
-          <h2>
-            {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
-          </h2>
-          <button type="button" onClick={onClose} disabled={isSubmitting}>
+        <div className="grant-editor-header">
+          <div>
+            <h2 className="grant-editor-title">
+              {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
+            </h2>
+            <p className="grant-editor-subtitle">
+              {isCreateMode
+                ? "Create a new user and assign farm or device visibility."
+                : "Update the user’s expiration date and access grants."}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className="grant-editor-close"
+            onClick={onClose}
+            disabled={isSubmitting}
+            aria-label="Close modal"
+          >
             ×
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="modal-form">
+        <form onSubmit={handleSubmit} className="grant-editor-form">
           {isCreateMode ? (
-            <>
-              <label>
-                Email
+            <div className="grant-editor-top-grid">
+              <label className="grant-editor-field">
+                <span className="grant-editor-label">Email</span>
                 <input
                   type="email"
                   value={email}
                   onChange={(event) => setEmail(event.target.value)}
                   disabled={isBusy}
+                  className="grant-editor-input"
                 />
               </label>
 
-              <label>
-                Temporary Password
+              <label className="grant-editor-field">
+                <span className="grant-editor-label">Temporary Password</span>
                 <input
                   type="text"
                   value={temporaryPassword}
                   onChange={(event) => setTemporaryPassword(event.target.value)}
                   disabled={isBusy}
+                  className="grant-editor-input"
                 />
               </label>
-            </>
-          ) : (
-            <div className="modal-user-summary">
-              <div className="modal-user-summary-row">
-                <span className="modal-user-summary-label">Email</span>
-                <span className="modal-user-summary-value">
-                  {initialValues?.email || "Unknown"}
-                </span>
-              </div>
-
-              <div className="modal-user-summary-row">
-                <span className="modal-user-summary-label">Username</span>
-                <span className="modal-user-summary-value">
-                  {initialValues?.username || "Unknown"}
-                </span>
-              </div>
-
-              <div className="modal-user-summary-row">
-                <span className="modal-user-summary-label">User Sub</span>
-                <span className="modal-user-summary-value">
-                  {initialValues?.userSub || "Unknown"}
-                </span>
-              </div>
             </div>
+          ) : (
+            <section className="grant-editor-identity-card">
+              <div className="grant-editor-identity-main">
+                <div className="grant-editor-identity-email">
+                  {initialValues?.email || "Unknown email"}
+                </div>
+                <div className="grant-editor-identity-username">
+                  {initialValues?.username || "Unknown username"}
+                </div>
+              </div>
+
+              <div className="grant-editor-identity-meta">
+                <span className="grant-editor-meta-pill">
+                  User Sub: {initialValues?.userSub || "Unknown"}
+                </span>
+              </div>
+            </section>
           )}
 
-          <label>
-            Expiration Time
-            <input
-              type="datetime-local"
-              value={expiresAt}
-              onChange={(event) => setExpiresAt(event.target.value)}
-              disabled={isBusy}
-            />
-          </label>
+          <section className="grant-editor-section grant-editor-section-compact">
+            <label className="grant-editor-field grant-editor-date-field">
+              <span className="grant-editor-label">Expiration Date</span>
+              <input
+                type="date"
+                value={expiresDate}
+                onChange={(event) => setExpiresDate(event.target.value)}
+                disabled={isBusy}
+                className="grant-editor-input"
+              />
+              <span className="grant-editor-helper-text">
+                Saved automatically as midnight for the selected date.
+              </span>
+            </label>
+          </section>
 
-          <div className="modal-section">
-            <h3>Farm Grants</h3>
+          <div className="grant-editor-grants-grid">
+            <section className="grant-editor-section">
+              <div className="grant-editor-section-header">
+                <h3>Farm Grants</h3>
+                <span className="grant-editor-count">
+                  {selectedFarmIds.length} selected
+                </span>
+              </div>
 
-            {loadingFarmOptions ? (
-              <p className="modal-helper-text">Loading farm options...</p>
-            ) : availableFarmOptions.length === 0 ? (
-              <p className="modal-helper-text">No farms available to grant.</p>
-            ) : (
-              availableFarmOptions.map((option) => (
-                <label key={option.id} className="checkbox-row">
-                  <input
-                    type="checkbox"
-                    checked={selectedFarmIds.includes(option.id)}
-                    onChange={() =>
-                      setSelectedFarmIds((currentValues) =>
-                        toggleStringSelection(option.id, currentValues),
-                      )
-                    }
-                    disabled={isBusy}
-                  />
-                  {option.label}
-                </label>
-              ))
-            )}
+              {loadingFarmOptions ? (
+                <p className="grant-editor-helper-text">Loading farm options...</p>
+              ) : availableFarmOptions.length === 0 ? (
+                <p className="grant-editor-helper-text">No farms available to grant.</p>
+              ) : (
+                <div className="grant-editor-option-list">
+                  {availableFarmOptions.map((option) => (
+                    <label key={option.id} className="grant-editor-option-row">
+                      <input
+                        type="checkbox"
+                        checked={selectedFarmIds.includes(option.id)}
+                        onChange={() =>
+                          setSelectedFarmIds((currentValues) =>
+                            toggleStringSelection(option.id, currentValues),
+                          )
+                        }
+                        disabled={isBusy}
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
+
+            <section className="grant-editor-section">
+              <div className="grant-editor-section-header">
+                <h3>Device Grants</h3>
+                <span className="grant-editor-count">
+                  {selectedDeviceIds.length} selected
+                </span>
+              </div>
+
+              {loadingDeviceOptions ? (
+                <p className="grant-editor-helper-text">Loading device options...</p>
+              ) : availableDeviceOptions.length === 0 ? (
+                <p className="grant-editor-helper-text">
+                  No devices available to grant.
+                </p>
+              ) : (
+                <div className="grant-editor-option-list">
+                  {availableDeviceOptions.map((option) => (
+                    <label key={option.id} className="grant-editor-option-row">
+                      <input
+                        type="checkbox"
+                        checked={selectedDeviceIds.includes(option.id)}
+                        onChange={() =>
+                          setSelectedDeviceIds((currentValues) =>
+                            toggleStringSelection(option.id, currentValues),
+                          )
+                        }
+                        disabled={isBusy}
+                      />
+                      <span>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </section>
           </div>
 
-          <div className="modal-section">
-            <h3>Device Grants</h3>
+          {optionsError && <p className="grant-editor-error">{optionsError}</p>}
+          {localError && <p className="grant-editor-error">{localError}</p>}
 
-            {loadingDeviceOptions ? (
-              <p className="modal-helper-text">Loading device options...</p>
-            ) : availableDeviceOptions.length === 0 ? (
-              <p className="modal-helper-text">No devices available to grant.</p>
-            ) : (
-              availableDeviceOptions.map((option) => (
-                <label key={option.id} className="checkbox-row">
-                  <input
-                    type="checkbox"
-                    checked={selectedDeviceIds.includes(option.id)}
-                    onChange={() =>
-                      setSelectedDeviceIds((currentValues) =>
-                        toggleStringSelection(option.id, currentValues),
-                      )
-                    }
-                    disabled={isBusy}
-                  />
-                  {option.label}
-                </label>
-              ))
-            )}
-          </div>
-
-          {optionsError && <p className="modal-error">{optionsError}</p>}
-          {localError && <p className="modal-error">{localError}</p>}
-
-          <div className="modal-actions">
-            <button type="button" onClick={onClose} disabled={isSubmitting}>
+          <div className="grant-editor-actions">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={isSubmitting}
+              className="grant-editor-button grant-editor-button-secondary"
+            >
               Cancel
             </button>
-            <button type="submit" disabled={isBusy}>
+            <button
+              type="submit"
+              disabled={isBusy}
+              className="grant-editor-button grant-editor-button-primary"
+            >
               {isSubmitting
                 ? "Saving..."
                 : isCreateMode

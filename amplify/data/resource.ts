@@ -28,10 +28,8 @@ const schema = a
         updatedAt: a.datetime().required(),
       })
       .identifier(["id"])
-      // TODO: Remove 
       .authorization((allow) => [
         allow.authenticated(),
-        // allow.group('farmAdmin'),
       ]),
 
     DeviceType: a.enum(["TEMPERATURE", "MOISTURE"]),
