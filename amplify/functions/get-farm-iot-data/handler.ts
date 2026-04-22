@@ -1,3 +1,10 @@
+export const handler: any /*getFarmIotDataHandler*/ = async (event) => {
+  console.log("getFarmIotData event:", JSON.stringify(event, null, 2));
+
+  throw new Error("getFarmIotDataFn not implemented yet.");
+};
+
+/*
 import {
   AthenaClient,
   StartQueryExecutionCommand,
@@ -20,9 +27,9 @@ Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
+type GrantRecord = Schema["GrantRecord"]["type"];
 type GetFarmIotDataHandler = Schema["getFarmIotData"]["functionHandler"];
 type Identity = Parameters<GetFarmIotDataHandler>[0]["identity"];
-type GrantRecord = Schema["GrantRecord"]["type"];
 type IoTDevice = Schema["IoTDevice"]["type"];
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -278,3 +285,4 @@ export const handler: GetFarmIotDataHandler = async (event) => {
     },
   ];
 };
+*/

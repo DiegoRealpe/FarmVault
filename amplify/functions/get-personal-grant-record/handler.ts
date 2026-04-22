@@ -1,4 +1,11 @@
+export const handler: any /*getPersonalGrantRecordHandler*/ = async (event) => {
+  console.log("getPersonalGrantRecord event:", JSON.stringify(event, null, 2));
+
+  throw new Error("getPersonalGrantRecordFn not implemented yet.");
+};
+
 // amplify/functions/get-grant-record/handler.ts
+/*
 import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
@@ -78,3 +85,4 @@ export const handler: GetGrantRecordHandler = async (event) => {
 
   return toMyGrantRecord(data);
 };
+*/

@@ -23,7 +23,6 @@ import GrantEditorModal, {
 } from "./GrantEditorModal";
 import "./GrantsPage.css";
 
-type GrantType = "farm" | "device";
 type GrantRecordSortBy =
   | "userSub"
   | "expiresAt"
@@ -32,6 +31,7 @@ type GrantRecordSortBy =
   | "createdAt"
   | "updatedAt";
 
+type GrantType = "farm" | "device";
 type GrantEntry = {
   grantType: GrantType;
   ids: (string | null | undefined)[];
