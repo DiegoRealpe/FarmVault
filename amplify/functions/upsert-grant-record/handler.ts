@@ -1,16 +1,5 @@
-// import type { Schema } from "../../data/resource";
-
-// type UpsertGrantRecordHandler =
-//   Schema["upsertGrantRecord"]["functionHandler"];
-
-export const handler: any /*UpsertGrantRecordHandler*/ = async (event) => {
-  console.log("upsertGrantRecord event:", JSON.stringify(event, null, 2));
-
-  throw new Error("upsertGrantRecordFn not implemented yet.");
-};
-
 // amplify/functions/upsert-grant-record/handler.ts
-/*import type { Schema } from "../../data/resource";
+import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
@@ -51,6 +40,46 @@ function getCallerSub(identity: Identity): string | null {
   return null;
 }
 
+function getCallerGroups(identity: Identity): string[] {
+  if (!identity) {
+    return [];
+  }
+
+  if ("groups" in identity && Array.isArray(identity.groups)) {
+    return identity.groups.filter(
+      (group): group is string => typeof group === "string",
+    );
+  }
+
+  if (
+    "claims" in identity &&
+    identity.claims &&
+    typeof identity.claims === "object" &&
+    "cognito:groups" in identity.claims
+  ) {
+    const rawGroups = identity.claims["cognito:groups"];
+
+    if (Array.isArray(rawGroups)) {
+      return rawGroups.filter(
+        (group): group is string => typeof group === "string",
+      );
+    }
+
+    if (typeof rawGroups === "string") {
+      return rawGroups
+        .split(",")
+        .map((group) => group.trim())
+        .filter(Boolean);
+    }
+  }
+
+  return [];
+}
+
+function isAdmin(identity: Identity): boolean {
+  return getCallerGroups(identity).includes("admin");
+}
+
 function toEpochSeconds(isoDateTime: string): number {
   const ms = new Date(isoDateTime).getTime();
 
@@ -62,10 +91,10 @@ function toEpochSeconds(isoDateTime: string): number {
 }
 
 function sanitizeGrants(
-  grants: UpsertGrantRecordArguments["grants"],
-): NonNullable<GrantRecord["grants"]> {
-  return (grants ?? [])
-    .filter((grant): grant is NonNullable<typeof grant> => grant != null)
+  givenGrants: UpsertGrantRecordArguments["grants"],
+): Array<{ grantType: "farm" | "device"; ids: string[] }> {
+  return (givenGrants ?? [])
+    .filter((grant) => grant != null)
     .map((grant) => ({
       grantType: grant.grantType,
       ids: (grant.ids ?? [])
@@ -76,41 +105,54 @@ function sanitizeGrants(
     .filter((grant) => grant.ids.length > 0);
 }
 
-function toResult(record: GrantRecord): UpsertGrantRecordResult {
+function toResult(givenGrantRecord: GrantRecord): UpsertGrantRecordResult {
   return {
-    userSub: record.userSub,
-    grants: (record.grants ?? []).filter(
-      (grant): grant is NonNullable<typeof grant> => grant != null,
-    ),
-    expiresAt: record.expiresAt,
-    createdAt: record.createdAt,
-    updatedAt: record.updatedAt,
+    userSub: givenGrantRecord.userSub,
+    email: givenGrantRecord.email,
+    username: givenGrantRecord.username,
+    grants: givenGrantRecord.grants ?? [],
+    expiresAt: givenGrantRecord.expiresAt,
+    createdAt: givenGrantRecord.createdAt,
+    updatedAt: givenGrantRecord.updatedAt,
   };
 }
 
 export const handler: UpsertGrantRecordHandler = async (event) => {
   console.log("upsertGrantRecord event:", JSON.stringify(event, null, 2));
 
+  if (!isAdmin(event.identity)) {
+    throw new Error("Only admins can upsert grant records.");
+  }
+
   const adminSub = getCallerSub(event.identity);
   if (!adminSub) {
     throw new Error("This endpoint requires Cognito userPool auth.");
   }
 
-  const { userSub, grants, expiresAt } = event.arguments;
+  const { userSub, email, username, grants, expiresAt } = event.arguments;
 
-  if (!userSub) {
+  if (!userSub?.trim()) {
     throw new Error("userSub is required.");
+  }
+
+  if (!email?.trim()) {
+    throw new Error("email is required.");
   }
 
   if (!expiresAt) {
     throw new Error("expiresAt is required.");
   }
 
+  const sanitizedUserSub = userSub.trim();
+  const sanitizedEmail = email.trim();
+  const sanitizedUsername = username?.trim() || undefined;
   const sanitizedGrants = sanitizeGrants(grants);
   const ttl = toEpochSeconds(expiresAt);
   const now = new Date().toISOString();
 
-  const existingResponse = await client.models.GrantRecord.get({ userSub });
+  const existingResponse = await client.models.GrantRecord.get({
+    userSub: sanitizedUserSub,
+  });
 
   if (existingResponse.errors?.length) {
     throw new Error(
@@ -118,16 +160,18 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
     );
   }
 
-  const existingRecord = existingResponse.data;
+  const existingGrantRecord = existingResponse.data;
 
-  if (existingRecord) {
+  if (existingGrantRecord) {
     const updateResponse = await client.models.GrantRecord.update({
-      userSub,
+      userSub: sanitizedUserSub,
+      email: sanitizedEmail,
+      username: sanitizedUsername,
       grants: sanitizedGrants,
       expiresAt,
       ttl,
       createdBySub: adminSub,
-      createdAt: existingRecord.createdAt,
+      createdAt: existingGrantRecord.createdAt,
       updatedAt: now,
     });
 
@@ -141,11 +185,13 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
       throw new Error("GrantRecord update returned no data.");
     }
 
-    return toResult(updateResponse.data as GrantRecord);
+    return toResult(updateResponse.data);
   }
 
   const createResponse = await client.models.GrantRecord.create({
-    userSub,
+    userSub: sanitizedUserSub,
+    email: sanitizedEmail,
+    username: sanitizedUsername,
     grants: sanitizedGrants,
     expiresAt,
     ttl,
@@ -164,6 +210,5 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
     throw new Error("GrantRecord create returned no data.");
   }
 
-  return toResult(createResponse.data as GrantRecord);
+  return toResult(createResponse.data);
 };
-*/

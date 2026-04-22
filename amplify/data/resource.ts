@@ -5,7 +5,7 @@ import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record
 import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
 import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
 import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
-// import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
+import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
 
 
 const schema = a
@@ -102,10 +102,12 @@ const schema = a
 
     UpsertGrantRecordResult: a.customType({
       userSub: a.string().required(),
-      grants: a.ref("GrantEntry").array().required(),
-      expiresAt: a.datetime().required(),
-      createdAt: a.datetime().required(),
-      updatedAt: a.datetime().required(),
+      email: a.string().required(),
+      username: a.string(),
+      grants: a.ref("GrantEntry").array(),
+      expiresAt: a.datetime(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
     }),
     
     DeviceTimeSeries: a.customType({
@@ -168,18 +170,19 @@ const schema = a
       .returns(a.ref("CreateFarmUserResult").required())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(createFarmUserFn)),
-
-    // upsertGrantRecord: a
-    //   .mutation()
-    //   .arguments({
-    //     userSub: a.string().required(),
-    //     grants: a.ref("GrantEntry").array().required(),
-    //     expiresAt: a.datetime().required(),
-    //   })
-    //   .returns(a.ref("UpsertGrantRecordResult").required())
-    //   // .authorization((allow) => [allow.group("admin")])
-    //   .authorization((allow) => [allow.authenticated()])
-    //   .handler(a.handler.function(upsertGrantRecordFn)),
+      
+    upsertGrantRecord: a
+      .mutation()
+      .arguments({
+        userSub: a.string().required(),
+        email: a.string().required(),
+        username: a.string(),
+        grants: a.ref("GrantEntry").array().required(),
+        expiresAt: a.datetime().required(),
+      })
+      .returns(a.ref("UpsertGrantRecordResult").required())
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(upsertGrantRecordFn)),
     
   })
   .authorization((allow) => [
@@ -188,7 +191,7 @@ const schema = a
     allow.resource(listCreatedGrantRecordsFn),
     allow.resource(listVisibleDevicesFn),
     allow.resource(listVisibleFarmsFn),
-    // allow.resource(upsertGrantRecordFn)
+    allow.resource(upsertGrantRecordFn)
   ]);
 
 // 2) Export Schema type for typed clients

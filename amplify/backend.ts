@@ -9,7 +9,7 @@ import { getPersonalGrantRecordFn } from "./functions/get-personal-grant-record/
 import { listVisibleDevicesFn } from "./functions/list-visible-devices/resource";
 import { listVisibleFarmsFn } from "./functions/list-visible-farms/resource";
 import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
-// import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
+import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
 // CDK Imports
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { CfnDatabase, CfnTable, CfnJob, CfnCrawler } from "aws-cdk-lib/aws-glue";
@@ -33,7 +33,7 @@ export const backend = defineBackend({
   listVisibleDevicesFn,
   listVisibleFarmsFn,
   listCreatedGrantRecordsFn,
-  // upsertGrantRecordFn,
+  upsertGrantRecordFn,
 });
 
 // Only allow administrators to create users

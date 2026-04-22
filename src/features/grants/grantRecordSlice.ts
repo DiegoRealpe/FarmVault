@@ -34,7 +34,7 @@ export interface CreateFarmUserResult {
 
 export interface UpsertGrantRecordInput {
   userSub: string;
-  username: string;
+  username?: string;
   email: string;
   grants: GrantEntry[];
   expiresAt: string;
@@ -143,17 +143,20 @@ export const upsertGrantRecordThunk = createAsyncThunk<
   GrantRecord,
   UpsertGrantRecordInput,
   { rejectValue: string }
->("grantRecord/upsertGrantRecord", async (_input, { rejectWithValue }) => {
+>("grantRecord/upsertGrantRecord", async (input, { rejectWithValue }) => {
   try {
-    const { data, errors } = {} as any;
-      //await client.mutations.upsertGrantRecord({
-      //  userSub: input.userSub,
-      //  grants: input.grants,
-      //  expiresAt: input.expiresAt,
-      //});
+    const { data, errors } = await client.mutations.upsertGrantRecord({
+      userSub: input.userSub,
+      username: input.username,
+      email: input.email,
+      grants: input.grants,
+      expiresAt: input.expiresAt,
+    });
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
+      return rejectWithValue(
+        errors.map((e: { message: string }) => e.message).join("; "),
+      );
     }
 
     if (!data) {
