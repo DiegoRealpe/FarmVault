@@ -1,11 +1,11 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
-// import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
-// import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
+// import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
 import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
+import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
+import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
 // import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
-// import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
 
 
 const schema = a
@@ -130,21 +130,21 @@ const schema = a
     //   ])
     //   .handler(a.handler.function(getFarmIotDataFn)),
 
-    // listVisibleFarms: a
-    //   .query()
-    //   .returns(a.ref("Farm").array().required())
-    //   .authorization((allow) => [
-    //     allow.authenticated(),
-    //   ])
-    //   .handler(a.handler.function(listVisibleFarmsFn)),
+    listVisibleFarms: a
+      .query()
+      .returns(a.ref("Farm").array().required())
+      .authorization((allow) => [
+        allow.authenticated(),
+      ])
+      .handler(a.handler.function(listVisibleFarmsFn)),
 
-    // listVisibleDevices: a
-    //   .query()
-    //   .returns(a.ref("IoTDevice").array().required())
-    //   .authorization((allow) => [
-    //     allow.authenticated(),
-    //   ])
-    //   .handler(a.handler.function(listVisibleDevicesFn)),
+    listVisibleDevices: a
+      .query()
+      .returns(a.ref("IoTDevice").array().required())
+      .authorization((allow) => [
+        allow.authenticated(),
+      ])
+      .handler(a.handler.function(listVisibleDevicesFn)),
 
     // ---- User Specific Queries ----
     getPersonalGrantRecord: a
@@ -186,11 +186,11 @@ const schema = a
   })
   .authorization((allow) => [
     allow.resource(createFarmUserFn),
-    allow.resource(listCreatedGrantRecordsFn),
-    // allow.resource(listVisibleDevicesFn),
-    // allow.resource(listVisibleFarmsFn),
     // allow.resource(getFarmIotDataFn),
     allow.resource(getPersonalGrantRecordFn),
+    allow.resource(listCreatedGrantRecordsFn),
+    allow.resource(listVisibleDevicesFn),
+    allow.resource(listVisibleFarmsFn),
     // allow.resource(upsertGrantRecordFn)
   ]);
 

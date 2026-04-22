@@ -1,11 +1,5 @@
-export const handler: any /*ListVisibleDevicesHandler*/ = async (event) => {
-  console.log("listVisibleDevices event:", JSON.stringify(event, null, 2));
-
-  throw new Error("listVisibleDevicesFn not implemented yet.");
-};
-
 // amplify/functions/list-visible-devices/handler.ts
-/*import type { Schema } from "../../data/resource";
+import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
@@ -21,12 +15,9 @@ const DEV_BYPASS = false;
 
 type ListVisibleDevicesHandler =
   Schema["listVisibleDevices"]["functionHandler"];
-type ListedIoTDevice = NonNullable<
-  Awaited<ReturnType<typeof client.models.IoTDevice.list>>["data"][number]
->;
 type GrantRecord = Schema["GrantRecord"]["type"];
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type IoTDevice = Schema["IoTDevice"]["type"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
 type Identity = Parameters<ListVisibleDevicesHandler>[0]["identity"];
 
 const MOCK_DEVICE: IoTDevice = {
@@ -101,19 +92,26 @@ function getCallerGroups(identity: Identity): string[] {
   return [];
 }
 
-function isExpired(expiresAt: string): boolean {
+function isExpired(expiresAt?: string | null): boolean {
+  if (!expiresAt) {
+    return false;
+  }
+
   return new Date(expiresAt).getTime() <= Date.now();
 }
 
 function getGrantIdsByType(
-  grantRecord: GrantRecord,
+  givenGrantRecord: GrantRecord | MyGrantRecord | null,
   grantType: "farm" | "device",
 ): string[] {
-  return (grantRecord.grants ?? [])
-    .filter((grant): grant is GrantEntry => grant != null)
-    .filter((grant) => grant.grantType === grantType)
+  if (!givenGrantRecord) {
+    return [];
+  }
+
+  return (givenGrantRecord.grants ?? [])
+    .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
-      (grant.ids ?? []).filter(
+      (grant?.ids ?? []).filter(
         (id): id is string => typeof id === "string" && id.length > 0,
       ),
     );
@@ -125,6 +123,7 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
   }
 
   const callerSub = getCallerSub(event.identity);
+
   if (!callerSub) {
     throw new Error("This endpoint requires Cognito userPool auth.");
   }
@@ -139,7 +138,7 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
       throw new Error(errors.map((error) => error.message).join("; "));
     }
 
-    return (data ?? []).filter((device): device is ListedIoTDevice => device != null);
+    return (data ?? []).filter((device): any => device != null);
   }
 
   const grantRecordResponse = await client.models.GrantRecord.get({
@@ -177,7 +176,7 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
   }
 
   const visibleDevices = (allDevices ?? [])
-    .filter((device): device is ListedIoTDevice => device != null)
+    .filter((device): any => device != null)
     .filter(
       (device) =>
         allowedDeviceIds.has(device.id) || allowedFarmIds.has(device.farmId),
@@ -185,4 +184,3 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
 
   return visibleDevices;
 };
-*/

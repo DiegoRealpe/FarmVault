@@ -1,10 +1,4 @@
-export const handler: any /*ListVisibleFarmsHandler*/ = async (event) => {
-  console.log("listVisibleFarms event:", JSON.stringify(event, null, 2));
-
-  throw new Error("listVisibleFarmsFn not implemented yet.");
-};
-
-/*import type { Schema } from "../../data/resource";
+import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
@@ -21,18 +15,11 @@ const DEV_BYPASS = false;
 type ListVisibleFarmsHandler =
   Schema["listVisibleFarms"]["functionHandler"];
 type GrantRecord = Schema["GrantRecord"]["type"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
+type Farm = Schema["Farm"]["type"];
 type Identity = Parameters<ListVisibleFarmsHandler>[0]["identity"];
 
-type ListedFarm = NonNullable<
-  Awaited<ReturnType<typeof client.models.Farm.list>>["data"][number]
->;
-
-type RetrievedDevice = NonNullable<
-  Awaited<ReturnType<typeof client.models.IoTDevice.get>>["data"]
->;
-
-const MOCK_FARM: Schema["Farm"]["type"] = {
+const MOCK_FARM: Farm = {
   id: "mock-farm",
   name: "Mock Farm",
   ownerSub: "mock-owner-sub",
@@ -100,7 +87,7 @@ function getCallerGroups(identity: Identity): string[] {
   return [];
 }
 
-function isExpired(expiresAt: string | null | undefined): boolean {
+function isExpired(expiresAt?: string | null): boolean {
   if (!expiresAt) {
     return true;
   }
@@ -109,14 +96,17 @@ function isExpired(expiresAt: string | null | undefined): boolean {
 }
 
 function getGrantIdsByType(
-  grantRecord: GrantRecord,
+  givenGrantRecord: GrantRecord | MyGrantRecord | null,
   grantType: "farm" | "device",
 ): string[] {
-  return (grantRecord.grants ?? [])
-    .filter((grant): grant is GrantEntry => grant != null)
-    .filter((grant) => grant.grantType === grantType)
+  if (!givenGrantRecord) {
+    return [];
+  }
+
+  return (givenGrantRecord.grants ?? [])
+    .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
-      (grant.ids ?? []).filter(
+      (grant?.ids ?? []).filter(
         (id): id is string => typeof id === "string" && id.length > 0,
       ),
     );
@@ -142,7 +132,7 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
       throw new Error(errors.map((error) => error.message).join("; "));
     }
 
-    return (data ?? []).filter((farm): farm is ListedFarm => farm != null);
+    return (data ?? []).filter((farm) => farm != null);
   }
 
   const grantRecordResponse = await client.models.GrantRecord.get({
@@ -185,7 +175,7 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
 
     const grantedDevices = deviceResponses
       .map((response) => response.data)
-      .filter((device): device is RetrievedDevice => device != null);
+      .filter((device) => device != null);
 
     for (const device of grantedDevices) {
       if (device.farmId) {
@@ -206,6 +196,6 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
   }
 
   return (allFarms ?? [])
-    .filter((farm): farm is ListedFarm => farm != null)
-    .filter((farm) => farm.id && visibleFarmIds.has(farm.id));
-};*/
+    .filter((farm) => farm != null)
+    .filter((farm) => visibleFarmIds.has(farm.id));
+};
