@@ -190,8 +190,8 @@ function GrantEditorModal({
                   <span className="grant-editor-label">Expiration Date</span>
                   <input
                     type="date"
-                    value={expiresDate}
-                    onChange={(event) => setExpiresDate(event.target.value)}
+                    value={expiresAt}
+                    onChange={(event) => setExpiresAt(event.target.value)}
                     disabled={isBusy}
                     className="grant-editor-input"
                   />
@@ -223,8 +223,8 @@ function GrantEditorModal({
                     <span className="grant-editor-label">Expiration Date</span>
                     <input
                       type="date"
-                      value={expiresDate}
-                      onChange={(event) => setExpiresDate(event.target.value)}
+                      value={expiresAt}
+                      onChange={(event) => setExpiresAt(event.target.value)}
                       disabled={isBusy}
                       className="grant-editor-input"
                     />
