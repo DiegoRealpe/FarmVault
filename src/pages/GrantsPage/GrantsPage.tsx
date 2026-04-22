@@ -175,8 +175,8 @@ function GrantsPage() {
 
       const createdUser = await dispatch(
         createFarmUserThunk({
-          email: values.email,
-          temporaryPassword: values.temporaryPassword,
+          email: values.email.trim(),
+          temporaryPassword: values.temporaryPassword.trim(),
         }),
       ).unwrap();
 
@@ -184,10 +184,14 @@ function GrantsPage() {
         throw new Error("Created user did not return a userSub.");
       }
 
+      if (!createdUser.username?.trim()) {
+        throw new Error("Created user did not return a username.");
+      }
+
       await dispatch(
         upsertGrantRecordThunk({
           userSub: createdUser.userSub,
-          username: createdUser.username,
+          username: createdUser.username.trim(),
           email: values.email.trim(),
           grants,
           expiresAt: values.expiresAt,
@@ -209,8 +213,8 @@ function GrantsPage() {
       await dispatch(
         upsertGrantRecordThunk({
           userSub: editingUserSub,
-          username: grantEditorInitialValues.username,
-          email: grantEditorInitialValues.email,
+          username: grantEditorInitialValues.username.trim(),
+          email: grantEditorInitialValues.email.trim(),
           grants,
           expiresAt: values.expiresAt,
         }),

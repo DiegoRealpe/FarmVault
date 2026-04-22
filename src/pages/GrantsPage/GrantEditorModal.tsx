@@ -1,8 +1,5 @@
 import { useEffect, useState } from "react";
-import {
-  toDateTimeLocalValue,
-  toggleStringSelection,
-} from "../../utils/utils";
+import { toDateInputValue, toggleStringSelection } from "../../utils/utils";
 
 export interface SelectOption {
   id: string;
@@ -22,6 +19,7 @@ export interface GrantEditorInitialValues {
 
 export interface GrantEditorFormValues {
   email: string;
+  username?: string;
   temporaryPassword?: string;
   expiresAt: string;
   selectedFarmIds: string[];
@@ -56,8 +54,9 @@ function GrantEditorModal({
   optionsError = null,
 }: GrantEditorModalProps) {
   const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
-  const [expiresAt, setExpiresAt] = useState("");
+  const [expiresDate, setExpiresDate] = useState("");
   const [selectedFarmIds, setSelectedFarmIds] = useState<string[]>([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -69,8 +68,9 @@ function GrantEditorModal({
   useEffect(() => {
     if (!isOpen) {
       setEmail("");
+      setUsername("");
       setTemporaryPassword("");
-      setExpiresAt("");
+      setExpiresDate("");
       setSelectedFarmIds([]);
       setSelectedDeviceIds([]);
       setLocalError(null);
@@ -78,12 +78,9 @@ function GrantEditorModal({
     }
 
     setEmail(initialValues?.email ?? "");
+    setUsername(initialValues?.username ?? "");
     setTemporaryPassword("");
-    setExpiresAt(
-      initialValues?.expiresAt
-        ? toDateTimeLocalValue(initialValues.expiresAt)
-        : "",
-    );
+    setExpiresDate(toDateInputValue(initialValues?.expiresAt));
     setSelectedFarmIds(initialValues?.selectedFarmIds ?? []);
     setSelectedDeviceIds(initialValues?.selectedDeviceIds ?? []);
     setLocalError(null);
@@ -107,21 +104,27 @@ function GrantEditorModal({
       return;
     }
 
+    if (isCreateMode && !username.trim()) {
+      setLocalError("Username is required.");
+      return;
+    }
+
     if (isCreateMode && !temporaryPassword.trim()) {
       setLocalError("Temporary password is required.");
       return;
     }
 
-    if (!expiresAt) {
-      setLocalError("Expiration time is required.");
+    if (!expiresDate) {
+      setLocalError("Expiration date is required.");
       return;
     }
 
     try {
       await onSubmit({
         email: email.trim(),
+        username: isCreateMode ? username.trim() : undefined,
         temporaryPassword: isCreateMode ? temporaryPassword.trim() : undefined,
-        expiresAt: new Date(expiresAt).toISOString(),
+        expiresAt: new Date(`${expiresDate}T00:00:00.000Z`).toISOString(),
         selectedFarmIds,
         selectedDeviceIds,
       });
@@ -131,7 +134,7 @@ function GrantEditorModal({
       );
     }
   };
-
+  
   return (
     <div className="grant-editor-backdrop" onClick={onClose}>
       <div
@@ -176,6 +179,17 @@ function GrantEditorModal({
                 </label>
 
                 <label className="grant-editor-field">
+                  <span className="grant-editor-label">Username</span>
+                  <input
+                    type="text"
+                    value={username}
+                    onChange={(event) => setUsername(event.target.value)}
+                    disabled={isBusy}
+                    className="grant-editor-input"
+                  />
+                </label>
+
+                <label className="grant-editor-field">
                   <span className="grant-editor-label">Temporary Password</span>
                   <input
                     type="text"
@@ -190,8 +204,8 @@ function GrantEditorModal({
                   <span className="grant-editor-label">Expiration Date</span>
                   <input
                     type="date"
-                    value={expiresAt}
-                    onChange={(event) => setExpiresAt(event.target.value)}
+                    value={expiresDate}
+                    onChange={(event) => setExpiresDate(event.target.value)}
                     disabled={isBusy}
                     className="grant-editor-input"
                   />
@@ -223,8 +237,8 @@ function GrantEditorModal({
                     <span className="grant-editor-label">Expiration Date</span>
                     <input
                       type="date"
-                      value={expiresAt}
-                      onChange={(event) => setExpiresAt(event.target.value)}
+                      value={expiresDate}
+                      onChange={(event) => setExpiresDate(event.target.value)}
                       disabled={isBusy}
                       className="grant-editor-input"
                     />

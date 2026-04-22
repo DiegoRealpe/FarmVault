@@ -113,6 +113,20 @@ export function toDateTimeLocalValue(value: string): string {
   return `${year}-${month}-${day}T${hours}:${minutes}`;
 }
 
+export function toDateInputValue(value?: string): string {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  return date.toISOString().slice(0, 10);
+}
+
 export function toggleStringSelection(
   value: string,
   currentValues: string[],
