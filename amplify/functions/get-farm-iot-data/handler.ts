@@ -21,6 +21,7 @@ Amplify.configure(resourceConfig, libraryOptions);
 const client = generateClient<Schema>();
 
 type GrantRecord = Schema["GrantRecord"]["type"];
+type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type GetFarmIotDataHandler = Schema["getFarmIotData"]["functionHandler"];
 type Identity = Parameters<GetFarmIotDataHandler>[0]["identity"];
 type IoTDevice = Schema["IoTDevice"]["type"];
@@ -38,6 +39,16 @@ function getCallerSub(identity: Identity): string | null {
     return identity.sub;
   }
 
+  if (
+    "claims" in identity &&
+    identity.claims &&
+    typeof identity.claims === "object" &&
+    "sub" in identity.claims &&
+    typeof identity.claims.sub === "string"
+  ) {
+    return identity.claims.sub;
+  }
+
   return null;
 }
 
@@ -52,6 +63,28 @@ function getGroups(identity: Identity): string[] {
     );
   }
 
+  if (
+    "claims" in identity &&
+    identity.claims &&
+    typeof identity.claims === "object" &&
+    "cognito:groups" in identity.claims
+  ) {
+    const rawGroups = identity.claims["cognito:groups"];
+
+    if (Array.isArray(rawGroups)) {
+      return rawGroups.filter(
+        (group): group is string => typeof group === "string",
+      );
+    }
+
+    if (typeof rawGroups === "string") {
+      return rawGroups
+        .split(",")
+        .map((group) => group.trim())
+        .filter(Boolean);
+    }
+  }
+
   return [];
 }
 
@@ -59,29 +92,29 @@ function isAdmin(identity: Identity): boolean {
   return getGroups(identity).includes("admin");
 }
 
-function isGrantActive(grantRecord: GrantRecord | null | undefined): boolean {
-  if (!grantRecord) {
+function isGrantActive(givenGrantRecord: GrantRecord | MyGrantRecord | null | undefined): boolean {
+  if (!givenGrantRecord) {
     return false;
   }
 
   const now = Date.now();
 
-  if (typeof grantRecord.ttl === "number") {
-    return grantRecord.ttl > Math.floor(now / 1000);
+  if ("ttl" in givenGrantRecord && typeof givenGrantRecord.ttl === "number") {
+    return givenGrantRecord.ttl > Math.floor(now / 1000);
   }
 
-  if (typeof grantRecord.expiresAt === "string") {
-    return new Date(grantRecord.expiresAt).getTime() > now;
+  if (typeof givenGrantRecord.expiresAt === "string") {
+    return new Date(givenGrantRecord.expiresAt).getTime() > now;
   }
 
   return false;
 }
 
 function userHasDeviceAccess(
-  grantRecord: GrantRecord,
+  givenGrantRecord: GrantRecord | MyGrantRecord,
   device: IoTDevice,
 ): boolean {
-  for (const entry of grantRecord.grants ?? []) {
+  for (const entry of givenGrantRecord.grants ?? []) {
     if (!entry) {
       continue;
     }
@@ -115,9 +148,8 @@ export const handler: GetFarmIotDataHandler = async (event) => {
     throw new Error("deviceId argument is required");
   }
 
-  const { data: device, errors: deviceErrors } = await client.models.IoTDevice.get(
-    { id: deviceIdArg },
-  );
+  const { data: device, errors: deviceErrors } =
+    await client.models.IoTDevice.get({ id: deviceIdArg });
 
   if (deviceErrors?.length) {
     throw new Error(
@@ -256,10 +288,10 @@ export const handler: GetFarmIotDataHandler = async (event) => {
     device.type === "TEMPERATURE" ? "temperature" : "moisture";
 
   const points = dataRows
-    .filter((r) => r["event_ts"] != null && r[valueColumn] != null)
-    .map((r) => ({
-      timestamp: r["event_ts"] as string,
-      value: parseFloat(r[valueColumn] as string),
+    .filter((row) => row["event_ts"] != null && row[valueColumn] != null)
+    .map((row) => ({
+      timestamp: row["event_ts"] as string,
+      value: parseFloat(row[valueColumn] as string),
     }))
     .filter((point) => !Number.isNaN(point.value));
 
