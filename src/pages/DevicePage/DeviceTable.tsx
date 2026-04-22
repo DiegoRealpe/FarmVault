@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import type { Schema } from "../../../amplify/data/resource";
-import "./DevicePage.css";
+import "./DeviceTable.css";
 import { formatDate } from "../../utils/utils";
 
 type IoTDevice = Schema["IoTDevice"]["type"];
