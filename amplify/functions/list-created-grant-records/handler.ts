@@ -1,11 +1,4 @@
-export const handler: any /*ListCreatedGrantRecordsHandler*/ = async (event) => {
-  console.log("listCreatedGrantRecords event:", JSON.stringify(event, null, 2));
-
-  throw new Error("listCreatedGrantRecordsFn not implemented yet.");
-};
-
 // amplify/functions/list-created-grant-records/handler.ts
-/*
 import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
@@ -97,4 +90,3 @@ export const handler: ListCreatedGrantRecordsHandler = async (event) => {
 
   return grantRecords;
 };
-*/

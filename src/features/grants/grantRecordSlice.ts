@@ -96,8 +96,7 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchCreatedGrantRecords", async (_, { rejectWithValue }) => {
   try {
-    const { data, errors } = {} as any;
-      //await client.queries.listCreatedGrantRecords({});
+    const { data, errors } = await client.queries.listCreatedGrantRecords({});
 
     if (errors?.length) {
       return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));

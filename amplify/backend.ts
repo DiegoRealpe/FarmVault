@@ -8,7 +8,7 @@ import { createFarmUserFn } from "./functions/create-farm-user/resource";
 import { getPersonalGrantRecordFn } from "./functions/get-personal-grant-record/resource";
 // import { listVisibleDevicesFn } from "./functions/list-visible-devices/resource";
 // import { listVisibleFarmsFn } from "./functions/list-visible-farms/resource";
-// import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
+import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
 // import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
 // CDK Imports
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
@@ -32,7 +32,7 @@ export const backend = defineBackend({
   getPersonalGrantRecordFn,
   // listVisibleDevicesFn,
   // listVisibleFarmsFn,
-  // listCreatedGrantRecordsFn,
+  listCreatedGrantRecordsFn,
   // upsertGrantRecordFn,
 });
 
