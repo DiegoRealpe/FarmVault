@@ -115,6 +115,8 @@
 // Technician
 {
   "userSub": { "S": "413b75b0-60b1-70e6-a428-1bfe69516779" },
+  "email": { "S": "TechnicianUser@FarmVault.com" },
+  "username": { "S": "TechnicianUser" },
   "grants": {
     "L": [
       {
@@ -139,6 +141,8 @@
 // Botanist
 {
   "userSub": { "S": "018b7590-80e1-7064-0c86-dd5902537ece" },
+  "email": { "S": "BotanistUser@FarmVault.com" },
+  "username": { "S": "BotanistUser" },
   "grants": {
     "L": [
       {
@@ -163,6 +167,8 @@
 // Farmhand
 {
   "userSub": { "S": "e10bc590-f081-70d5-927a-bcbe514c78f3" },
+  "email": { "S": "FarmhandUser@FarmVault.com" },
+  "username": { "S": "FarmhandUser" },
   "grants": {
     "L": [
       {

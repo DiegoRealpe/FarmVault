@@ -76,8 +76,7 @@ export const fetchGrantRecord = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
-    const { data, errors } = {} as any;
-      //await client.queries.getPersonalGrantRecord({});
+    const { data, errors } = await client.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
       return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
