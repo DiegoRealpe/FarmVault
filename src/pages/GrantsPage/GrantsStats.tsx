@@ -65,7 +65,6 @@ function GrantsStats({
   const farmIds = getGrantIdsByType(givenGrantRecord, "farm");
   const deviceIds = getGrantIdsByType(givenGrantRecord, "device");
 
-  const displayEmail = givenGrantRecord.email ?? "Email unavailable";
   const displayUsername = givenGrantRecord.username ?? "Username unavailable";
   const displayExpiresAt = givenGrantRecord.expiresAt
     ? new Date(givenGrantRecord.expiresAt).toLocaleString()
@@ -77,7 +76,7 @@ function GrantsStats({
         <div>
           <h2>Your Access Grants</h2>
           <div className="grant-user-summary">
-            <span>{displayEmail}</span>
+            <span>{givenGrantRecord.email}</span>
             <span className="grant-user-summary-separator">•</span>
             <span>{displayUsername}</span>
           </div>

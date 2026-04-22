@@ -2,7 +2,7 @@ import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 // import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
 // import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
-// import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
+import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
 // import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
 // import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
 // import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
@@ -59,8 +59,8 @@ const schema = a
     GrantRecord: a
       .model({
         userSub: a.string().required(),
+        email: a.string().required(),
         username: a.string(),
-        email: a.string(),
         grants: a.ref("GrantEntry").array(),
         expiresAt: a.datetime(),
         ttl: a.integer(),
@@ -87,8 +87,8 @@ const schema = a
     }),
 
     MyGrantRecord: a.customType({
-      username: a.string().required(),
-      email: a.string(),
+      email: a.string().required(),
+      username: a.string(),
       grants: a.ref("GrantEntry").array(),
       expiresAt: a.datetime(),
       createdAt: a.datetime(),
@@ -147,11 +147,11 @@ const schema = a
     //   .handler(a.handler.function(listVisibleDevicesFn)),
 
     // ---- User Specific Queries ----
-    // getPersonalGrantRecord: a
-    //   .query()
-    //   .returns(a.ref("MyGrantRecord"))
-    //   .authorization((allow) => [allow.authenticated()])
-    //   .handler(a.handler.function(getPersonalGrantRecordFn)),
+    getPersonalGrantRecord: a
+      .query()
+      .returns(a.ref("MyGrantRecord"))
+      .authorization((allow) => [allow.authenticated()])
+      .handler(a.handler.function(getPersonalGrantRecordFn)),
 
     // ---- Admin Specific Queries ----
     // listCreatedGrantRecords: a
