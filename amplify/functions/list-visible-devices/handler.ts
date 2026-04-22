@@ -1,5 +1,11 @@
+export const handler: any /*ListVisibleDevicesHandler*/ = async (event) => {
+  console.log("listVisibleDevices event:", JSON.stringify(event, null, 2));
+
+  throw new Error("listVisibleDevicesFn not implemented yet.");
+};
+
 // amplify/functions/list-visible-devices/handler.ts
-import type { Schema } from "../../data/resource";
+/*import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
@@ -179,3 +185,4 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
 
   return visibleDevices;
 };
+*/

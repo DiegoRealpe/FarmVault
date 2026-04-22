@@ -1,4 +1,10 @@
-import type { Schema } from "../../data/resource";
+export const handler: any /*ListVisibleFarmsHandler*/ = async (event) => {
+  console.log("listVisibleFarms event:", JSON.stringify(event, null, 2));
+
+  throw new Error("listVisibleFarmsFn not implemented yet.");
+};
+
+/*import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
@@ -202,4 +208,4 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
   return (allFarms ?? [])
     .filter((farm): farm is ListedFarm => farm != null)
     .filter((farm) => farm.id && visibleFarmIds.has(farm.id));
-};
+};*/

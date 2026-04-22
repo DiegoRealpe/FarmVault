@@ -1,25 +1,31 @@
-// amplify/functions/get-personal-grant-record/handler.ts
+export const handler: any /*ListCreatedGrantRecordsHandler*/ = async (event) => {
+  console.log("listCreatedGrantRecords event:", JSON.stringify(event, null, 2));
+
+  throw new Error("listCreatedGrantRecordsFn not implemented yet.");
+};
+
+// amplify/functions/list-created-grant-records/handler.ts
+/*
 import type { Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/get-personal-grant-record";
+import { env } from "$amplify/env/list-created-grant-records";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
+
 Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
-type GetGrantRecordHandler =
-  Schema["getPersonalGrantRecord"]["functionHandler"];
+type ListCreatedGrantRecordsHandler =
+  Schema["listCreatedGrantRecords"]["functionHandler"];
 type GrantRecord = Schema["GrantRecord"]["type"];
-type MyGrantRecord = Schema["MyGrantRecord"]["type"];
-type Identity = Parameters<GetGrantRecordHandler>[0]["identity"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+type Identity = Parameters<ListCreatedGrantRecordsHandler>[0]["identity"];
 
 function getCallerSub(identity: Identity): string | null {
-  if (!identity) {
+  if (!identity || typeof identity !== "object") {
     return null;
   }
 
@@ -27,65 +33,68 @@ function getCallerSub(identity: Identity): string | null {
     return identity.sub;
   }
 
-  if (
-    "claims" in identity &&
-    identity.claims &&
-    typeof identity.claims === "object" &&
-    "sub" in identity.claims &&
-    typeof identity.claims.sub === "string"
-  ) {
-    return identity.claims.sub;
-  }
-
   return null;
 }
 
-function normalizeGrantEntries(grants: GrantRecord["grants"]): GrantEntry[] {
-  return (grants ?? []).filter(
-    (grant): grant is GrantEntry => grant != null,
-  );
-}
-
-function requireString(
-  value: string | null | undefined,
-  fieldName: string,
-): string {
-  if (!value) {
-    throw new Error(`GrantRecord is missing required field: ${fieldName}`);
+function getGroups(identity: Identity): string[] {
+  if (!identity || typeof identity !== "object") {
+    return [];
   }
 
-  return value;
+  if ("groups" in identity && Array.isArray(identity.groups)) {
+    return identity.groups.filter(
+      (group): group is string => typeof group === "string",
+    );
+  }
+
+  return [];
 }
 
-function toMyGrantRecord(record: GrantRecord): MyGrantRecord {
-  return {
-    username: requireString(record.username, "username"),
-    email: requireString(record.email, "email"),
-    grants: normalizeGrantEntries(record.grants),
-    expiresAt: requireString(record.expiresAt, "expiresAt"),
-    createdAt: requireString(record.createdAt, "createdAt"),
-    updatedAt: requireString(record.updatedAt, "updatedAt"),
-  };
+function isAdmin(identity: Identity): boolean {
+  return getGroups(identity).includes("admin");
 }
 
-export const handler: GetGrantRecordHandler = async (event) => {
+export const handler: ListCreatedGrantRecordsHandler = async (event) => {
+  console.log(
+    "listCreatedGrantRecords event:",
+    JSON.stringify(
+      {
+        arguments: event.arguments,
+        identity: event.identity,
+      },
+      null,
+      2,
+    ),
+  );
+
   const callerSub = getCallerSub(event.identity);
 
   if (!callerSub) {
     throw new Error("This endpoint requires Cognito userPool auth.");
   }
 
-  const { data, errors } = await client.models.GrantRecord.get({
-    userSub: callerSub,
+  if (!isAdmin(event.identity)) {
+    throw new Error("Not authorized.");
+  }
+
+  const { data, errors } = await client.models.GrantRecord.list({
+    filter: {
+      createdBySub: { eq: callerSub },
+    },
   });
 
   if (errors?.length) {
-    throw new Error(errors.map((error) => error.message).join("; "));
+    throw new Error(
+      `Failed to list created grant records: ${errors
+        .map((error) => error.message)
+        .join("; ")}`,
+    );
   }
 
-  if (!data) {
-    return null;
-  }
+  const grantRecords = (data ?? []).filter(
+    (record) => record != null,
+  ) as GrantRecord[];
 
-  return toMyGrantRecord(data);
+  return grantRecords;
 };
+*/
