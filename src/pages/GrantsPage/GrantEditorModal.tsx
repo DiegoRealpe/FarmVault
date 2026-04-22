@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { toDateInputValue, toggleStringSelection } from "../../utils/utils";
+import "./GrantEditorModal.css";
 
 export interface SelectOption {
   id: string;
