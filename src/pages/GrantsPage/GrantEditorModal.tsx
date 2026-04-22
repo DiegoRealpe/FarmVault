@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import "./GrantEditorModal.css";
-import { toggleStringSelection } from "../../utils/utils";
+import {
+  toDateTimeLocalValue,
+  toggleStringSelection,
+} from "../../utils/utils";
 
 export interface SelectOption {
   id: string;
@@ -40,20 +42,6 @@ interface GrantEditorModalProps {
   optionsError?: string | null;
 }
 
-function toDateInputValue(value?: string): string {
-  if (!value) {
-    return "";
-  }
-
-  const date = new Date(value);
-
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
-
-  return date.toISOString().slice(0, 10);
-}
-
 function GrantEditorModal({
   isOpen,
   mode,
@@ -69,7 +57,7 @@ function GrantEditorModal({
 }: GrantEditorModalProps) {
   const [email, setEmail] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
-  const [expiresDate, setExpiresDate] = useState("");
+  const [expiresAt, setExpiresAt] = useState("");
   const [selectedFarmIds, setSelectedFarmIds] = useState<string[]>([]);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
   const [localError, setLocalError] = useState<string | null>(null);
@@ -82,7 +70,7 @@ function GrantEditorModal({
     if (!isOpen) {
       setEmail("");
       setTemporaryPassword("");
-      setExpiresDate("");
+      setExpiresAt("");
       setSelectedFarmIds([]);
       setSelectedDeviceIds([]);
       setLocalError(null);
@@ -91,7 +79,11 @@ function GrantEditorModal({
 
     setEmail(initialValues?.email ?? "");
     setTemporaryPassword("");
-    setExpiresDate(toDateInputValue(initialValues?.expiresAt));
+    setExpiresAt(
+      initialValues?.expiresAt
+        ? toDateTimeLocalValue(initialValues.expiresAt)
+        : "",
+    );
     setSelectedFarmIds(initialValues?.selectedFarmIds ?? []);
     setSelectedDeviceIds(initialValues?.selectedDeviceIds ?? []);
     setLocalError(null);
@@ -120,8 +112,8 @@ function GrantEditorModal({
       return;
     }
 
-    if (!expiresDate) {
-      setLocalError("Expiration date is required.");
+    if (!expiresAt) {
+      setLocalError("Expiration time is required.");
       return;
     }
 
@@ -129,7 +121,7 @@ function GrantEditorModal({
       await onSubmit({
         email: email.trim(),
         temporaryPassword: isCreateMode ? temporaryPassword.trim() : undefined,
-        expiresAt: new Date(`${expiresDate}T00:00:00.000Z`).toISOString(),
+        expiresAt: new Date(expiresAt).toISOString(),
         selectedFarmIds,
         selectedDeviceIds,
       });
@@ -147,17 +139,6 @@ function GrantEditorModal({
         onClick={(event) => event.stopPropagation()}
       >
         <div className="grant-editor-header">
-          <div>
-            <h2 className="grant-editor-title">
-              {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
-            </h2>
-            <p className="grant-editor-subtitle">
-              {isCreateMode
-                ? "Create a new user and assign farm or device visibility."
-                : "Update the user’s expiration date and access grants."}
-            </p>
-          </div>
-
           <button
             type="button"
             className="grant-editor-close"
@@ -167,70 +148,97 @@ function GrantEditorModal({
           >
             ×
           </button>
+
+          <h2 className="grant-editor-title">
+            {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
+          </h2>
+
+          <p className="grant-editor-subtitle">
+            {isCreateMode
+              ? "Create a new user and assign farm or device visibility."
+              : "Update the user’s expiration date and access grants."}
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="grant-editor-form">
-          {isCreateMode ? (
-            <div className="grant-editor-top-grid">
-              <label className="grant-editor-field">
-                <span className="grant-editor-label">Email</span>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  disabled={isBusy}
-                  className="grant-editor-input"
-                />
-              </label>
+          <section className="grant-editor-top-card">
+            {isCreateMode ? (
+              <div className="grant-editor-create-grid">
+                <label className="grant-editor-field">
+                  <span className="grant-editor-label">Email</span>
+                  <input
+                    type="email"
+                    value={email}
+                    onChange={(event) => setEmail(event.target.value)}
+                    disabled={isBusy}
+                    className="grant-editor-input"
+                  />
+                </label>
 
-              <label className="grant-editor-field">
-                <span className="grant-editor-label">Temporary Password</span>
-                <input
-                  type="text"
-                  value={temporaryPassword}
-                  onChange={(event) => setTemporaryPassword(event.target.value)}
-                  disabled={isBusy}
-                  className="grant-editor-input"
-                />
-              </label>
-            </div>
-          ) : (
-            <section className="grant-editor-identity-card">
-              <div className="grant-editor-identity-main">
-                <div className="grant-editor-identity-email">
-                  {initialValues?.email || "Unknown email"}
+                <label className="grant-editor-field">
+                  <span className="grant-editor-label">Temporary Password</span>
+                  <input
+                    type="text"
+                    value={temporaryPassword}
+                    onChange={(event) => setTemporaryPassword(event.target.value)}
+                    disabled={isBusy}
+                    className="grant-editor-input"
+                  />
+                </label>
+
+                <label className="grant-editor-field grant-editor-date-field">
+                  <span className="grant-editor-label">Expiration Date</span>
+                  <input
+                    type="date"
+                    value={expiresDate}
+                    onChange={(event) => setExpiresDate(event.target.value)}
+                    disabled={isBusy}
+                    className="grant-editor-input"
+                  />
+                  <span className="grant-editor-helper-text">
+                    Saved automatically as midnight for the selected date.
+                  </span>
+                </label>
+              </div>
+            ) : (
+              <div className="grant-editor-summary-layout">
+                <div className="grant-editor-summary-main">
+                  <div className="grant-editor-identity-email">
+                    {initialValues?.email || "Unknown email"}
+                  </div>
+
+                  <div className="grant-editor-identity-username">
+                    {initialValues?.username || "Unknown username"}
+                  </div>
+
+                  <div className="grant-editor-meta-row">
+                    <span className="grant-editor-meta-pill">
+                      User Sub: {initialValues?.userSub || "Unknown"}
+                    </span>
+                  </div>
                 </div>
-                <div className="grant-editor-identity-username">
-                  {initialValues?.username || "Unknown username"}
+
+                <div className="grant-editor-summary-side">
+                  <label className="grant-editor-field grant-editor-date-field">
+                    <span className="grant-editor-label">Expiration Date</span>
+                    <input
+                      type="date"
+                      value={expiresDate}
+                      onChange={(event) => setExpiresDate(event.target.value)}
+                      disabled={isBusy}
+                      className="grant-editor-input"
+                    />
+                    <span className="grant-editor-helper-text">
+                      Saved automatically as midnight for the selected date.
+                    </span>
+                  </label>
                 </div>
               </div>
-
-              <div className="grant-editor-identity-meta">
-                <span className="grant-editor-meta-pill">
-                  User Sub: {initialValues?.userSub || "Unknown"}
-                </span>
-              </div>
-            </section>
-          )}
-
-          <section className="grant-editor-section grant-editor-section-compact">
-            <label className="grant-editor-field grant-editor-date-field">
-              <span className="grant-editor-label">Expiration Date</span>
-              <input
-                type="date"
-                value={expiresDate}
-                onChange={(event) => setExpiresDate(event.target.value)}
-                disabled={isBusy}
-                className="grant-editor-input"
-              />
-              <span className="grant-editor-helper-text">
-                Saved automatically as midnight for the selected date.
-              </span>
-            </label>
+            )}
           </section>
 
           <div className="grant-editor-grants-grid">
-            <section className="grant-editor-section">
+            <div className="grant-editor-section">
               <div className="grant-editor-section-header">
                 <h3>Farm Grants</h3>
                 <span className="grant-editor-count">
@@ -261,9 +269,9 @@ function GrantEditorModal({
                   ))}
                 </div>
               )}
-            </section>
+            </div>
 
-            <section className="grant-editor-section">
+            <div className="grant-editor-section">
               <div className="grant-editor-section-header">
                 <h3>Device Grants</h3>
                 <span className="grant-editor-count">
@@ -274,9 +282,7 @@ function GrantEditorModal({
               {loadingDeviceOptions ? (
                 <p className="grant-editor-helper-text">Loading device options...</p>
               ) : availableDeviceOptions.length === 0 ? (
-                <p className="grant-editor-helper-text">
-                  No devices available to grant.
-                </p>
+                <p className="grant-editor-helper-text">No devices available to grant.</p>
               ) : (
                 <div className="grant-editor-option-list">
                   {availableDeviceOptions.map((option) => (
@@ -296,7 +302,7 @@ function GrantEditorModal({
                   ))}
                 </div>
               )}
-            </section>
+            </div>
           </div>
 
           {optionsError && <p className="grant-editor-error">{optionsError}</p>}
@@ -311,6 +317,7 @@ function GrantEditorModal({
             >
               Cancel
             </button>
+
             <button
               type="submit"
               disabled={isBusy}
