@@ -1,6 +1,6 @@
 import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
-// import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
+import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
 import { listCreatedGrantRecordsFn } from "../functions/list-created-grant-records/resource";
 import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource";
@@ -115,18 +115,18 @@ const schema = a
 
     //// ---- Lambda Backed Queries ----
     // ---- User Agnostic Queries ----
-    // getFarmIotData: a
-    //   .query()
-    //   .arguments({
-    //     deviceId: a.string().required(),
-    //     from: a.datetime(),
-    //     to: a.datetime(),  
-    //   })
-    //   .returns(a.ref("DeviceTimeSeries").array())
-    //   .authorization((allow) => [
-    //     allow.authenticated(),
-    //   ])
-    //   .handler(a.handler.function(getFarmIotDataFn)),
+    getFarmIotData: a
+      .query()
+      .arguments({
+        deviceId: a.string().required(),
+        from: a.datetime(),
+        to: a.datetime(),  
+      })
+      .returns(a.ref("DeviceTimeSeries").array())
+      .authorization((allow) => [
+        allow.authenticated(),
+      ])
+      .handler(a.handler.function(getFarmIotDataFn)),
 
     listVisibleFarms: a
       .query()
@@ -183,8 +183,7 @@ const schema = a
     
   })
   .authorization((allow) => [
-    allow.resource(createFarmUserFn),
-    // allow.resource(getFarmIotDataFn),
+    allow.resource(getFarmIotDataFn),
     allow.resource(getPersonalGrantRecordFn),
     allow.resource(listCreatedGrantRecordsFn),
     allow.resource(listVisibleDevicesFn),

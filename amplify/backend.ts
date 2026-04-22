@@ -4,7 +4,7 @@ import { data } from "./data/resource";
 import { metricsBucket } from "./storage/resource";
 // Lambda function resources
 import { createFarmUserFn } from "./functions/create-farm-user/resource";
-// import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
+import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "./functions/get-personal-grant-record/resource";
 import { listVisibleDevicesFn } from "./functions/list-visible-devices/resource";
 import { listVisibleFarmsFn } from "./functions/list-visible-farms/resource";
@@ -28,7 +28,7 @@ export const backend = defineBackend({
   data,
   metricsBucket,
   createFarmUserFn,
-  // getFarmIotDataFn,
+  getFarmIotDataFn,
   getPersonalGrantRecordFn,
   listVisibleDevicesFn,
   listVisibleFarmsFn,
@@ -49,9 +49,9 @@ new BucketDeployment(backend.stack, "DeployGlueScripts", {
   sources: [Source.asset(join(__dirname, "glue-scripts"))],
 });
 
-// backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
-//   ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
-// )
+backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
+  ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
+)
 
 const glueStack = backend.createStack("GlueInfra");
 
