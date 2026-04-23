@@ -1,20 +1,14 @@
 import { Link, useLocation } from "react-router-dom";
-import homeIcon from "../assets/home.svg";
-import devicesIcon from "../assets/devices.png";
-import metricsIcon from "../assets/metrics.png";
-import grantsIcon from "../assets/grants.png";
-import settingsIcon from "../assets/settings.svg";
 import "./TabFooter.css";
 
 const TabFooter = () => {
   const location = useLocation();
 
   const tabs = [
-    { id: 1, name: "Home", path: "/", icon: homeIcon },
-    { id: 2, name: "Devices", path: "/devices", icon: devicesIcon },
-    { id: 3, name: "Metrics", path: "/metrics", icon: metricsIcon },
-    { id: 4, name: "Grants", path: "/grants", icon: grantsIcon },
-    { id: 5, name: "Settings", path: "/settings", icon: settingsIcon },
+    { id: 1, name: "Home", path: "/", icon: "/home.svg" },
+    { id: 2, name: "Devices", path: "/devices", icon: "/devices.png" },
+    { id: 3, name: "Metrics", path: "/metrics", icon: "/metrics.png" },
+    { id: 4, name: "Grants", path: "/grants", icon: "/grants.png" },
   ];
 
   return (
@@ -32,10 +26,10 @@ const TabFooter = () => {
             >
               <img
                 src={tab.icon}
-                alt=""
+                alt={tab.name}
                 className="tab-icon"
-                width={48} 
-                height={48}
+                width={28}
+                height={28}
               />
               <span className="tab-label">{tab.name}</span>
             </Link>

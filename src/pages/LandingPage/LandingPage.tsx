@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
-import landingImage from "../../assets/landingimage.webp";
 import "./LandingPage.css";
 
 type LandingViewMode = "showcase" | "state";
@@ -19,13 +18,15 @@ function LandingPage() {
   }
 
   return (
-    <main className="landing-page">
+    <section className="landing-page">
       <section className="landing-page__shell">
         <header className="landing-page__header">
           <div className="landing-page__heading">
             <h1 className="landing-page__title">FarmVault</h1>
             <p className="landing-page__subtitle">
-              Secure farm data access, visibility, and device intelligence in one place.
+              Iowa State-inspired farm intelligence with secure cloud access,
+              connected devices, and visibility into the data that drives
+              smarter decisions.
             </p>
           </div>
 
@@ -68,7 +69,7 @@ function LandingPage() {
           <section className="landing-page__showcase">
             <div className="landing-page__showcase-card">
               <img
-                src={landingImage}
+                src="/landingimage.webp"
                 alt="FarmVault marketing graphic"
                 className="landing-page__hero-image"
               />
@@ -94,7 +95,7 @@ function LandingPage() {
           </section>
         )}
       </section>
-    </main>
+    </section>
   );
 }
 

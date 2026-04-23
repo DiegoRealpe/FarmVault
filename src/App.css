@@ -14,7 +14,7 @@ main {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-image: url("/assets/background.webp");
+  background-image: url("/public/background.webp");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

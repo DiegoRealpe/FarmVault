@@ -15,7 +15,6 @@ const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
 const MetricsPage = lazy(() => import("./pages/MetricsPage/MetricsPage"));
 const DevicePage = lazy(() => import("./pages/DevicePage/DevicePage"));
 const GrantsPage = lazy(() => import("./pages/GrantsPage/GrantsPage"));
-const SettingsPage = lazy(() => import("./pages/SettingsPage/SettingsPage"));
 
 interface AppProps {
   user: AuthUser | undefined;
@@ -54,7 +53,6 @@ function App({ user, onSignOut }: AppProps) {
               <Route path="/devices" element={<DevicePage />} />
               <Route path="/metrics" element={<MetricsPage />} />
               <Route path="/grants" element={<GrantsPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
             </Routes>
           </Suspense>
         </main>
