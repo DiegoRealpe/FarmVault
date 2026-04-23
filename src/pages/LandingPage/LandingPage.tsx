@@ -68,11 +68,38 @@ function LandingPage() {
         {viewMode === "showcase" ? (
           <section className="landing-page__showcase">
             <div className="landing-page__showcase-card">
-              <img
-                src="/landingimage.webp"
-                alt="FarmVault marketing graphic"
-                className="landing-page__hero-image"
-              />
+              <div className="landing-page__hero-frame">
+                <img
+                  src="/landingimage.webp"
+                  alt="FarmVault marketing graphic"
+                  className="landing-page__hero-image"
+                />
+
+                <div
+                  className="landing-page__status-overlay"
+                  aria-label="System health status (mock)"
+                >
+                  <div className="landing-page__status-item">
+                    <span
+                      className="landing-page__status-dot landing-page__status-dot--healthy"
+                      aria-hidden="true"
+                    />
+                    <span className="landing-page__status-text">
+                      Devices Healthy
+                    </span>
+                  </div>
+
+                  <div className="landing-page__status-item">
+                    <span
+                      className="landing-page__status-dot landing-page__status-dot--healthy"
+                      aria-hidden="true"
+                    />
+                    <span className="landing-page__status-text">
+                      Cloud Healthy
+                    </span>
+                  </div>
+                </div>
+              </div>
             </div>
           </section>
         ) : (
