@@ -1,14 +1,18 @@
 import { Link, useLocation } from "react-router-dom";
+import homeIcon from "../../assets/home.svg";
+import devicesIcon from "../../assets/devices.svg";
+import grantsIcon from "../../assets/grants.svg";
+import settingsIcon from "../../assets/settings.svg";
 import "./TabFooter.css";
 
 const TabFooter = () => {
   const location = useLocation();
 
   const tabs = [
-    { id: 1, name: "Home", path: "/", icon: "◻" },
-    { id: 2, name: "Devices", path: "/devices", icon: "⌁" },
-    { id: 3, name: "Grants", path: "/grants", icon: "◇" },
-    { id: 4, name: "Settings", path: "/settings", icon: "○" },
+    { id: 1, name: "Home", path: "/", icon: homeIcon },
+    { id: 2, name: "Devices", path: "/devices", icon: devicesIcon },
+    { id: 3, name: "Grants", path: "/grants", icon: grantsIcon },
+    { id: 4, name: "Settings", path: "/settings", icon: settingsIcon },
   ];
 
   return (
@@ -24,9 +28,11 @@ const TabFooter = () => {
               className={`tab-item ${isActive ? "active" : ""}`}
               aria-current={isActive ? "page" : undefined}
             >
-              <span className="tab-icon" aria-hidden="true">
-                {tab.icon}
-              </span>
+              <img
+                src={tab.icon}
+                alt=""
+                className="tab-icon"
+              />
               <span className="tab-label">{tab.name}</span>
             </Link>
           );

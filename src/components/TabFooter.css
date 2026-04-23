@@ -59,10 +59,20 @@
 }
 
 .tab-icon {
-  font-size: 1rem;
-  line-height: 1;
-  font-weight: 700;
-  opacity: 0.9;
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  opacity: 0.75;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+
+.tab-item.active .tab-icon {
+  opacity: 1;
+  transform: scale(1.05);
+}
+
+.tab-item:hover .tab-icon {
+  opacity: 1;
 }
 
 .tab-label {
