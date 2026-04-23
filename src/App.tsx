@@ -12,8 +12,9 @@ import TabFooter from "./components/TabFooter";
 import { setUserFromAuth, clearUser } from "./features/user/userSlice";
 
 const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
-const GrantsPage = lazy(() => import("./pages/GrantsPage/GrantsPage"));
+const MetricsPage = lazy(() => import("./pages/MetricsPage/MetricsPage"));
 const DevicePage = lazy(() => import("./pages/DevicePage/DevicePage"));
+const GrantsPage = lazy(() => import("./pages/GrantsPage/GrantsPage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage/SettingsPage"));
 
 interface AppProps {
@@ -50,8 +51,9 @@ function App({ user, onSignOut }: AppProps) {
       <Suspense fallback={<div className="page-loading">Loading page...</div>}>
         <Routes>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/grants" element={<GrantsPage />} />
           <Route path="/devices" element={<DevicePage />} />
+          <Route path="/metrics" element={<MetricsPage />} />
+          <Route path="/grants" element={<GrantsPage />} />
           <Route path="/settings" element={<SettingsPage />} />
         </Routes>
       </Suspense>
