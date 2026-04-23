@@ -1,37 +1,99 @@
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
+import landingImage from "../../assets/landingimage.webp";
+import "./LandingPage.css";
+
+type LandingViewMode = "showcase" | "state";
 
 function LandingPage() {
   const reduxState = useSelector((state: RootState) => state);
+  const [viewMode, setViewMode] = useState<LandingViewMode>("showcase");
+
+  async function handleCopyState() {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(reduxState, null, 2));
+    } catch (error) {
+      console.error("Failed to copy redux state:", error);
+    }
+  }
 
   return (
-    <main style={{ padding: "1.5rem" }}>
-      <h1>Dev Landing Page</h1>
-      <p>Current Redux state</p>
+    <main className="landing-page">
+      <section className="landing-page__shell">
+        <header className="landing-page__header">
+          <div className="landing-page__heading">
+            <h1 className="landing-page__title">FarmVault</h1>
+            <p className="landing-page__subtitle">
+              Secure farm data access, visibility, and device intelligence in one place.
+            </p>
+          </div>
 
-      <button
-        type="button"
-        onClick={() =>
-          navigator.clipboard.writeText(JSON.stringify(reduxState, null, 2))
-        }
-        style={{ marginBottom: "1rem" }}
-      >
-        Copy state
-      </button>
+          <div
+            className="landing-page__toggle"
+            role="tablist"
+            aria-label="Landing page view mode"
+          >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === "showcase"}
+              className={`landing-page__toggle-button ${
+                viewMode === "showcase"
+                  ? "landing-page__toggle-button--active"
+                  : ""
+              }`}
+              onClick={() => setViewMode("showcase")}
+            >
+              Showcase
+            </button>
 
-      <pre
-        style={{
-          backgroundColor: "#111",
-          color: "#f5f5f5",
-          padding: "1rem",
-          borderRadius: "8px",
-          overflowX: "auto",
-          whiteSpace: "pre-wrap",
-          wordBreak: "break-word",
-        }}
-      >
-        {JSON.stringify(reduxState, null, 2)}
-      </pre>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={viewMode === "state"}
+              className={`landing-page__toggle-button ${
+                viewMode === "state"
+                  ? "landing-page__toggle-button--active"
+                  : ""
+              }`}
+              onClick={() => setViewMode("state")}
+            >
+              Redux State
+            </button>
+          </div>
+        </header>
+
+        {viewMode === "showcase" ? (
+          <section className="landing-page__showcase">
+            <div className="landing-page__showcase-card">
+              <img
+                src={landingImage}
+                alt="FarmVault marketing graphic"
+                className="landing-page__hero-image"
+              />
+            </div>
+          </section>
+        ) : (
+          <section className="landing-page__state-panel">
+            <div className="landing-page__state-actions">
+              <h2 className="landing-page__panel-title">Current Redux State</h2>
+
+              <button
+                type="button"
+                className="landing-page__copy-button"
+                onClick={handleCopyState}
+              >
+                Copy State
+              </button>
+            </div>
+
+            <pre className="landing-page__state-block">
+              {JSON.stringify(reduxState, null, 2)}
+            </pre>
+          </section>
+        )}
+      </section>
     </main>
   );
 }

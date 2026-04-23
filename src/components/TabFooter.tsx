@@ -1,9 +1,9 @@
 import { Link, useLocation } from "react-router-dom";
-import homeIcon from "../../assets/home.svg";
-import devicesIcon from "../../assets/devices.png";
-import metricsIcon from "../../assets/metrics.png";
-import grantsIcon from "../../assets/grants.png";
-import settingsIcon from "../../assets/settings.svg";
+import homeIcon from "../assets/home.svg";
+import devicesIcon from "../assets/devices.png";
+import metricsIcon from "../assets/metrics.png";
+import grantsIcon from "../assets/grants.png";
+import settingsIcon from "../assets/settings.svg";
 import "./TabFooter.css";
 
 const TabFooter = () => {
@@ -34,6 +34,8 @@ const TabFooter = () => {
                 src={tab.icon}
                 alt=""
                 className="tab-icon"
+                width={48} 
+                height={48}
               />
               <span className="tab-label">{tab.name}</span>
             </Link>

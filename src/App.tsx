@@ -47,17 +47,17 @@ function App({ user, onSignOut }: AppProps) {
   return (
     <div className="app">
       <Header onSignOut={onSignOut} />
-
-      <Suspense fallback={<div className="page-loading">Loading page...</div>}>
-        <Routes>
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/devices" element={<DevicePage />} />
-          <Route path="/metrics" element={<MetricsPage />} />
-          <Route path="/grants" element={<GrantsPage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-        </Routes>
-      </Suspense>
-
+        <main>
+          <Suspense fallback={<div className="page-loading">Loading page...</div>}>
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/devices" element={<DevicePage />} />
+              <Route path="/metrics" element={<MetricsPage />} />
+              <Route path="/grants" element={<GrantsPage />} />
+              <Route path="/settings" element={<SettingsPage />} />
+            </Routes>
+          </Suspense>
+        </main>
       <TabFooter />
     </div>
   );
