@@ -1,0 +1,61 @@
+/* src/pages/MetricsPage/MetricsGraph.css */
+
+.metrics-graph-placeholder {
+  display: grid;
+  gap: 1rem;
+  min-height: 18rem;
+  padding: 2rem;
+
+  border: 1px dashed var(--border-strong);
+  border-radius: 1rem;
+
+  background: linear-gradient(
+    135deg,
+    rgba(105, 174, 230, 0.12),
+    rgba(241, 184, 45, 0.12)
+  );
+
+  box-shadow: var(--shadow-soft);
+}
+
+.metrics-graph-placeholder__title {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 900;
+  color: var(--brand-primary);
+}
+
+.metrics-graph-placeholder__text {
+  margin: 0;
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 40rem;
+}
+
+.metrics-graph-placeholder__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.metrics-graph-placeholder__meta span {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+
+  border: 1px solid var(--border-soft);
+  background: var(--surface-strong);
+
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+.metrics-graph-placeholder__error {
+  margin: 0;
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--brand-primary);
+}
