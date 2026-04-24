@@ -1,13 +1,15 @@
-/* pages/GrantsPage.css */
-
 .grants-container {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--space-6);
   color: var(--text-primary);
 }
-
+ 
 .grants-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-5);
   margin-bottom: var(--space-6);
 }
 
@@ -25,6 +27,33 @@
   color: var(--text-secondary);
   font-size: 1rem;
 }
+ 
+.grants-new-user-button {
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-5);
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--button-primary);
+  color: #ffffff;
+  font: inherit;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 18px rgba(200, 16, 46, 0.2);
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.grants-new-user-button:hover {
+  background: var(--button-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 24px rgba(200, 16, 46, 0.25);
+}
+ 
+.grants-page-actions {
+  display: none;
+}
 
 .grants-content {
   padding: var(--space-6);
@@ -38,12 +67,6 @@
 .grants-content p {
   margin: 0 0 var(--space-3) 0;
   color: var(--text-secondary);
-}
-
-.grants-page-actions {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: var(--space-4);
 }
 
 .grants-page-filters {
@@ -127,13 +150,22 @@
   color: var(--color-error);
   font-weight: 800;
 }
-
+ 
 @media (max-width: 768px) {
   .grants-container {
     padding: var(--space-4);
   }
 
-  .grants-page-actions,
+  .grants-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-4);
+  }
+
+  .grants-new-user-button {
+    width: 100%;
+  }
+
   .modal-actions {
     flex-direction: column;
   }

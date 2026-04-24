@@ -250,7 +250,7 @@ function GrantsPage() {
       id: device.id,
       label: device.name ?? device.id,
     }));
-
+    
   return (
     <div className="grants-container">
       <header className="grants-header">
@@ -260,6 +260,16 @@ function GrantsPage() {
             Manage temporary users and review farm or device-level access.
           </p>
         </div>
+
+        {isAdmin && (
+          <button
+            type="button"
+            className="grants-new-user-button"
+            onClick={handleOpenCreateGrantEditor}
+          >
+            + New User
+          </button>
+        )}
       </header>
 
       {!isAdmin && (
@@ -279,10 +289,6 @@ function GrantsPage() {
 
       {isAdmin && (
         <>
-          <div className="grants-page-actions">
-            <button onClick={handleOpenCreateGrantEditor}>+ New User</button>
-          </div>
-
           <div className="grants-page-filters">
             <label className="grants-page-checkbox">
               <input
