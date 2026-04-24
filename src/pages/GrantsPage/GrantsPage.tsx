@@ -253,6 +253,15 @@ function GrantsPage() {
 
   return (
     <div className="grants-container">
+      <header className="grants-header">
+        <div>
+          <h1 className="grants-title">Access Grants</h1>
+          <p className="grants-subtitle">
+            Manage temporary users and review farm or device-level access.
+          </p>
+        </div>
+      </header>
+
       {!isAdmin && (
         <>
           <div className="info-banner">
@@ -284,6 +293,7 @@ function GrantsPage() {
               Show expired grants
             </label>
           </div>
+
           <GrantsTable
             createdGrantRecords={createdGrantRecords}
             loadingCreatedGrantRecords={loadingCreatedGrantRecords}
