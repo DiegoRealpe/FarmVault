@@ -1,110 +1,145 @@
 /* pages/GrantsPage.css */
+
 .grants-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--space-6);
+  color: var(--text-primary);
 }
 
 .grants-header {
-  margin-bottom: 32px;
+  margin-bottom: var(--space-6);
 }
 
 .grants-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--brand-primary);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .grants-subtitle {
-  color: #666;
-  font-size: 1rem;
   margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
 }
 
 .grants-content {
-  padding: 40px;
+  padding: var(--space-6);
   text-align: center;
-  background-color: #f8f9fa;
-  border-radius: 8px;
-  border: 1px solid #e9ecef;
+  background: var(--surface);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
 }
 
 .grants-content p {
-  margin-bottom: 12px;
-  color: #666;
+  margin: 0 0 var(--space-3) 0;
+  color: var(--text-secondary);
 }
 
 .grants-page-actions {
   display: flex;
   justify-content: flex-end;
-  margin-bottom: 1rem;
+  margin-bottom: var(--space-4);
+}
+
+.grants-page-filters {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: var(--space-4);
+}
+
+.grants-page-checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  font-weight: 700;
 }
 
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(0, 0, 0, 0.45);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1rem;
-  z-index: 1000;
+  padding: var(--space-4);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
 }
 
 .modal-panel {
-  background: white;
   width: 100%;
   max-width: 700px;
-  border-radius: 12px;
-  padding: 1rem;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+  padding: var(--space-4);
+  background: var(--surface-strong);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 20px 50px rgba(15, 23, 42, 0.22);
 }
 
 .modal-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 1rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
+}
+
+.modal-header h2,
+.modal-header h3 {
+  margin: 0;
+  color: var(--brand-primary);
+  font-weight: 900;
+  letter-spacing: -0.03em;
 }
 
 .modal-form {
   display: grid;
-  gap: 1rem;
+  gap: var(--space-4);
 }
 
 .modal-section {
-  border-top: 1px solid #ddd;
-  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-soft);
+  padding-top: var(--space-3);
 }
 
 .checkbox-row {
   display: flex;
-  gap: 0.5rem;
+  gap: var(--space-2);
   align-items: center;
-  margin: 0.35rem 0;
+  margin: var(--space-2) 0;
+  color: var(--text-primary);
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
+  gap: var(--space-3);
 }
 
 .modal-error {
-  color: #b00020;
+  color: var(--color-error);
+  font-weight: 800;
 }
 
-.grants-page-filters {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 16px;
-}
+@media (max-width: 768px) {
+  .grants-container {
+    padding: var(--space-4);
+  }
 
-.grants-page-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  color: #333;
-  font-size: 0.875rem;
+  .grants-page-actions,
+  .modal-actions {
+    flex-direction: column;
+  }
+
+  .modal-panel {
+    max-height: 90vh;
+    overflow-y: auto;
+  }
 }

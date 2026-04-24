@@ -3,7 +3,7 @@
   flex: 1;
   display: flex;
   justify-content: center;
-  padding: 2rem 1.25rem 6.5rem;
+  padding: var(--space-6) var(--space-5) 6.5rem;
 }
 
 .landing-page__shell {
@@ -11,7 +11,7 @@
   max-width: 1100px;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: var(--space-5);
   margin: 0 auto;
 }
 
@@ -19,14 +19,14 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  gap: 1.25rem;
-  padding: 0 0.25rem;
+  gap: var(--space-5);
+  padding: 0 var(--space-1);
 }
 
 .landing-page__heading {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: var(--space-2);
 }
 
 .landing-page__title {
@@ -48,11 +48,11 @@
 .landing-page__toggle {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.3rem;
+  gap: var(--space-1);
+  padding: var(--space-1);
   border: 1px solid var(--border-strong);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.78);
+  border-radius: var(--radius-pill);
+  background: var(--surface);
   backdrop-filter: blur(8px);
   box-shadow: var(--shadow-soft);
   align-self: flex-start;
@@ -62,20 +62,20 @@
   border: none;
   background: transparent;
   color: var(--text-secondary);
-  padding: 0.7rem 1.1rem;
-  border-radius: 999px;
+  padding: var(--space-3) var(--space-4);
+  border-radius: var(--radius-pill);
   font-size: 0.95rem;
   font-weight: 700;
   cursor: pointer;
   transition:
-    background-color 0.18s ease,
-    color 0.18s ease,
-    transform 0.18s ease,
-    box-shadow 0.18s ease;
+    background 180ms ease,
+    color 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
 }
 
 .landing-page__toggle-button:hover {
-  background: rgba(105, 174, 230, 0.1);
+  background: var(--bg-info);
   color: var(--text-primary);
 }
 
@@ -95,13 +95,13 @@
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--border-soft);
-  border-radius: 24px;
+  border-radius: var(--radius-xl);
   backdrop-filter: blur(10px);
   box-shadow: var(--shadow-soft);
 }
 
 .landing-page__showcase {
-  padding: clamp(0.9rem, 2vw, 1.5rem);
+  padding: clamp(0.9rem, 2vw, var(--space-5));
   display: flex;
   justify-content: center;
   align-items: center;
@@ -111,10 +111,10 @@
   width: 100%;
   max-width: 920px;
   margin: 0 auto;
-  border-radius: 20px;
+  border-radius: var(--radius-xl);
   overflow: hidden;
-  background: rgba(255, 255, 255, 0.94);
-  border: 1px solid rgba(201, 216, 231, 0.8);
+  background: var(--surface-strong);
+  border: 1px solid var(--border-soft);
   box-shadow:
     0 16px 40px rgba(15, 23, 42, 0.08),
     inset 0 1px 0 rgba(255, 255, 255, 0.75);
@@ -133,10 +133,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: 1.5rem;
+  gap: var(--space-5);
   flex-wrap: wrap;
-  padding: 0.95rem 1.25rem 1.1rem;
-  border-top: 1px solid rgba(201, 216, 231, 0.65);
+  padding: var(--space-4) var(--space-5);
+  border-top: 1px solid var(--border-soft);
   background: linear-gradient(
     180deg,
     rgba(248, 250, 252, 0.72) 0%,
@@ -147,12 +147,12 @@
 .landing-page__status-item {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
-  padding: 0.45rem 0.8rem;
-  border-radius: 999px;
-  background: rgba(240, 253, 244, 0.75);
-  border: 1px solid rgba(134, 239, 172, 0.45);
-  box-shadow: 0 4px 12px rgba(34, 197, 94, 0.08);
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--bg-success);
+  border: 1px solid rgba(22, 163, 74, 0.25);
+  box-shadow: 0 4px 12px rgba(22, 163, 74, 0.08);
 }
 
 .landing-page__status-dot {
@@ -166,12 +166,12 @@
   background: radial-gradient(
     circle at 35% 35%,
     #86efac 0%,
-    #22c55e 55%,
+    var(--color-success) 55%,
     #15803d 100%
   );
   box-shadow:
-    0 0 0 0 rgba(34, 197, 94, 0.38),
-    0 0 10px rgba(34, 197, 94, 0.28);
+    0 0 0 0 rgba(22, 163, 74, 0.38),
+    0 0 10px rgba(22, 163, 74, 0.28);
   animation: landing-status-pulse 1.8s ease-in-out infinite;
 }
 
@@ -183,15 +183,15 @@
 }
 
 .landing-page__state-panel {
-  padding: 1.25rem;
+  padding: var(--space-5);
 }
 
 .landing-page__state-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: var(--space-4);
+  margin-bottom: var(--space-4);
 }
 
 .landing-page__panel-title {
@@ -214,8 +214,8 @@
 
 .landing-page__state-block {
   margin: 0;
-  padding: 1rem;
-  border-radius: 16px;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
   border: 1px solid rgba(105, 174, 230, 0.18);
   background: rgba(18, 25, 38, 0.96);
   color: #e8eef7;
@@ -231,22 +231,22 @@
   0% {
     transform: scale(1);
     box-shadow:
-      0 0 0 0 rgba(34, 197, 94, 0.34),
-      0 0 8px rgba(34, 197, 94, 0.22);
+      0 0 0 0 rgba(22, 163, 74, 0.34),
+      0 0 8px rgba(22, 163, 74, 0.22);
   }
 
   50% {
     transform: scale(1.08);
     box-shadow:
-      0 0 0 8px rgba(34, 197, 94, 0),
-      0 0 14px rgba(34, 197, 94, 0.28);
+      0 0 0 8px rgba(22, 163, 74, 0),
+      0 0 14px rgba(22, 163, 74, 0.28);
   }
 
   100% {
     transform: scale(1);
     box-shadow:
-      0 0 0 0 rgba(34, 197, 94, 0),
-      0 0 8px rgba(34, 197, 94, 0.22);
+      0 0 0 0 rgba(22, 163, 74, 0),
+      0 0 8px rgba(22, 163, 74, 0.22);
   }
 }
 
@@ -258,13 +258,13 @@
 
 @media (max-width: 900px) {
   .landing-page {
-    padding: 1.25rem 1rem 6.5rem;
+    padding: var(--space-5) var(--space-4) 6.5rem;
   }
 
   .landing-page__header {
     flex-direction: column;
     align-items: stretch;
-    gap: 1rem;
+    gap: var(--space-4);
   }
 
   .landing-page__toggle {
@@ -282,7 +282,7 @@
 
 @media (max-width: 640px) {
   .landing-page {
-    padding: 1rem 0.75rem 6.5rem;
+    padding: var(--space-4) var(--space-3) 6.5rem;
   }
 
   .landing-page__state-actions {
@@ -306,16 +306,16 @@
 
   .landing-page__showcase,
   .landing-page__state-panel {
-    border-radius: 18px;
+    border-radius: var(--radius-xl);
   }
 
   .landing-page__showcase-card {
-    border-radius: 16px;
+    border-radius: var(--radius-lg);
   }
 
   .landing-page__status-bar {
-    gap: 0.75rem;
-    padding: 0.85rem 0.85rem 1rem;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-3) var(--space-4);
   }
 
   .landing-page__status-item {

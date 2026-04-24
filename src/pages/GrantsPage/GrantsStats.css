@@ -1,119 +1,132 @@
 .grants-stats-panel {
-  background: #ffffff;
-  border: 1px solid #d9e2ec;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 1px 3px rgba(16, 24, 40, 0.06);
-  margin-top: 20px;
+  margin-top: var(--space-5);
+  padding: var(--space-5);
+  background: var(--surface-strong);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-soft);
 }
 
 .grants-stats-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 20px;
+  margin-bottom: var(--space-5);
 }
 
 .grants-stats-header h2 {
   margin: 0;
   font-size: 1.2rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
+/* Status badges */
 .grant-status-badge {
-  padding: 6px 12px;
-  border-radius: 999px;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-pill);
   font-size: 0.85rem;
-  font-weight: 600;
+  font-weight: 800;
+  border: 1px solid transparent;
 }
 
 .grant-status-badge.active {
-  background: #ecfdf3;
-  color: #027a48;
-  border: 1px solid #abefc6;
+  background: var(--bg-success);
+  color: var(--color-success);
+  border-color: rgba(22, 163, 74, 0.25);
 }
 
 .grant-status-badge.expired {
-  background: #fef3f2;
-  color: #b42318;
-  border: 1px solid #fecdca;
+  background: var(--bg-error);
+  color: var(--color-error);
+  border-color: rgba(220, 38, 38, 0.25);
 }
 
+/* Grid */
 .grants-stats-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--space-4);
+  margin-bottom: var(--space-5);
 }
 
 .grant-info-card {
-  border: 1px solid #d9e2ec;
-  border-radius: 10px;
-  padding: 16px;
-  background: #f8fafc;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: var(--space-2);
+  padding: var(--space-4);
+
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-lg);
+
+  background: var(--surface);
 }
 
 .grant-info-label {
   font-size: 0.85rem;
-  color: #475467;
+  color: var(--text-secondary);
 }
 
 .grant-info-value {
   font-size: 1rem;
-  font-weight: 600;
-  color: #111827;
+  font-weight: 800;
+  color: var(--text-primary);
   word-break: break-word;
 }
 
+/* Lists */
 .grant-list-section {
-  margin-top: 20px;
+  margin-top: var(--space-5);
 }
 
 .grant-list-section h3 {
-  margin: 0 0 12px 0;
+  margin: 0 0 var(--space-3) 0;
   font-size: 1rem;
-  font-weight: 600;
-  color: #1f2937;
+  font-weight: 800;
+  color: var(--text-primary);
 }
 
 .grant-pill-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px;
+  gap: var(--space-3);
 }
 
 .grant-pill {
-  padding: 10px 14px;
-  border: 1px solid #d0d5dd;
-  border-radius: 10px;
-  background: #ffffff;
-  font-size: 0.95rem;
-  color: #344054;
+  padding: var(--space-2) var(--space-4);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  background: var(--surface-strong);
+
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
+/* Empty states */
 .grant-list-empty,
 .grants-stats-empty {
-  border: 1px dashed #d0d5dd;
-  border-radius: 10px;
-  padding: 16px;
-  background: #fcfcfd;
-  color: #667085;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+
+  border: 1px dashed var(--border-strong);
+  background: var(--surface);
+
+  color: var(--text-secondary);
 }
 
+/* User summary */
 .grant-user-summary {
-  margin-top: 6px;
+  margin-top: var(--space-2);
   font-size: 0.9rem;
-  color: #667085;
+  color: var(--text-secondary);
+
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--space-2);
   flex-wrap: wrap;
 }
 
 .grant-user-summary-separator {
-  color: #98a2b3;
+  color: var(--border-strong);
 }

@@ -31,6 +31,33 @@
 
   --focus-ring: rgba(105, 174, 230, 0.28);
   --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Border radius scale */
+  --radius-sm: 0.5rem;
+  --radius-md: 0.75rem;
+  --radius-lg: 1rem;
+  --radius-xl: 1.25rem;
+  --radius-pill: 999px;
+
+  /* Semantic colors */
+  --color-success: #16a34a;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: var(--brand-sky);
+
+  /* Soft background variants */
+  --bg-success: rgba(22, 163, 74, 0.1);
+  --bg-warning: rgba(217, 119, 6, 0.1);
+  --bg-error: rgba(220, 38, 38, 0.1);
+  --bg-info: rgba(105, 174, 230, 0.12);
 }
 
 *,

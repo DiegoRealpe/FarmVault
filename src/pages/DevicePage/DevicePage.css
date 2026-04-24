@@ -1,32 +1,35 @@
 .device-container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
+  padding: var(--space-6);
+  color: var(--text-primary);
 }
 
 .device-header {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-5);
 }
 
 .device-title {
-  font-size: 2rem;
-  font-weight: 600;
-  color: #1a1a1a;
-  margin: 0 0 8px 0;
+  margin: 0 0 var(--space-2) 0;
+  color: var(--brand-primary);
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1;
+  font-weight: 800;
+  letter-spacing: -0.04em;
 }
 
 .device-subtitle {
-  color: #666;
-  font-size: 1rem;
   margin: 0;
+  color: var(--text-secondary);
+  font-size: 1rem;
 }
 
 @media (max-width: 768px) {
   .device-container {
-    padding: 16px;
+    padding: var(--space-4);
   }
 
   .device-title {
-    font-size: 1.5rem;
+    font-size: 1.75rem;
   }
 }

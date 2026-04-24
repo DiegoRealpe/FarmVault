@@ -5,8 +5,9 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
-  background: rgba(15, 23, 42, 0.42);
+  padding: var(--space-6);
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(6px);
 }
 
 .grant-editor-modal {
@@ -14,10 +15,11 @@
   width: min(920px, 100%);
   max-height: 90vh;
   overflow-y: auto;
-  background: #ffffff;
-  border-radius: 20px;
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.18);
-  padding: 24px;
+  padding: var(--space-6);
+  background: var(--surface-strong);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.22);
 }
 
 .grant-editor-header {
@@ -25,155 +27,172 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding-top: var(--space-1);
   text-align: center;
-  gap: 8px;
-  margin-bottom: 20px;
-  padding-top: 4px;
 }
 
 .grant-editor-title {
   margin: 0;
+  color: var(--brand-primary);
   font-size: 1.75rem;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.15;
-  color: #0f172a;
+  letter-spacing: -0.03em;
 }
 
 .grant-editor-subtitle {
-  margin: 0;
   max-width: 640px;
+  margin: 0;
+  color: var(--text-secondary);
   font-size: 0.98rem;
   line-height: 1.45;
-  color: #64748b;
 }
 
 .grant-editor-close {
   position: absolute;
   top: 0;
   right: 0;
+  display: inline-flex;
   width: 40px;
   height: 40px;
-  display: inline-flex;
   align-items: center;
   justify-content: center;
   border: none;
-  border-radius: 12px;
-  background: #0f172a;
+  border-radius: var(--radius-md);
+  background: var(--brand-primary);
   color: #ffffff;
   font-size: 1.35rem;
   line-height: 1;
   cursor: pointer;
+  transition:
+    background 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
+}
+
+.grant-editor-close:hover:not(:disabled) {
+  background: var(--brand-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(200, 16, 46, 0.2);
 }
 
 .grant-editor-form {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .grant-editor-top-card {
-  border: 1px solid #dbe3ee;
-  background: #f8fafc;
-  border-radius: 16px;
-  padding: 20px;
+  padding: var(--space-5);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  background: var(--surface);
 }
 
 .grant-editor-create-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--space-4);
   align-items: start;
 }
 
 .grant-editor-summary-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(260px, 0.9fr);
-  gap: 20px;
+  gap: var(--space-5);
   align-items: center;
 }
 
 .grant-editor-summary-main {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-2);
   text-align: center;
-  gap: 8px;
-  min-width: 0;
 }
 
 .grant-editor-summary-side {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
 }
 
 .grant-editor-identity-email {
+  color: var(--text-primary);
   font-size: 1.15rem;
-  font-weight: 800;
+  font-weight: 900;
   line-height: 1.3;
-  color: #0f172a;
   word-break: break-word;
 }
 
 .grant-editor-identity-username {
+  color: var(--text-secondary);
   font-size: 1rem;
   line-height: 1.3;
-  color: #475569;
   word-break: break-word;
 }
 
 .grant-editor-meta-row {
   display: flex;
-  justify-content: center;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 4px;
+  justify-content: center;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
 }
 
 .grant-editor-meta-pill {
   display: inline-flex;
+  max-width: 100%;
   align-items: center;
   justify-content: center;
-  max-width: 100%;
-  padding: 7px 12px;
-  border-radius: 999px;
-  background: #e2e8f0;
-  color: #334155;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-pill);
+  background: var(--surface-strong);
+  color: var(--text-secondary);
   font-size: 0.82rem;
+  font-weight: 800;
   line-height: 1.2;
   word-break: break-word;
 }
 
 .grant-editor-field {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
   min-width: 0;
+  flex-direction: column;
+  gap: var(--space-2);
 }
 
 .grant-editor-label {
+  color: var(--text-secondary);
   font-size: 0.9rem;
-  font-weight: 700;
-  color: #334155;
+  font-weight: 800;
 }
 
 .grant-editor-input {
   width: 100%;
   min-width: 0;
-  border: 1px solid #cbd5e1;
-  border-radius: 10px;
-  padding: 10px 12px;
-  background: #ffffff;
-  color: #0f172a;
+  padding: var(--space-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-md);
+  background: var(--surface-strong);
+  color: var(--text-primary);
+  font: inherit;
   font-size: 0.95rem;
   line-height: 1.2;
+  outline: none;
+  transition:
+    border-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .grant-editor-input:focus {
-  outline: none;
-  border-color: #64748b;
-  box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.12);
+  border-color: var(--brand-sky);
+  box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .grant-editor-date-field {
@@ -183,108 +202,132 @@
 
 .grant-editor-helper-text {
   margin: 0;
+  color: var(--text-secondary);
   font-size: 0.84rem;
   line-height: 1.4;
-  color: #64748b;
 }
 
 .grant-editor-grants-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 16px;
+  gap: var(--space-4);
 }
 
 .grant-editor-section {
   min-width: 0;
-  border: 1px solid #e2e8f0;
-  border-radius: 16px;
-  background: #ffffff;
-  padding: 16px;
+  padding: var(--space-4);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-xl);
+  background: var(--surface-strong);
 }
 
 .grant-editor-section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
+  gap: var(--space-3);
+  margin-bottom: var(--space-3);
 }
 
 .grant-editor-section-header h3 {
   margin: 0;
+  color: var(--text-primary);
   font-size: 1.05rem;
-  font-weight: 800;
-  color: #0f172a;
+  font-weight: 900;
 }
 
 .grant-editor-count {
+  color: var(--text-secondary);
   font-size: 0.84rem;
-  color: #64748b;
   white-space: nowrap;
 }
 
 .grant-editor-option-list {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
   max-height: 260px;
+  flex-direction: column;
+  gap: var(--space-2);
   overflow-y: auto;
-  padding-right: 4px;
+  padding-right: var(--space-1);
 }
 
 .grant-editor-option-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 9px 10px;
-  border-radius: 10px;
-  background: #f8fafc;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  color: var(--text-primary);
   cursor: pointer;
   font-size: 0.95rem;
   line-height: 1.35;
-  color: #0f172a;
+  transition:
+    background 160ms ease,
+    border-color 160ms ease;
 }
 
 .grant-editor-option-row:hover {
-  background: #f1f5f9;
+  background: var(--bg-info);
+  border-color: rgba(105, 174, 230, 0.24);
 }
 
 .grant-editor-option-row input[type="checkbox"] {
   flex: 0 0 auto;
   margin: 0;
+  accent-color: var(--brand-primary);
 }
 
 .grant-editor-error {
   margin: 0;
+  color: var(--color-error);
   font-size: 0.92rem;
+  font-weight: 700;
   line-height: 1.4;
-  color: #b91c1c;
 }
 
 .grant-editor-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  padding-top: 4px;
+  gap: var(--space-3);
+  padding-top: var(--space-1);
 }
 
 .grant-editor-button {
+  padding: var(--space-3) var(--space-4);
   border: none;
-  border-radius: 10px;
-  padding: 10px 14px;
-  font-size: 0.95rem;
-  font-weight: 700;
+  border-radius: var(--radius-md);
   cursor: pointer;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 800;
+  transition:
+    background 160ms ease,
+    color 160ms ease,
+    transform 160ms ease,
+    box-shadow 160ms ease;
 }
 
 .grant-editor-button-secondary {
-  background: #e2e8f0;
-  color: #1e293b;
+  background: var(--surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-soft);
+}
+
+.grant-editor-button-secondary:hover:not(:disabled) {
+  background: var(--bg-info);
 }
 
 .grant-editor-button-primary {
-  background: #0f172a;
+  background: var(--button-primary);
   color: #ffffff;
+}
+
+.grant-editor-button-primary:hover:not(:disabled) {
+  background: var(--button-primary-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 8px 18px rgba(200, 16, 46, 0.2);
 }
 
 .grant-editor-button:disabled,
@@ -297,14 +340,14 @@
 
 @media (max-width: 760px) {
   .grant-editor-backdrop {
-    padding: 12px;
+    padding: var(--space-3);
   }
 
   .grant-editor-modal {
     width: 100%;
     max-height: 95vh;
-    padding: 18px 16px 16px;
-    border-radius: 16px;
+    padding: var(--space-5) var(--space-4) var(--space-4);
+    border-radius: var(--radius-xl);
   }
 
   .grant-editor-header {
