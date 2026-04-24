@@ -1,8 +1,10 @@
-import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
+
+import { useEffect } from "react";
+
+import type { AppDispatch, RootState } from "../../app/store";
 import { fetchVisibleDevices } from "../../features/devices/deviceSlice";
 import "./DevicePage.css";
-import type { AppDispatch, RootState } from "../../app/store";
 import DeviceTable from "./DeviceTable";
 
 function DevicePage() {
@@ -26,7 +28,9 @@ function DevicePage() {
     <div className="device-container">
       <header className="device-header">
         <h1 className="device-title">IoT Devices</h1>
-        <p className="device-subtitle">View and monitor the devices you can access</p>
+        <p className="device-subtitle">
+          View and monitor the devices you can access
+        </p>
       </header>
 
       <DeviceTable

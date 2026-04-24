@@ -1,27 +1,29 @@
-import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import type { AppDispatch, RootState } from "../../app/store";
-import {
-  fetchGrantRecord,
-  fetchCreatedGrantRecords,
-  createFarmUserThunk,
-  upsertGrantRecordThunk,
-  toggleSort,
-  setShowExpired,
-} from "../../features/grants/grantRecordSlice";
+
+import { useEffect, useState } from "react";
+
 import type { Schema } from "../../../amplify/data/resource";
+import type { AppDispatch, RootState } from "../../app/store";
 import {
   fetchVisibleDevices,
   fetchVisibleFarms,
 } from "../../features/devices/deviceSlice";
-import GrantsStats from "./GrantsStats";
-import GrantsTable from "./GrantsTable";
+import {
+  createFarmUserThunk,
+  fetchCreatedGrantRecords,
+  fetchGrantRecord,
+  setShowExpired,
+  toggleSort,
+  upsertGrantRecordThunk,
+} from "../../features/grants/grantRecordSlice";
 import GrantEditorModal, {
   GrantEditorFormValues,
   GrantEditorInitialValues,
   GrantEditorMode,
 } from "./GrantEditorModal";
 import "./GrantsPage.css";
+import GrantsStats from "./GrantsStats";
+import GrantsTable from "./GrantsTable";
 
 type GrantRecordSortBy =
   | "userSub"
@@ -42,7 +44,9 @@ function GrantsPage() {
     useState<GrantEditorMode>("create");
   const [grantEditorInitialValues, setGrantEditorInitialValues] =
     useState<GrantEditorInitialValues | null>(null);
-  const [editingUserSub, setEditingUserSub] = useState<string | null>(null);
+  const [editingUserSub, setEditingUserSub] = useState<string | null>(
+    null
+  );
 
   const user = useSelector((state: RootState) => state.user);
 
@@ -110,19 +114,19 @@ function GrantsPage() {
     ensureGrantEditorOptionsLoaded();
 
     const normalizedGrants = (record.grants ?? []).filter(
-      (grant): grant is NonNullable<typeof grant> => grant != null,
+      (grant): grant is NonNullable<typeof grant> => grant != null
     );
 
     const farmGrantIds = normalizedGrants
       .filter((grant) => grant.grantType === "farm")
       .flatMap((grant) =>
-        (grant.ids ?? []).filter((id): id is string => id != null),
+        (grant.ids ?? []).filter((id): id is string => id != null)
       );
 
     const deviceGrantIds = normalizedGrants
       .filter((grant) => grant.grantType === "device")
       .flatMap((grant) =>
-        (grant.ids ?? []).filter((id): id is string => id != null),
+        (grant.ids ?? []).filter((id): id is string => id != null)
       );
 
     setGrantEditorMode("edit");
@@ -146,7 +150,7 @@ function GrantsPage() {
   };
 
   const handleSubmitGrantEditor = async (
-    values: GrantEditorFormValues,
+    values: GrantEditorFormValues
   ) => {
     const grants: GrantEntry[] = [];
 
@@ -177,7 +181,7 @@ function GrantsPage() {
         createFarmUserThunk({
           email: values.email.trim(),
           temporaryPassword: values.temporaryPassword.trim(),
-        }),
+        })
       ).unwrap();
 
       if (!createdUser.userSub) {
@@ -195,7 +199,7 @@ function GrantsPage() {
           email: values.email.trim(),
           grants,
           expiresAt: values.expiresAt,
-        }),
+        })
       ).unwrap();
     } else {
       if (!editingUserSub) {
@@ -217,7 +221,7 @@ function GrantsPage() {
           email: grantEditorInitialValues.email.trim(),
           grants,
           expiresAt: values.expiresAt,
-        }),
+        })
       ).unwrap();
     }
 
@@ -230,7 +234,7 @@ function GrantsPage() {
   };
 
   const handleShowExpiredChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: React.ChangeEvent<HTMLInputElement>
   ) => {
     dispatch(setShowExpired(event.target.checked));
   };
@@ -250,14 +254,15 @@ function GrantsPage() {
       id: device.id,
       label: device.name ?? device.id,
     }));
-    
+
   return (
     <div className="grants-container">
       <header className="grants-header">
         <div>
           <h1 className="grants-title">Access Grants</h1>
           <p className="grants-subtitle">
-            Manage temporary users and review farm or device-level access.
+            Manage temporary users and review farm or device-level
+            access.
           </p>
         </div>
 
@@ -275,7 +280,10 @@ function GrantsPage() {
       {!isAdmin && (
         <>
           <div className="info-banner">
-            <p>ℹ️ You are viewing your grant record as a temporary user.</p>
+            <p>
+              ℹ️ You are viewing your grant record as a temporary
+              user.
+            </p>
           </div>
 
           <GrantsStats

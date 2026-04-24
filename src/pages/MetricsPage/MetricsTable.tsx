@@ -1,6 +1,6 @@
 import type { Schema } from "../../../amplify/data/resource";
-import "./MetricsTable.css";
 import { formatDate } from "../../utils/utils";
+import "./MetricsTable.css";
 
 type TimeSeriesPoint = Schema["TimeSeriesPoint"]["type"];
 type IoTDevice = Schema["IoTDevice"]["type"];
@@ -48,7 +48,9 @@ function MetricsTable({
   if (points.length === 0) {
     return (
       <div className="metrics-table-empty-state">
-        <p>No metric points returned for this device and time range.</p>
+        <p>
+          No metric points returned for this device and time range.
+        </p>
       </div>
     );
   }
@@ -93,7 +95,9 @@ function MetricsTable({
                 </td>
 
                 <td>
-                  <span className="metrics-table-unit">{unit || "N/A"}</span>
+                  <span className="metrics-table-unit">
+                    {unit || "N/A"}
+                  </span>
                 </td>
               </tr>
             ))}

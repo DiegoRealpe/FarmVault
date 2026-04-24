@@ -3,9 +3,9 @@
   "trailingComma": "es5",
   "singleQuote": false,
   "jsxSingleQuote": false,
-  "printWidth": 80,
+  "printWidth": 70,
   "tabWidth": 2,
-
+  "bracketSameLine": false,
   "importOrder": [
     "^react$",
     "^@aws-amplify",

@@ -1,5 +1,6 @@
 // amplify/auth/resource.ts
 import { defineAuth } from "@aws-amplify/backend";
+
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
 
 export const auth = defineAuth({
@@ -8,9 +9,8 @@ export const auth = defineAuth({
   },
   groups: ["admin", "farmuser"],
   access: (allow) => [
-    allow.resource(createFarmUserFn).to([
-      "createUser",
-      "addUserToGroup",
-    ]),
+    allow
+      .resource(createFarmUserFn)
+      .to(["createUser", "addUserToGroup"]),
   ],
 });

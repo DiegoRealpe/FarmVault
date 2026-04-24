@@ -1,23 +1,37 @@
+import { Stack } from "aws-cdk-lib";
+import { CfnWorkGroup } from "aws-cdk-lib/aws-athena";
+import {
+  CfnCrawler,
+  CfnDatabase,
+  CfnJob,
+  CfnTable,
+} from "aws-cdk-lib/aws-glue";
+import {
+  ManagedPolicy,
+  Role,
+  ServicePrincipal,
+} from "aws-cdk-lib/aws-iam";
+// CDK Imports
+import {
+  BucketDeployment,
+  Source,
+} from "aws-cdk-lib/aws-s3-deployment";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
+
 import { defineBackend } from "@aws-amplify/backend";
+
 import { auth } from "./auth/resource";
 import { data } from "./data/resource";
-import { metricsBucket } from "./storage/resource";
 // Lambda function resources
 import { createFarmUserFn } from "./functions/create-farm-user/resource";
 import { getFarmIotDataFn } from "./functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "./functions/get-personal-grant-record/resource";
+import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
 import { listVisibleDevicesFn } from "./functions/list-visible-devices/resource";
 import { listVisibleFarmsFn } from "./functions/list-visible-farms/resource";
-import { listCreatedGrantRecordsFn } from "./functions/list-created-grant-records/resource";
 import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
-// CDK Imports
-import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
-import { CfnDatabase, CfnTable, CfnJob, CfnCrawler } from "aws-cdk-lib/aws-glue";
-import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
-import { CfnWorkGroup } from "aws-cdk-lib/aws-athena";
-import { dirname, join } from "path";
-import { fileURLToPath } from "url";
-import { Stack } from "aws-cdk-lib";
+import { metricsBucket } from "./storage/resource";
 
 // ESM-compatible __dirname / __filename
 const __filename = fileURLToPath(import.meta.url);
@@ -37,9 +51,10 @@ export const backend = defineBackend({
 });
 
 // Only allow administrators to create users
-backend.auth.resources.cfnResources.cfnUserPool.adminCreateUserConfig = {
-  allowAdminCreateUserOnly: true,
-};
+backend.auth.resources.cfnResources.cfnUserPool.adminCreateUserConfig =
+  {
+    allowAdminCreateUserOnly: true,
+  };
 
 const bucket = backend.metricsBucket.resources.bucket;
 
@@ -50,8 +65,8 @@ new BucketDeployment(backend.stack, "DeployGlueScripts", {
 });
 
 backend.getFarmIotDataFn.resources.lambda.role?.addManagedPolicy(
-  ManagedPolicy.fromAwsManagedPolicyName('AmazonAthenaFullAccess')
-)
+  ManagedPolicy.fromAwsManagedPolicyName("AmazonAthenaFullAccess")
+);
 
 const glueStack = backend.createStack("GlueInfra");
 
@@ -65,49 +80,55 @@ const glueDb = new CfnDatabase(glueStack, "IotTelemetryDb", {
   },
 });
 
-const glueTable = new CfnTable(glueStack, "IotTelemetryParquetTable", {
-  catalogId,
-  databaseName: glueDb.ref,
-  tableInput: {
-    name: "iot_metrics_parquet",
-    tableType: "EXTERNAL_TABLE",
-    parameters: {
-      classification: "parquet",
-      "projection.enabled": "false",
-    },
-    storageDescriptor: {
-      location: `s3://${bucket.bucketName}/parquet/`,
-      inputFormat:
-        "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
-      outputFormat:
-        "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
-      serdeInfo: {
-        serializationLibrary:
-          "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+const glueTable = new CfnTable(
+  glueStack,
+  "IotTelemetryParquetTable",
+  {
+    catalogId,
+    databaseName: glueDb.ref,
+    tableInput: {
+      name: "iot_metrics_parquet",
+      tableType: "EXTERNAL_TABLE",
+      parameters: {
+        classification: "parquet",
+        "projection.enabled": "false",
       },
-      columns: [
-        { name: "device_id", type: "string" },
-        { name: "application_id", type: "string" },
-        { name: "gateway_id", type: "string" },
-        { name: "metric_type", type: "string" },
-        { name: "value", type: "double" },
-        { name: "timestamp", type: "timestamp" },
+      storageDescriptor: {
+        location: `s3://${bucket.bucketName}/parquet/`,
+        inputFormat:
+          "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+        outputFormat:
+          "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+        serdeInfo: {
+          serializationLibrary:
+            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+        },
+        columns: [
+          { name: "device_id", type: "string" },
+          { name: "application_id", type: "string" },
+          { name: "gateway_id", type: "string" },
+          { name: "metric_type", type: "string" },
+          { name: "value", type: "double" },
+          { name: "timestamp", type: "timestamp" },
+        ],
+      },
+      partitionKeys: [
+        { name: "year", type: "string" },
+        { name: "month", type: "string" },
+        { name: "day", type: "string" },
       ],
     },
-    partitionKeys: [
-      { name: "year", type: "string" },
-      { name: "month", type: "string" },
-      { name: "day", type: "string" },
-    ],
-  },
-});
+  }
+);
 glueTable.addDependency(glueDb);
 
 const glueJobRole = new Role(glueStack, "GlueJobRole", {
   assumedBy: new ServicePrincipal("glue.amazonaws.com"),
 });
 glueJobRole.addManagedPolicy(
-  ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
+  ManagedPolicy.fromAwsManagedPolicyName(
+    "service-role/AWSGlueServiceRole"
+  )
 );
 bucket.grantReadWrite(glueJobRole);
 
@@ -132,7 +153,9 @@ const glueCrawlerRole = new Role(glueStack, "GlueCrawlerRole", {
   assumedBy: new ServicePrincipal("glue.amazonaws.com"),
 });
 glueCrawlerRole.addManagedPolicy(
-  ManagedPolicy.fromAwsManagedPolicyName("service-role/AWSGlueServiceRole"),
+  ManagedPolicy.fromAwsManagedPolicyName(
+    "service-role/AWSGlueServiceRole"
+  )
 );
 bucket.grantRead(glueCrawlerRole);
 
@@ -163,6 +186,6 @@ const athenaWorkGroup = new CfnWorkGroup(
       enforceWorkGroupConfiguration: true,
       publishCloudWatchMetricsEnabled: true,
     },
-  },
+  }
 );
 athenaWorkGroup.addDependency(glueDb);

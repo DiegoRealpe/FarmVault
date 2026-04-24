@@ -1,4 +1,5 @@
 import { useSelector } from "react-redux";
+
 import { RootState } from "../app/store";
 import "./Header.css";
 
@@ -8,7 +9,7 @@ interface HeaderProps {
 
 export function Header({ onSignOut }: HeaderProps) {
   const { groups, email, isAuthenticated } = useSelector(
-    (state: RootState) => state.user,
+    (state: RootState) => state.user
   );
 
   if (!isAuthenticated) {
@@ -19,9 +20,7 @@ export function Header({ onSignOut }: HeaderProps) {
             <span className="header-title">FarmVault</span>
           </div>
 
-          <div className="header-right muted">
-            Not signed in
-          </div>
+          <div className="header-right muted">Not signed in</div>
         </header>
       </div>
     );
@@ -42,10 +41,7 @@ export function Header({ onSignOut }: HeaderProps) {
         </div>
 
         <div className="header-right">
-          <button
-            className="header-logout"
-            onClick={onSignOut}
-          >
+          <button className="header-logout" onClick={onSignOut}>
             Log out
           </button>
         </div>

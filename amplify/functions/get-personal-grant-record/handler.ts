@@ -1,9 +1,11 @@
 // amplify/functions/get-grant-record/handler.ts
-import type { Schema } from "../../data/resource";
+import { env } from "$amplify/env/get-personal-grant-record";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/get-personal-grant-record";
+
+import type { Schema } from "../../data/resource";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -16,7 +18,9 @@ type GetGrantRecordHandler =
 type GrantRecord = Schema["GrantRecord"]["type"];
 type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type Identity = Parameters<GetGrantRecordHandler>[0]["identity"];
-type GrantEntry = NonNullable<NonNullable<GrantRecord["grants"]>[number]>;
+type GrantEntry = NonNullable<
+  NonNullable<GrantRecord["grants"]>[number]
+>;
 
 function getCallerSub(identity: Identity): string | null {
   if (!identity) {
@@ -40,9 +44,11 @@ function getCallerSub(identity: Identity): string | null {
   return null;
 }
 
-function normalizeGrantEntries(grants: GrantRecord["grants"]): GrantEntry[] {
+function normalizeGrantEntries(
+  grants: GrantRecord["grants"]
+): GrantEntry[] {
   return (grants ?? []).filter(
-    (grant): grant is GrantEntry => grant != null,
+    (grant): grant is GrantEntry => grant != null
   );
 }
 

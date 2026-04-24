@@ -4,7 +4,7 @@
   padding: var(--space-6);
   color: var(--text-primary);
 }
- 
+
 .grants-header {
   display: flex;
   align-items: flex-start;
@@ -27,7 +27,7 @@
   color: var(--text-secondary);
   font-size: 1rem;
 }
- 
+
 .grants-new-user-button {
   flex-shrink: 0;
   padding: var(--space-3) var(--space-5);
@@ -50,7 +50,7 @@
   transform: translateY(-1px);
   box-shadow: 0 12px 24px rgba(200, 16, 46, 0.25);
 }
- 
+
 .grants-page-actions {
   display: none;
 }
@@ -150,7 +150,7 @@
   color: var(--color-error);
   font-weight: 800;
 }
- 
+
 @media (max-width: 768px) {
   .grants-container {
     padding: var(--space-4);

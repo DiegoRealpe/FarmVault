@@ -1,7 +1,8 @@
 import { useMemo, useState } from "react";
+
 import type { Schema } from "../../../amplify/data/resource";
-import "./DeviceTable.css";
 import { formatDate } from "../../utils/utils";
+import "./DeviceTable.css";
 
 type IoTDevice = Schema["IoTDevice"]["type"];
 
@@ -21,9 +22,11 @@ function DeviceTable({
   const [selectedFarmId, setSelectedFarmId] = useState("");
 
   const farmOptions = useMemo(() => {
-    return [...new Set(devices.map((device) => device.farmId).filter(Boolean))].sort(
-      (a, b) => a.localeCompare(b),
-    );
+    return [
+      ...new Set(
+        devices.map((device) => device.farmId).filter(Boolean)
+      ),
+    ].sort((a, b) => a.localeCompare(b));
   }, [devices]);
 
   const filteredDevices = useMemo(() => {
@@ -31,7 +34,9 @@ function DeviceTable({
       return devices;
     }
 
-    return devices.filter((device) => device.farmId === selectedFarmId);
+    return devices.filter(
+      (device) => device.farmId === selectedFarmId
+    );
   }, [devices, selectedFarmId]);
 
   if (loading) {
@@ -67,14 +72,17 @@ function DeviceTable({
       <div className="device-controls">
         <div className="device-controls-left">
           <span className="device-count">
-            {filteredDevices.length} device{filteredDevices.length !== 1 ? "s" : ""}
+            {filteredDevices.length} device
+            {filteredDevices.length !== 1 ? "s" : ""}
           </span>
 
           <label className="device-filter-label">
             Farm
             <select
               value={selectedFarmId}
-              onChange={(event) => setSelectedFarmId(event.target.value)}
+              onChange={(event) =>
+                setSelectedFarmId(event.target.value)
+              }
               className="device-farm-filter"
             >
               <option value="">All farms</option>
@@ -124,10 +132,14 @@ function DeviceTable({
                     )}
                   </td>
                   <td>
-                    <code className="device-farm-id">{device.farmId}</code>
+                    <code className="device-farm-id">
+                      {device.farmId}
+                    </code>
                   </td>
                   <td>
-                    <code className="device-eui">{device.devEui}</code>
+                    <code className="device-eui">
+                      {device.devEui}
+                    </code>
                   </td>
                   <td>
                     <span
@@ -140,14 +152,20 @@ function DeviceTable({
                   </td>
                   <td>
                     {device.location ? (
-                      <span className="device-location">{device.location}</span>
+                      <span className="device-location">
+                        {device.location}
+                      </span>
                     ) : (
-                      <span className="no-location">Not specified</span>
+                      <span className="no-location">
+                        Not specified
+                      </span>
                     )}
                   </td>
                   <td>
                     {device.gatewayId ? (
-                      <code className="gateway-id">{device.gatewayId}</code>
+                      <code className="gateway-id">
+                        {device.gatewayId}
+                      </code>
                     ) : (
                       <span className="no-gateway">N/A</span>
                     )}

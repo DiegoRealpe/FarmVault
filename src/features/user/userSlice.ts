@@ -1,4 +1,4 @@
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { PayloadAction, createSlice } from "@reduxjs/toolkit";
 
 export interface UserState {
   sub: string | null;
@@ -29,7 +29,8 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     setUserFromAuth(state, action: PayloadAction<SetUserPayload>) {
-      const { sub, email, groups, isAuthenticated, isAdmin } = action.payload;
+      const { sub, email, groups, isAuthenticated, isAdmin } =
+        action.payload;
 
       state.sub = sub;
       state.email = email;

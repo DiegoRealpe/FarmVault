@@ -1,16 +1,17 @@
-import React from "react";
-import ReactDOM from "react-dom/client";
 import { Amplify } from "aws-amplify";
+import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import { BrowserRouter } from "react-router-dom";
-import { Authenticator } from "@aws-amplify/ui-react";
 
+import React from "react";
+
+import { Authenticator } from "@aws-amplify/ui-react";
+import "@aws-amplify/ui-react/styles.css";
+
+import outputs from "../amplify_outputs.json";
 import App from "./App";
 import { store } from "./app/store";
-import outputs from "../amplify_outputs.json";
-
 import "./index.css";
-import "@aws-amplify/ui-react/styles.css";
 
 Amplify.configure(outputs);
 
@@ -20,10 +21,7 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Authenticator hideSignUp={true}>
         {({ user, signOut }) => (
           <BrowserRouter>
-            <App
-              user={user}
-              onSignOut={() => signOut?.()}
-            />
+            <App user={user} onSignOut={() => signOut?.()} />
           </BrowserRouter>
         )}
       </Authenticator>

@@ -1,6 +1,8 @@
-import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import type { Schema } from "../../../amplify/data/resource";
 import { generateClient } from "aws-amplify/data";
+
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+
+import type { Schema } from "../../../amplify/data/resource";
 
 const client = generateClient<Schema>({
   authMode: "userPool",
@@ -42,11 +44,13 @@ export const fetchVisibleDevices = createAsyncThunk<
 
     return devices.filter(
       (device): device is IoTDevice =>
-        device != null && typeof device === "object",
+        device != null && typeof device === "object"
     );
   } catch (error) {
     return rejectWithValue(
-      error instanceof Error ? error.message : "Failed to fetch visible devices",
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch visible devices"
     );
   }
 });
@@ -66,12 +70,14 @@ export const fetchVisibleFarms = createAsyncThunk<
     const farms = (response.data ?? []) as Farm[];
 
     return farms.filter(
-      (farm): farm is Farm => farm != null && typeof farm === "object",
+      (farm): farm is Farm => farm != null && typeof farm === "object"
     );
   } catch (error) {
     console.error("[fetchVisibleFarms] error:", error);
     return rejectWithValue(
-      error instanceof Error ? error.message : "Failed to fetch visible farms",
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch visible farms"
     );
   }
 });

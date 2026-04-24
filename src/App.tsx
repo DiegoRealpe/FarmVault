@@ -1,20 +1,31 @@
-import { Suspense, lazy, useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { AuthUser } from "aws-amplify/auth";
+import { useDispatch } from "react-redux";
+import { Route, Routes } from "react-router-dom";
+
+import { Suspense, lazy, useEffect } from "react";
 
 import "./App.css";
-
 import type { AppDispatch } from "./app/store";
 import { getAuthenticatedUserInfo } from "./auth/authUtils";
 import { Header } from "./components/Header";
 import TabFooter from "./components/TabFooter";
-import { setUserFromAuth, clearUser } from "./features/user/userSlice";
+import {
+  clearUser,
+  setUserFromAuth,
+} from "./features/user/userSlice";
 
-const LandingPage = lazy(() => import("./pages/LandingPage/LandingPage"));
-const MetricsPage = lazy(() => import("./pages/MetricsPage/MetricsPage"));
-const DevicePage = lazy(() => import("./pages/DevicePage/DevicePage"));
-const GrantsPage = lazy(() => import("./pages/GrantsPage/GrantsPage"));
+const LandingPage = lazy(
+  () => import("./pages/LandingPage/LandingPage")
+);
+const MetricsPage = lazy(
+  () => import("./pages/MetricsPage/MetricsPage")
+);
+const DevicePage = lazy(
+  () => import("./pages/DevicePage/DevicePage")
+);
+const GrantsPage = lazy(
+  () => import("./pages/GrantsPage/GrantsPage")
+);
 
 interface AppProps {
   user: AuthUser | undefined;
@@ -46,16 +57,20 @@ function App({ user, onSignOut }: AppProps) {
   return (
     <div className="app">
       <Header onSignOut={onSignOut} />
-        <main>
-          <Suspense fallback={<div className="page-loading">Loading page...</div>}>
-            <Routes>
-              <Route path="/" element={<LandingPage />} />
-              <Route path="/devices" element={<DevicePage />} />
-              <Route path="/metrics" element={<MetricsPage />} />
-              <Route path="/grants" element={<GrantsPage />} />
-            </Routes>
-          </Suspense>
-        </main>
+      <main>
+        <Suspense
+          fallback={
+            <div className="page-loading">Loading page...</div>
+          }
+        >
+          <Routes>
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/devices" element={<DevicePage />} />
+            <Route path="/metrics" element={<MetricsPage />} />
+            <Route path="/grants" element={<GrantsPage />} />
+          </Routes>
+        </Suspense>
+      </main>
       <TabFooter />
     </div>
   );

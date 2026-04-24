@@ -1,9 +1,11 @@
 // amplify/functions/list-visible-devices/handler.ts
-import type { Schema } from "../../data/resource";
+import { env } from "$amplify/env/list-visible-devices";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/list-visible-devices";
+
+import type { Schema } from "../../data/resource";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -63,7 +65,7 @@ function getCallerGroups(identity: Identity): string[] {
 
   if ("groups" in identity && Array.isArray(identity.groups)) {
     return identity.groups.filter(
-      (group): group is string => typeof group === "string",
+      (group): group is string => typeof group === "string"
     );
   }
 
@@ -77,7 +79,7 @@ function getCallerGroups(identity: Identity): string[] {
 
     if (Array.isArray(rawGroups)) {
       return rawGroups.filter(
-        (group): group is string => typeof group === "string",
+        (group): group is string => typeof group === "string"
       );
     }
 
@@ -102,7 +104,7 @@ function isExpired(expiresAt?: string | null): boolean {
 
 function getGrantIdsByType(
   givenGrantRecord: GrantRecord | MyGrantRecord | null,
-  grantType: "farm" | "device",
+  grantType: "farm" | "device"
 ): string[] {
   if (!givenGrantRecord) {
     return [];
@@ -112,8 +114,8 @@ function getGrantIdsByType(
     .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
       (grant?.ids ?? []).filter(
-        (id): id is string => typeof id === "string" && id.length > 0,
-      ),
+        (id): id is string => typeof id === "string" && id.length > 0
+      )
     );
 }
 
@@ -135,7 +137,9 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
     const { data, errors } = await client.models.IoTDevice.list();
 
     if (errors?.length) {
-      throw new Error(errors.map((error) => error.message).join("; "));
+      throw new Error(
+        errors.map((error) => error.message).join("; ")
+      );
     }
 
     return (data ?? []).filter((device): any => device != null);
@@ -147,7 +151,9 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
 
   if (grantRecordResponse.errors?.length) {
     throw new Error(
-      grantRecordResponse.errors.map((error) => error.message).join("; "),
+      grantRecordResponse.errors
+        .map((error) => error.message)
+        .join("; ")
     );
   }
 
@@ -161,8 +167,12 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
     return [];
   }
 
-  const allowedFarmIds = new Set(getGrantIdsByType(grantRecord, "farm"));
-  const allowedDeviceIds = new Set(getGrantIdsByType(grantRecord, "device"));
+  const allowedFarmIds = new Set(
+    getGrantIdsByType(grantRecord, "farm")
+  );
+  const allowedDeviceIds = new Set(
+    getGrantIdsByType(grantRecord, "device")
+  );
 
   if (allowedFarmIds.size === 0 && allowedDeviceIds.size === 0) {
     return [];
@@ -172,14 +182,17 @@ export const handler: ListVisibleDevicesHandler = async (event) => {
     await client.models.IoTDevice.list();
 
   if (deviceListErrors?.length) {
-    throw new Error(deviceListErrors.map((error) => error.message).join("; "));
+    throw new Error(
+      deviceListErrors.map((error) => error.message).join("; ")
+    );
   }
 
   const visibleDevices = (allDevices ?? [])
     .filter((device): any => device != null)
     .filter(
       (device) =>
-        allowedDeviceIds.has(device.id) || allowedFarmIds.has(device.farmId),
+        allowedDeviceIds.has(device.id) ||
+        allowedFarmIds.has(device.farmId)
     );
 
   return visibleDevices;

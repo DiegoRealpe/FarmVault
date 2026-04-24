@@ -1,9 +1,11 @@
+import { generateClient } from "aws-amplify/data";
+
 import {
+  type PayloadAction,
   createAsyncThunk,
   createSlice,
-  type PayloadAction,
 } from "@reduxjs/toolkit";
-import { generateClient } from "aws-amplify/data";
+
 import type { Schema } from "../../../amplify/data/resource";
 
 const client = generateClient<Schema>();
@@ -48,38 +50,43 @@ export const fetchMetricsForDevice = createAsyncThunk<
   TimeSeriesPoint[],
   FetchMetricsArgs,
   { rejectValue: string }
->("metrics/fetchMetricsForDevice", async ({ deviceId, from, to }, thunkApi) => {
-  try {
-    const result = await client.queries.getFarmIotData(
-      {
-        deviceId,
-        from,
-        to,
-      },
-      {
-        authMode: "userPool",
-      },
-    );
+>(
+  "metrics/fetchMetricsForDevice",
+  async ({ deviceId, from, to }, thunkApi) => {
+    try {
+      const result = await client.queries.getFarmIotData(
+        {
+          deviceId,
+          from,
+          to,
+        },
+        {
+          authMode: "userPool",
+        }
+      );
 
-    if (result.errors?.length) {
-      return thunkApi.rejectWithValue(result.errors[0].message);
+      if (result.errors?.length) {
+        return thunkApi.rejectWithValue(result.errors[0].message);
+      }
+
+      const series = (result.data ?? []).filter(
+        (item): item is DeviceTimeSeries => item != null
+      );
+
+      return (
+        series[0]?.points?.filter(
+          (point): point is TimeSeriesPoint => point != null
+        ) ?? []
+      );
+    } catch (error) {
+      return thunkApi.rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch metrics."
+      );
     }
-
-    const series = (result.data ?? []).filter(
-      (item): item is DeviceTimeSeries => item != null,
-    );
-
-    return (
-      series[0]?.points?.filter(
-        (point): point is TimeSeriesPoint => point != null,
-      ) ?? []
-    );
-  } catch (error) {
-    return thunkApi.rejectWithValue(
-      error instanceof Error ? error.message : "Failed to fetch metrics.",
-    );
   }
-});
+);
 
 const metricsSlice = createSlice({
   name: "metrics",
@@ -89,7 +96,10 @@ const metricsSlice = createSlice({
       state.selectedDeviceId = action.payload;
     },
 
-    setMetricsViewMode(state, action: PayloadAction<MetricsViewMode>) {
+    setMetricsViewMode(
+      state,
+      action: PayloadAction<MetricsViewMode>
+    ) {
       state.viewMode = action.payload;
     },
 
@@ -98,7 +108,9 @@ const metricsSlice = createSlice({
 
       state.from = nextFrom;
 
-      if (new Date(nextFrom).getTime() > new Date(state.to).getTime()) {
+      if (
+        new Date(nextFrom).getTime() > new Date(state.to).getTime()
+      ) {
         state.to = nextFrom;
       }
     },
@@ -108,7 +120,9 @@ const metricsSlice = createSlice({
 
       state.to = nextTo;
 
-      if (new Date(state.from).getTime() > new Date(nextTo).getTime()) {
+      if (
+        new Date(state.from).getTime() > new Date(nextTo).getTime()
+      ) {
         state.from = nextTo;
       }
     },

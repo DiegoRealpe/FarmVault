@@ -1,4 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
+
 import "./TabFooter.css";
 
 const TabFooter = () => {
@@ -6,8 +7,18 @@ const TabFooter = () => {
 
   const tabs = [
     { id: 1, name: "Home", path: "/", icon: "/home.svg" },
-    { id: 2, name: "Devices", path: "/devices", icon: "/devices.png" },
-    { id: 3, name: "Metrics", path: "/metrics", icon: "/metrics.png" },
+    {
+      id: 2,
+      name: "Devices",
+      path: "/devices",
+      icon: "/devices.png",
+    },
+    {
+      id: 3,
+      name: "Metrics",
+      path: "/metrics",
+      icon: "/metrics.png",
+    },
     { id: 4, name: "Grants", path: "/grants", icon: "/grants.png" },
   ];
 

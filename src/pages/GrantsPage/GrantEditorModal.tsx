@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
-import { toDateInputValue, toggleStringSelection } from "../../utils/utils";
+
+import {
+  toDateInputValue,
+  toggleStringSelection,
+} from "../../utils/utils";
 import "./GrantEditorModal.css";
 
 export interface SelectOption {
@@ -58,8 +62,12 @@ function GrantEditorModal({
   const [username, setUsername] = useState("");
   const [temporaryPassword, setTemporaryPassword] = useState("");
   const [expiresDate, setExpiresDate] = useState("");
-  const [selectedFarmIds, setSelectedFarmIds] = useState<string[]>([]);
-  const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]);
+  const [selectedFarmIds, setSelectedFarmIds] = useState<string[]>(
+    []
+  );
+  const [selectedDeviceIds, setSelectedDeviceIds] = useState<
+    string[]
+  >([]);
   const [localError, setLocalError] = useState<string | null>(null);
 
   const isCreateMode = mode === "create";
@@ -91,12 +99,16 @@ function GrantEditorModal({
     return null;
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (
+    event: React.FormEvent<HTMLFormElement>
+  ) => {
     event.preventDefault();
     setLocalError(null);
 
     if (isOptionsLoading) {
-      setLocalError("Please wait for farms and devices to finish loading.");
+      setLocalError(
+        "Please wait for farms and devices to finish loading."
+      );
       return;
     }
 
@@ -124,18 +136,24 @@ function GrantEditorModal({
       await onSubmit({
         email: email.trim(),
         username: isCreateMode ? username.trim() : undefined,
-        temporaryPassword: isCreateMode ? temporaryPassword.trim() : undefined,
-        expiresAt: new Date(`${expiresDate}T00:00:00.000Z`).toISOString(),
+        temporaryPassword: isCreateMode
+          ? temporaryPassword.trim()
+          : undefined,
+        expiresAt: new Date(
+          `${expiresDate}T00:00:00.000Z`
+        ).toISOString(),
         selectedFarmIds,
         selectedDeviceIds,
       });
     } catch (error) {
       setLocalError(
-        error instanceof Error ? error.message : "Failed to save grant.",
+        error instanceof Error
+          ? error.message
+          : "Failed to save grant."
       );
     }
   };
-  
+
   return (
     <div className="grant-editor-backdrop" onClick={onClose}>
       <div
@@ -154,7 +172,9 @@ function GrantEditorModal({
           </button>
 
           <h2 className="grant-editor-title">
-            {isCreateMode ? "Create User + Grant Access" : "Edit Grant Access"}
+            {isCreateMode
+              ? "Create User + Grant Access"
+              : "Edit Grant Access"}
           </h2>
 
           <p className="grant-editor-subtitle">
@@ -184,34 +204,45 @@ function GrantEditorModal({
                   <input
                     type="text"
                     value={username}
-                    onChange={(event) => setUsername(event.target.value)}
+                    onChange={(event) =>
+                      setUsername(event.target.value)
+                    }
                     disabled={isBusy}
                     className="grant-editor-input"
                   />
                 </label>
 
                 <label className="grant-editor-field">
-                  <span className="grant-editor-label">Temporary Password</span>
+                  <span className="grant-editor-label">
+                    Temporary Password
+                  </span>
                   <input
                     type="text"
                     value={temporaryPassword}
-                    onChange={(event) => setTemporaryPassword(event.target.value)}
+                    onChange={(event) =>
+                      setTemporaryPassword(event.target.value)
+                    }
                     disabled={isBusy}
                     className="grant-editor-input"
                   />
                 </label>
 
                 <label className="grant-editor-field grant-editor-date-field">
-                  <span className="grant-editor-label">Expiration Date</span>
+                  <span className="grant-editor-label">
+                    Expiration Date
+                  </span>
                   <input
                     type="date"
                     value={expiresDate}
-                    onChange={(event) => setExpiresDate(event.target.value)}
+                    onChange={(event) =>
+                      setExpiresDate(event.target.value)
+                    }
                     disabled={isBusy}
                     className="grant-editor-input"
                   />
                   <span className="grant-editor-helper-text">
-                    Saved automatically as midnight for the selected date.
+                    Saved automatically as midnight for the selected
+                    date.
                   </span>
                 </label>
               </div>
@@ -235,16 +266,21 @@ function GrantEditorModal({
 
                 <div className="grant-editor-summary-side">
                   <label className="grant-editor-field grant-editor-date-field">
-                    <span className="grant-editor-label">Expiration Date</span>
+                    <span className="grant-editor-label">
+                      Expiration Date
+                    </span>
                     <input
                       type="date"
                       value={expiresDate}
-                      onChange={(event) => setExpiresDate(event.target.value)}
+                      onChange={(event) =>
+                        setExpiresDate(event.target.value)
+                      }
                       disabled={isBusy}
                       className="grant-editor-input"
                     />
                     <span className="grant-editor-helper-text">
-                      Saved automatically as midnight for the selected date.
+                      Saved automatically as midnight for the selected
+                      date.
                     </span>
                   </label>
                 </div>
@@ -262,19 +298,29 @@ function GrantEditorModal({
               </div>
 
               {loadingFarmOptions ? (
-                <p className="grant-editor-helper-text">Loading farm options...</p>
+                <p className="grant-editor-helper-text">
+                  Loading farm options...
+                </p>
               ) : availableFarmOptions.length === 0 ? (
-                <p className="grant-editor-helper-text">No farms available to grant.</p>
+                <p className="grant-editor-helper-text">
+                  No farms available to grant.
+                </p>
               ) : (
                 <div className="grant-editor-option-list">
                   {availableFarmOptions.map((option) => (
-                    <label key={option.id} className="grant-editor-option-row">
+                    <label
+                      key={option.id}
+                      className="grant-editor-option-row"
+                    >
                       <input
                         type="checkbox"
                         checked={selectedFarmIds.includes(option.id)}
                         onChange={() =>
                           setSelectedFarmIds((currentValues) =>
-                            toggleStringSelection(option.id, currentValues),
+                            toggleStringSelection(
+                              option.id,
+                              currentValues
+                            )
                           )
                         }
                         disabled={isBusy}
@@ -295,19 +341,31 @@ function GrantEditorModal({
               </div>
 
               {loadingDeviceOptions ? (
-                <p className="grant-editor-helper-text">Loading device options...</p>
+                <p className="grant-editor-helper-text">
+                  Loading device options...
+                </p>
               ) : availableDeviceOptions.length === 0 ? (
-                <p className="grant-editor-helper-text">No devices available to grant.</p>
+                <p className="grant-editor-helper-text">
+                  No devices available to grant.
+                </p>
               ) : (
                 <div className="grant-editor-option-list">
                   {availableDeviceOptions.map((option) => (
-                    <label key={option.id} className="grant-editor-option-row">
+                    <label
+                      key={option.id}
+                      className="grant-editor-option-row"
+                    >
                       <input
                         type="checkbox"
-                        checked={selectedDeviceIds.includes(option.id)}
+                        checked={selectedDeviceIds.includes(
+                          option.id
+                        )}
                         onChange={() =>
                           setSelectedDeviceIds((currentValues) =>
-                            toggleStringSelection(option.id, currentValues),
+                            toggleStringSelection(
+                              option.id,
+                              currentValues
+                            )
                           )
                         }
                         disabled={isBusy}
@@ -320,8 +378,12 @@ function GrantEditorModal({
             </div>
           </div>
 
-          {optionsError && <p className="grant-editor-error">{optionsError}</p>}
-          {localError && <p className="grant-editor-error">{localError}</p>}
+          {optionsError && (
+            <p className="grant-editor-error">{optionsError}</p>
+          )}
+          {localError && (
+            <p className="grant-editor-error">{localError}</p>
+          )}
 
           <div className="grant-editor-actions">
             <button

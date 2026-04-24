@@ -1,6 +1,6 @@
 import type { Schema } from "../../../amplify/data/resource";
-import "./GrantsStats.css";
 import { getGrantIdsByType } from "../../utils/utils";
+import "./GrantsStats.css";
 
 type MyGrantRecord = Schema["MyGrantRecord"]["type"];
 type GrantRecord = Schema["GrantRecord"]["type"];
@@ -28,7 +28,9 @@ function GrantsStats({
         <div className="grants-stats-header">
           <h2>Your Access Grants</h2>
         </div>
-        <div className="grants-stats-empty">Loading your grant record...</div>
+        <div className="grants-stats-empty">
+          Loading your grant record...
+        </div>
       </section>
     );
   }
@@ -65,7 +67,8 @@ function GrantsStats({
   const farmIds = getGrantIdsByType(givenGrantRecord, "farm");
   const deviceIds = getGrantIdsByType(givenGrantRecord, "device");
 
-  const displayUsername = givenGrantRecord.username ?? "Username unavailable";
+  const displayUsername =
+    givenGrantRecord.username ?? "Username unavailable";
   const displayExpiresAt = givenGrantRecord.expiresAt
     ? new Date(givenGrantRecord.expiresAt).toLocaleString()
     : "Unknown";
@@ -117,7 +120,9 @@ function GrantsStats({
             ))}
           </div>
         ) : (
-          <div className="grant-list-empty">No farm grants assigned.</div>
+          <div className="grant-list-empty">
+            No farm grants assigned.
+          </div>
         )}
       </div>
 
@@ -132,7 +137,9 @@ function GrantsStats({
             ))}
           </div>
         ) : (
-          <div className="grant-list-empty">No device grants assigned.</div>
+          <div className="grant-list-empty">
+            No device grants assigned.
+          </div>
         )}
       </div>
     </section>

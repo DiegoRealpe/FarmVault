@@ -1,4 +1,9 @@
-import { a, defineData, type ClientSchema } from "@aws-amplify/backend";
+import {
+  type ClientSchema,
+  a,
+  defineData,
+} from "@aws-amplify/backend";
+
 import { createFarmUserFn } from "../functions/create-farm-user/resource";
 import { getFarmIotDataFn } from "../functions/get-farm-iot-data/resource";
 import { getPersonalGrantRecordFn } from "../functions/get-personal-grant-record/resource";
@@ -7,10 +12,9 @@ import { listVisibleDevicesFn } from "../functions/list-visible-devices/resource
 import { listVisibleFarmsFn } from "../functions/list-visible-farms/resource";
 import { upsertGrantRecordFn } from "../functions/upsert-grant-record/resource";
 
-
 const schema = a
   .schema({
-    // TODO: Remove 
+    // TODO: Remove
     Todo: a
       .model({
         content: a.string(),
@@ -28,9 +32,7 @@ const schema = a
         updatedAt: a.datetime().required(),
       })
       .identifier(["id"])
-      .authorization((allow) => [
-        allow.authenticated(),
-      ]),
+      .authorization((allow) => [allow.authenticated()]),
 
     DeviceType: a.enum(["TEMPERATURE", "MOISTURE"]),
     IoTDevice: a
@@ -48,12 +50,12 @@ const schema = a
         createdAt: a.datetime().required(),
         updatedAt: a.datetime().required(),
       })
-      // TODO: Remove 
+      // TODO: Remove
       .authorization((allow) => [
         allow.authenticated(),
         // allow.group('farmAdmin'),
       ]),
-    
+
     GrantRecord: a
       .model({
         userSub: a.string().required(),
@@ -67,16 +69,14 @@ const schema = a
         updatedAt: a.datetime(),
       })
       .identifier(["userSub"])
-      .authorization((allow) => [
-        allow.authenticated(),
-      ]),
+      .authorization((allow) => [allow.authenticated()]),
 
     // -- Custom Types --
     TimeSeriesPoint: a.customType({
       timestamp: a.datetime().required(),
       value: a.float().required(),
     }),
-    
+
     GrantType: a.enum(["farm", "device"]),
 
     GrantEntry: a.customType({
@@ -109,7 +109,7 @@ const schema = a
       createdAt: a.datetime(),
       updatedAt: a.datetime(),
     }),
-    
+
     DeviceTimeSeries: a.customType({
       deviceId: a.string().required(),
       points: a.ref("TimeSeriesPoint").array(),
@@ -122,28 +122,22 @@ const schema = a
       .arguments({
         deviceId: a.string().required(),
         from: a.datetime(),
-        to: a.datetime(),  
+        to: a.datetime(),
       })
       .returns(a.ref("DeviceTimeSeries").array())
-      .authorization((allow) => [
-        allow.authenticated(),
-      ])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(getFarmIotDataFn)),
 
     listVisibleFarms: a
       .query()
       .returns(a.ref("Farm").array().required())
-      .authorization((allow) => [
-        allow.authenticated(),
-      ])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(listVisibleFarmsFn)),
 
     listVisibleDevices: a
       .query()
       .returns(a.ref("IoTDevice").array().required())
-      .authorization((allow) => [
-        allow.authenticated(),
-      ])
+      .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(listVisibleDevicesFn)),
 
     // ---- User Specific Queries ----
@@ -170,7 +164,7 @@ const schema = a
       .returns(a.ref("CreateFarmUserResult").required())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(createFarmUserFn)),
-      
+
     upsertGrantRecord: a
       .mutation()
       .arguments({
@@ -183,7 +177,6 @@ const schema = a
       .returns(a.ref("UpsertGrantRecordResult").required())
       .authorization((allow) => [allow.authenticated()])
       .handler(a.handler.function(upsertGrantRecordFn)),
-    
   })
   .authorization((allow) => [
     allow.resource(getFarmIotDataFn),
@@ -191,7 +184,7 @@ const schema = a
     allow.resource(listCreatedGrantRecordsFn),
     allow.resource(listVisibleDevicesFn),
     allow.resource(listVisibleFarmsFn),
-    allow.resource(upsertGrantRecordFn)
+    allow.resource(upsertGrantRecordFn),
   ]);
 
 // 2) Export Schema type for typed clients

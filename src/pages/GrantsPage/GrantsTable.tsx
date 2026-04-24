@@ -1,15 +1,15 @@
 import type { Schema } from "../../../amplify/data/resource";
-import "./GrantsTable.css";
-import {
-  formatDate,
-  getGrantIdsByType,
-  compareGrantRecords,
-  getSortIndicator,
-} from "../../utils/utils";
 import type {
   GrantRecordSortBy,
   GrantRecordSortDirection,
 } from "../../features/grants/grantRecordSlice";
+import {
+  compareGrantRecords,
+  formatDate,
+  getGrantIdsByType,
+  getSortIndicator,
+} from "../../utils/utils";
+import "./GrantsTable.css";
 
 type GrantRecord = Schema["GrantRecord"]["type"];
 
@@ -28,7 +28,9 @@ interface GrantsTableProps {
 
 function renderGrantList(ids: string[], emptyLabel: string) {
   if (ids.length === 0) {
-    return <span className="grants-table-empty-value">{emptyLabel}</span>;
+    return (
+      <span className="grants-table-empty-value">{emptyLabel}</span>
+    );
   }
 
   return (
@@ -69,7 +71,7 @@ function GrantsTable({
   });
 
   const records = [...filteredRecords].sort((a, b) =>
-    compareGrantRecords(a, b, sortBy, sortDirection),
+    compareGrantRecords(a, b, sortBy, sortDirection)
   );
 
   if (loadingCreatedGrantRecords) {
@@ -84,7 +86,9 @@ function GrantsTable({
   if (!currentUserSub) {
     return (
       <div className="grants-table-error">
-        <p className="grants-table-error-message">You must be logged in.</p>
+        <p className="grants-table-error-message">
+          You must be logged in.
+        </p>
       </div>
     );
   }
@@ -117,7 +121,8 @@ function GrantsTable({
       <div className="grants-table-controls">
         <div>
           <span className="grants-table-count">
-            {records.length} grant record{records.length !== 1 ? "s" : ""}
+            {records.length} grant record
+            {records.length !== 1 ? "s" : ""}
           </span>
         </div>
 
@@ -134,7 +139,8 @@ function GrantsTable({
                 className="grants-sortable-header"
                 onClick={() => onToggleSort("userSub")}
               >
-                User{getSortIndicator("userSub", sortBy, sortDirection)}
+                User
+                {getSortIndicator("userSub", sortBy, sortDirection)}
               </th>
               <th>Farm Grants</th>
               <th>Device Grants</th>
@@ -142,13 +148,15 @@ function GrantsTable({
                 className="grants-sortable-header"
                 onClick={() => onToggleSort("expiresAt")}
               >
-                Expires{getSortIndicator("expiresAt", sortBy, sortDirection)}
+                Expires
+                {getSortIndicator("expiresAt", sortBy, sortDirection)}
               </th>
               <th
                 className="grants-sortable-header"
                 onClick={() => onToggleSort("updatedAt")}
               >
-                Updated{getSortIndicator("updatedAt", sortBy, sortDirection)}
+                Updated
+                {getSortIndicator("updatedAt", sortBy, sortDirection)}
               </th>
             </tr>
           </thead>
@@ -171,22 +179,32 @@ function GrantsTable({
                     </div>
                     <div className="grants-user-subtext">
                       {record.username ?? "No username"}
-                      {isCurrentUser ? " • Current signed-in user" : ""}
+                      {isCurrentUser
+                        ? " • Current signed-in user"
+                        : ""}
                     </div>
                   </td>
 
-                  <td>{renderGrantList(farmIds, "No farm grants")}</td>
-                  <td>{renderGrantList(deviceIds, "No device grants")}</td>
+                  <td>
+                    {renderGrantList(farmIds, "No farm grants")}
+                  </td>
+                  <td>
+                    {renderGrantList(deviceIds, "No device grants")}
+                  </td>
 
                   <td>
                     <span className="grants-date-value">
-                      {record.expiresAt ? formatDate(record.expiresAt) : "Unknown"}
+                      {record.expiresAt
+                        ? formatDate(record.expiresAt)
+                        : "Unknown"}
                     </span>
                   </td>
 
                   <td>
                     <span className="grants-date-muted">
-                      {record.updatedAt ? formatDate(record.updatedAt) : "Unknown"}
+                      {record.updatedAt
+                        ? formatDate(record.updatedAt)
+                        : "Unknown"}
                     </span>
                   </td>
                 </tr>

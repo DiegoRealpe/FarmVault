@@ -10,7 +10,7 @@ type GrantType = "farm" | "device";
 
 export function getGrantIdsByType(
   givenGrantRecord: GrantRecord | MyGrantRecord | null,
-  grantType: GrantType,
+  grantType: GrantType
 ): string[] {
   if (!givenGrantRecord) {
     return [];
@@ -19,13 +19,15 @@ export function getGrantIdsByType(
   return (givenGrantRecord.grants ?? [])
     .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
-      (grant?.ids ?? []).filter((id): id is string => typeof id === "string"),
+      (grant?.ids ?? []).filter(
+        (id): id is string => typeof id === "string"
+      )
     );
 }
 
 export function getGrantRecordSortValue(
   record: GrantRecord,
-  sortBy: GrantRecordSortBy,
+  sortBy: GrantRecordSortBy
 ): string | number {
   switch (sortBy) {
     case "ttl":
@@ -49,7 +51,7 @@ export function compareGrantRecords(
   a: GrantRecord,
   b: GrantRecord,
   sortBy: GrantRecordSortBy,
-  sortDirection: GrantRecordSortDirection,
+  sortDirection: GrantRecordSortDirection
 ): number {
   const aValue = getGrantRecordSortValue(a, sortBy);
   const bValue = getGrantRecordSortValue(b, sortBy);
@@ -68,7 +70,7 @@ export function compareGrantRecords(
 export function getSortIndicator(
   column: GrantRecordSortBy,
   sortBy: GrantRecordSortBy,
-  sortDirection: GrantRecordSortDirection,
+  sortDirection: GrantRecordSortDirection
 ): string {
   if (column !== sortBy) {
     return "";
@@ -81,7 +83,7 @@ export function formatDate(dateString: string): string {
   const date = new Date(dateString);
   const now = new Date();
   const diffInHours = Math.floor(
-    (now.getTime() - date.getTime()) / (1000 * 60 * 60),
+    (now.getTime() - date.getTime()) / (1000 * 60 * 60)
   );
 
   if (diffInHours < 24) {
@@ -129,7 +131,7 @@ export function toDateInputValue(value?: string): string {
 
 export function toggleStringSelection(
   value: string,
-  currentValues: string[],
+  currentValues: string[]
 ): string[] {
   if (currentValues.includes(value)) {
     return currentValues.filter((item) => item !== value);

@@ -1,5 +1,11 @@
-import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { generateClient } from "aws-amplify/data";
+
+import {
+  PayloadAction,
+  createAsyncThunk,
+  createSlice,
+} from "@reduxjs/toolkit";
+
 import type { Schema } from "../../../amplify/data/resource";
 
 const client = generateClient<Schema>({
@@ -76,16 +82,21 @@ export const fetchGrantRecord = createAsyncThunk<
   { rejectValue: string }
 >("grantRecord/fetchGrantRecord", async (_, { rejectWithValue }) => {
   try {
-    const { data, errors } = await client.queries.getPersonalGrantRecord({});
+    const { data, errors } =
+      await client.queries.getPersonalGrantRecord({});
 
     if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
+      return rejectWithValue(
+        errors.map((e: { message: any }) => e.message).join("; ")
+      );
     }
 
     return (data as MyGrantRecord | null) ?? null;
   } catch (error) {
     return rejectWithValue(
-      error instanceof Error ? error.message : "Failed to fetch grant record",
+      error instanceof Error
+        ? error.message
+        : "Failed to fetch grant record"
     );
   }
 });
@@ -94,84 +105,105 @@ export const fetchCreatedGrantRecords = createAsyncThunk<
   GrantRecord[],
   void,
   { rejectValue: string }
->("grantRecord/fetchCreatedGrantRecords", async (_, { rejectWithValue }) => {
-  try {
-    const { data, errors } = await client.queries.listCreatedGrantRecords({});
+>(
+  "grantRecord/fetchCreatedGrantRecords",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data, errors } =
+        await client.queries.listCreatedGrantRecords({});
 
-    if (errors?.length) {
-      return rejectWithValue(errors.map((e: { message: any; }) => e.message).join("; "));
+      if (errors?.length) {
+        return rejectWithValue(
+          errors.map((e: { message: any }) => e.message).join("; ")
+        );
+      }
+
+      return (data as GrantRecord[] | null) ?? [];
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "Failed to fetch created grant records"
+      );
     }
-
-    return (data as GrantRecord[] | null) ?? [];
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error
-        ? error.message
-        : "Failed to fetch created grant records",
-    );
   }
-});
+);
 
 export const createFarmUserThunk = createAsyncThunk<
   CreateFarmUserResult,
   CreateFarmUserInput,
   { rejectValue: string }
->("grantRecord/createFarmUser", async (input, { rejectWithValue }) => {
-  try {
-    const { data, errors } = await client.mutations.createFarmUser({
-      email: input.email,
-      temporaryPassword: input.temporaryPassword,
-    });
+>(
+  "grantRecord/createFarmUser",
+  async (input, { rejectWithValue }) => {
+    try {
+      const { data, errors } = await client.mutations.createFarmUser({
+        email: input.email,
+        temporaryPassword: input.temporaryPassword,
+      });
 
-    if (errors?.length) {
-      return rejectWithValue(errors.map((e) => e.message).join("; "));
+      if (errors?.length) {
+        return rejectWithValue(
+          errors.map((e) => e.message).join("; ")
+        );
+      }
+
+      if (!data) {
+        return rejectWithValue(
+          "No user was returned from createFarmUser"
+        );
+      }
+
+      return data as CreateFarmUserResult;
+    } catch (error) {
+      return rejectWithValue(
+        error instanceof Error
+          ? error.message
+          : "Failed to create farm user"
+      );
     }
-
-    if (!data) {
-      return rejectWithValue("No user was returned from createFarmUser");
-    }
-
-    return data as CreateFarmUserResult;
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error ? error.message : "Failed to create farm user",
-    );
   }
-});
+);
 
 export const upsertGrantRecordThunk = createAsyncThunk<
   GrantRecord,
   UpsertGrantRecordInput,
   { rejectValue: string }
->("grantRecord/upsertGrantRecord", async (input, { rejectWithValue }) => {
-  try {
-    const { data, errors } = await client.mutations.upsertGrantRecord({
-      userSub: input.userSub,
-      username: input.username,
-      email: input.email,
-      grants: input.grants,
-      expiresAt: input.expiresAt,
-    });
+>(
+  "grantRecord/upsertGrantRecord",
+  async (input, { rejectWithValue }) => {
+    try {
+      const { data, errors } =
+        await client.mutations.upsertGrantRecord({
+          userSub: input.userSub,
+          username: input.username,
+          email: input.email,
+          grants: input.grants,
+          expiresAt: input.expiresAt,
+        });
 
-    if (errors?.length) {
+      if (errors?.length) {
+        return rejectWithValue(
+          errors.map((e: { message: string }) => e.message).join("; ")
+        );
+      }
+
+      if (!data) {
+        return rejectWithValue(
+          "No grant record was returned from upsertGrantRecord"
+        );
+      }
+
+      return data as GrantRecord;
+    } catch (error) {
       return rejectWithValue(
-        errors.map((e: { message: string }) => e.message).join("; "),
+        error instanceof Error
+          ? error.message
+          : "Failed to upsert grant record"
       );
     }
-
-    if (!data) {
-      return rejectWithValue(
-        "No grant record was returned from upsertGrantRecord",
-      );
-    }
-
-    return data as GrantRecord;
-  } catch (error) {
-    return rejectWithValue(
-      error instanceof Error ? error.message : "Failed to upsert grant record",
-    );
   }
-});
+);
 
 const grantRecordSlice = createSlice({
   name: "grantRecord",
@@ -187,7 +219,7 @@ const grantRecordSlice = createSlice({
 
     setSortDirection: (
       state,
-      action: PayloadAction<GrantRecordSortDirection>,
+      action: PayloadAction<GrantRecordSortDirection>
     ) => {
       state.filters.sortDirection = action.payload;
     },
@@ -225,20 +257,25 @@ const grantRecordSlice = createSlice({
       })
       .addCase(fetchGrantRecord.rejected, (state, action) => {
         state.loadingGrantRecord = false;
-        state.error = action.payload ?? "Failed to fetch grant record";
+        state.error =
+          action.payload ?? "Failed to fetch grant record";
       })
 
       .addCase(fetchCreatedGrantRecords.pending, (state) => {
         state.loadingCreatedGrantRecords = true;
         state.error = null;
       })
-      .addCase(fetchCreatedGrantRecords.fulfilled, (state, action) => {
-        state.loadingCreatedGrantRecords = false;
-        state.createdGrantRecords = action.payload;
-      })
+      .addCase(
+        fetchCreatedGrantRecords.fulfilled,
+        (state, action) => {
+          state.loadingCreatedGrantRecords = false;
+          state.createdGrantRecords = action.payload;
+        }
+      )
       .addCase(fetchCreatedGrantRecords.rejected, (state, action) => {
         state.loadingCreatedGrantRecords = false;
-        state.error = action.payload ?? "Failed to fetch created grant records";
+        state.error =
+          action.payload ?? "Failed to fetch created grant records";
       })
 
       .addCase(createFarmUserThunk.pending, (state) => {
@@ -261,7 +298,7 @@ const grantRecordSlice = createSlice({
         state.upsertingGrantRecord = false;
 
         const existingIndex = state.createdGrantRecords.findIndex(
-          (record) => record.userSub === action.payload.userSub,
+          (record) => record.userSub === action.payload.userSub
         );
 
         if (existingIndex >= 0) {
@@ -279,7 +316,8 @@ const grantRecordSlice = createSlice({
       })
       .addCase(upsertGrantRecordThunk.rejected, (state, action) => {
         state.upsertingGrantRecord = false;
-        state.error = action.payload ?? "Failed to upsert grant record";
+        state.error =
+          action.payload ?? "Failed to upsert grant record";
       });
   },
 });

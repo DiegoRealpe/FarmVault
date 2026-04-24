@@ -1,8 +1,10 @@
-import type { Schema } from "../../data/resource";
+import { env } from "$amplify/env/list-visible-farms";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/list-visible-farms";
+
+import type { Schema } from "../../data/resource";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -58,7 +60,7 @@ function getCallerGroups(identity: Identity): string[] {
 
   if ("groups" in identity && Array.isArray(identity.groups)) {
     return identity.groups.filter(
-      (group): group is string => typeof group === "string",
+      (group): group is string => typeof group === "string"
     );
   }
 
@@ -72,7 +74,7 @@ function getCallerGroups(identity: Identity): string[] {
 
     if (Array.isArray(rawGroups)) {
       return rawGroups.filter(
-        (group): group is string => typeof group === "string",
+        (group): group is string => typeof group === "string"
       );
     }
 
@@ -97,7 +99,7 @@ function isExpired(expiresAt?: string | null): boolean {
 
 function getGrantIdsByType(
   givenGrantRecord: GrantRecord | MyGrantRecord | null,
-  grantType: "farm" | "device",
+  grantType: "farm" | "device"
 ): string[] {
   if (!givenGrantRecord) {
     return [];
@@ -107,8 +109,8 @@ function getGrantIdsByType(
     .filter((grant) => grant?.grantType === grantType)
     .flatMap((grant) =>
       (grant?.ids ?? []).filter(
-        (id): id is string => typeof id === "string" && id.length > 0,
-      ),
+        (id): id is string => typeof id === "string" && id.length > 0
+      )
     );
 }
 
@@ -129,7 +131,9 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
     const { data, errors } = await client.models.Farm.list();
 
     if (errors?.length) {
-      throw new Error(errors.map((error) => error.message).join("; "));
+      throw new Error(
+        errors.map((error) => error.message).join("; ")
+      );
     }
 
     return (data ?? []).filter((farm) => farm != null);
@@ -141,7 +145,9 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
 
   if (grantRecordResponse.errors?.length) {
     throw new Error(
-      grantRecordResponse.errors.map((error) => error.message).join("; "),
+      grantRecordResponse.errors
+        .map((error) => error.message)
+        .join("; ")
     );
   }
 
@@ -155,22 +161,26 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
     return [];
   }
 
-  const visibleFarmIds = new Set(getGrantIdsByType(grantRecord, "farm"));
+  const visibleFarmIds = new Set(
+    getGrantIdsByType(grantRecord, "farm")
+  );
   const grantedDeviceIds = getGrantIdsByType(grantRecord, "device");
 
   if (grantedDeviceIds.length > 0) {
     const deviceResponses = await Promise.all(
       grantedDeviceIds.map((deviceId) =>
-        client.models.IoTDevice.get({ id: deviceId }),
-      ),
+        client.models.IoTDevice.get({ id: deviceId })
+      )
     );
 
     const deviceErrors = deviceResponses.flatMap(
-      (response) => response.errors ?? [],
+      (response) => response.errors ?? []
     );
 
     if (deviceErrors.length) {
-      throw new Error(deviceErrors.map((error) => error.message).join("; "));
+      throw new Error(
+        deviceErrors.map((error) => error.message).join("; ")
+      );
     }
 
     const grantedDevices = deviceResponses
@@ -192,7 +202,9 @@ export const handler: ListVisibleFarmsHandler = async (event) => {
     await client.models.Farm.list();
 
   if (farmListErrors?.length) {
-    throw new Error(farmListErrors.map((error) => error.message).join("; "));
+    throw new Error(
+      farmListErrors.map((error) => error.message).join("; ")
+    );
   }
 
   return (allFarms ?? [])

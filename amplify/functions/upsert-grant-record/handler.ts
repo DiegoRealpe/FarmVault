@@ -1,9 +1,11 @@
 // amplify/functions/upsert-grant-record/handler.ts
-import type { Schema } from "../../data/resource";
+import { env } from "$amplify/env/upsert-grant-record";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/upsert-grant-record";
+
+import type { Schema } from "../../data/resource";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -11,12 +13,14 @@ Amplify.configure(resourceConfig, libraryOptions);
 
 const client = generateClient<Schema>();
 
-type UpsertGrantRecordHandler = Schema["upsertGrantRecord"]["functionHandler"];
+type UpsertGrantRecordHandler =
+  Schema["upsertGrantRecord"]["functionHandler"];
 type Identity = Parameters<UpsertGrantRecordHandler>[0]["identity"];
 type UpsertGrantRecordArguments =
   Parameters<UpsertGrantRecordHandler>[0]["arguments"];
 type GrantRecord = Schema["GrantRecord"]["type"];
-type UpsertGrantRecordResult = Schema["UpsertGrantRecordResult"]["type"];
+type UpsertGrantRecordResult =
+  Schema["UpsertGrantRecordResult"]["type"];
 
 function getCallerSub(identity: Identity): string | null {
   if (!identity) {
@@ -47,7 +51,7 @@ function getCallerGroups(identity: Identity): string[] {
 
   if ("groups" in identity && Array.isArray(identity.groups)) {
     return identity.groups.filter(
-      (group): group is string => typeof group === "string",
+      (group): group is string => typeof group === "string"
     );
   }
 
@@ -61,7 +65,7 @@ function getCallerGroups(identity: Identity): string[] {
 
     if (Array.isArray(rawGroups)) {
       return rawGroups.filter(
-        (group): group is string => typeof group === "string",
+        (group): group is string => typeof group === "string"
       );
     }
 
@@ -91,7 +95,7 @@ function toEpochSeconds(isoDateTime: string): number {
 }
 
 function sanitizeGrants(
-  givenGrants: UpsertGrantRecordArguments["grants"],
+  givenGrants: UpsertGrantRecordArguments["grants"]
 ): Array<{ grantType: "farm" | "device"; ids: string[] }> {
   return (givenGrants ?? [])
     .filter((grant) => grant != null)
@@ -105,7 +109,9 @@ function sanitizeGrants(
     .filter((grant) => grant.ids.length > 0);
 }
 
-function toResult(givenGrantRecord: GrantRecord): UpsertGrantRecordResult {
+function toResult(
+  givenGrantRecord: GrantRecord
+): UpsertGrantRecordResult {
   return {
     userSub: givenGrantRecord.userSub,
     email: givenGrantRecord.email,
@@ -118,7 +124,10 @@ function toResult(givenGrantRecord: GrantRecord): UpsertGrantRecordResult {
 }
 
 export const handler: UpsertGrantRecordHandler = async (event) => {
-  console.log("upsertGrantRecord event:", JSON.stringify(event, null, 2));
+  console.log(
+    "upsertGrantRecord event:",
+    JSON.stringify(event, null, 2)
+  );
 
   if (!isAdmin(event.identity)) {
     throw new Error("Only admins can upsert grant records.");
@@ -129,7 +138,8 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
     throw new Error("This endpoint requires Cognito userPool auth.");
   }
 
-  const { userSub, email, username, grants, expiresAt } = event.arguments;
+  const { userSub, email, username, grants, expiresAt } =
+    event.arguments;
 
   if (!userSub?.trim()) {
     throw new Error("userSub is required.");
@@ -156,7 +166,7 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
 
   if (existingResponse.errors?.length) {
     throw new Error(
-      existingResponse.errors.map((error) => error.message).join("; "),
+      existingResponse.errors.map((error) => error.message).join("; ")
     );
   }
 
@@ -177,7 +187,7 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
 
     if (updateResponse.errors?.length) {
       throw new Error(
-        updateResponse.errors.map((error) => error.message).join("; "),
+        updateResponse.errors.map((error) => error.message).join("; ")
       );
     }
 
@@ -202,7 +212,7 @@ export const handler: UpsertGrantRecordHandler = async (event) => {
 
   if (createResponse.errors?.length) {
     throw new Error(
-      createResponse.errors.map((error) => error.message).join("; "),
+      createResponse.errors.map((error) => error.message).join("; ")
     );
   }
 

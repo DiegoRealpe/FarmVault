@@ -1,11 +1,11 @@
-import {
-  CognitoIdentityProviderClient,
-  AdminCreateUserCommand,
-  AdminAddUserToGroupCommand,
-  AdminGetUserCommand,
-} from "@aws-sdk/client-cognito-identity-provider";
-
 import { env } from "$amplify/env/create-farm-user";
+
+import {
+  AdminAddUserToGroupCommand,
+  AdminCreateUserCommand,
+  AdminGetUserCommand,
+  CognitoIdentityProviderClient,
+} from "@aws-sdk/client-cognito-identity-provider";
 
 type AppSyncEvent = {
   arguments: {
@@ -29,10 +29,10 @@ export const handler = async (event: AppSyncEvent) => {
 
   const username = email.trim().toLowerCase();
 
-  const userPoolId = env.AMPLIFY_AUTH_USERPOOL_ID 
-    // ||
-    // env.AUTH_USERPOOL_ID ||
-    // env.USER_POOL_ID;
+  const userPoolId = env.AMPLIFY_AUTH_USERPOOL_ID;
+  // ||
+  // env.AUTH_USERPOOL_ID ||
+  // env.USER_POOL_ID;
 
   if (!userPoolId) {
     throw new Error(
@@ -69,8 +69,8 @@ export const handler = async (event: AppSyncEvent) => {
   );
 
   const userSub =
-    createdUser.UserAttributes?.find((attr) => attr.Name === "sub")?.Value ??
-    null;
+    createdUser.UserAttributes?.find((attr) => attr.Name === "sub")
+      ?.Value ?? null;
 
   return {
     success: true,

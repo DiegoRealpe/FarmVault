@@ -1,5 +1,7 @@
-import { useState } from "react";
 import { useSelector } from "react-redux";
+
+import { useState } from "react";
+
 import type { RootState } from "../../app/store";
 import "./LandingPage.css";
 
@@ -7,11 +9,14 @@ type LandingViewMode = "showcase" | "state";
 
 function LandingPage() {
   const reduxState = useSelector((state: RootState) => state);
-  const [viewMode, setViewMode] = useState<LandingViewMode>("showcase");
+  const [viewMode, setViewMode] =
+    useState<LandingViewMode>("showcase");
 
   async function handleCopyState() {
     try {
-      await navigator.clipboard.writeText(JSON.stringify(reduxState, null, 2));
+      await navigator.clipboard.writeText(
+        JSON.stringify(reduxState, null, 2)
+      );
     } catch (error) {
       console.error("Failed to copy redux state:", error);
     }
@@ -24,9 +29,9 @@ function LandingPage() {
           <div className="landing-page__heading">
             <h1 className="landing-page__title">FarmVault</h1>
             <p className="landing-page__subtitle">
-              Iowa State-inspired farm intelligence with secure cloud access,
-              connected devices, and visibility into the data that drives
-              smarter decisions.
+              Iowa State-inspired farm intelligence with secure cloud
+              access, connected devices, and visibility into the data
+              that drives smarter decisions.
             </p>
           </div>
 
@@ -105,7 +110,9 @@ function LandingPage() {
         ) : (
           <section className="landing-page__state-panel">
             <div className="landing-page__state-actions">
-              <h2 className="landing-page__panel-title">Current Redux State</h2>
+              <h2 className="landing-page__panel-title">
+                Current Redux State
+              </h2>
 
               <button
                 type="button"

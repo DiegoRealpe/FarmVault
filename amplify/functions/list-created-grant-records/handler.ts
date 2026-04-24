@@ -1,9 +1,11 @@
 // amplify/functions/list-created-grant-records/handler.ts
-import type { Schema } from "../../data/resource";
+import { env } from "$amplify/env/list-created-grant-records";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+
 import { getAmplifyDataClientConfig } from "@aws-amplify/backend/function/runtime";
-import { env } from "$amplify/env/list-created-grant-records";
+
+import type { Schema } from "../../data/resource";
 
 const { resourceConfig, libraryOptions } =
   await getAmplifyDataClientConfig(env);
@@ -15,7 +17,8 @@ const client = generateClient<Schema>();
 type ListCreatedGrantRecordsHandler =
   Schema["listCreatedGrantRecords"]["functionHandler"];
 type GrantRecord = Schema["GrantRecord"]["type"];
-type Identity = Parameters<ListCreatedGrantRecordsHandler>[0]["identity"];
+type Identity =
+  Parameters<ListCreatedGrantRecordsHandler>[0]["identity"];
 
 function getCallerSub(identity: Identity): string | null {
   if (!identity || typeof identity !== "object") {
@@ -36,7 +39,7 @@ function getGroups(identity: Identity): string[] {
 
   if ("groups" in identity && Array.isArray(identity.groups)) {
     return identity.groups.filter(
-      (group): group is string => typeof group === "string",
+      (group): group is string => typeof group === "string"
     );
   }
 
@@ -47,7 +50,9 @@ function isAdmin(identity: Identity): boolean {
   return getGroups(identity).includes("admin");
 }
 
-export const handler: ListCreatedGrantRecordsHandler = async (event) => {
+export const handler: ListCreatedGrantRecordsHandler = async (
+  event
+) => {
   console.log(
     "listCreatedGrantRecords event:",
     JSON.stringify(
@@ -56,8 +61,8 @@ export const handler: ListCreatedGrantRecordsHandler = async (event) => {
         identity: event.identity,
       },
       null,
-      2,
-    ),
+      2
+    )
   );
 
   const callerSub = getCallerSub(event.identity);
@@ -80,12 +85,12 @@ export const handler: ListCreatedGrantRecordsHandler = async (event) => {
     throw new Error(
       `Failed to list created grant records: ${errors
         .map((error) => error.message)
-        .join("; ")}`,
+        .join("; ")}`
     );
   }
 
   const grantRecords = (data ?? []).filter(
-    (record) => record != null,
+    (record) => record != null
   ) as GrantRecord[];
 
   return grantRecords;
