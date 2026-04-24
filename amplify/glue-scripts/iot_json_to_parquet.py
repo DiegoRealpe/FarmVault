@@ -3,12 +3,20 @@ from awsglue.context import GlueContext
 from awsglue.job import Job
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
-from pyspark.sql import Row
-from pyspark.sql.functions import col, to_timestamp, year, month, dayofmonth
+from pyspark.sql.functions import (
+    coalesce,
+    col,
+    dayofmonth,
+    lit,
+    month,
+    to_timestamp,
+    when,
+    year,
+)
 
 # ------------------------------------------------------------------
 # Expected job arguments:
-#   --JOB_NAME         (automatically provided by Glue)
+#   --JOB_NAME
 #   --RAW_S3_PATH      e.g. s3://your-bucket/raw/
 #   --PARQUET_S3_PATH  e.g. s3://your-bucket/parquet/
 # ------------------------------------------------------------------
@@ -16,13 +24,13 @@ from pyspark.sql.functions import col, to_timestamp, year, month, dayofmonth
 args = getResolvedOptions(
     sys.argv,
     [
-        "JOB_NAME", 
-        # "RAW_S3_PATH", 
-        "PARQUET_S3_PATH"
+        "JOB_NAME",
+        "RAW_S3_PATH",
+        "PARQUET_S3_PATH",
     ],
 )
 
-# RAW_S3_PATH = args["RAW_S3_PATH"]
+RAW_S3_PATH = args["RAW_S3_PATH"]
 PARQUET_S3_PATH = args["PARQUET_S3_PATH"]
 
 sc = SparkContext()
@@ -32,65 +40,92 @@ spark = glue_context.spark_session
 job = Job(glue_context)
 job.init(args["JOB_NAME"], args)
 
-# print(f"Reading JSON from: {RAW_S3_PATH}")
+print(f"[INFO] Reading JSON from: {RAW_S3_PATH}")
 
-# # Read JSON as a DynamicFrame from S3
-# raw_dyf = glue_context.create_dynamic_frame_from_options(
-#     connection_type="s3",
-#     connection_options={"paths": [RAW_S3_PATH]},
-#     format="json",
-# )
-
-# Convert to Spark DataFrame for easier transformations
-# df = raw_dyf.toDF()
-
-# Optional: sanity print of schema
-# print("Input schema:")
-# df.printSchema()
-
-# ------------------------------------------------------------------
-# 1) Create a tiny in-memory dataset (one test row)
-# ------------------------------------------------------------------
-
-test_row = Row(
-    id="TEST-0001",
-    payload="dummy-payload",
-    moisture=100,
-    timestamp="2024-03-15T20:55:27.966Z",  # ISO-8601-style string
-    application_id="lorasensor01",
-    device_id="eui-2cf7f1c04230026a",
-    gateway_id="eui-e45f01fffec5bcf",
+raw_dyf = glue_context.create_dynamic_frame_from_options(
+    connection_type="s3",
+    connection_options={
+        "paths": [RAW_S3_PATH],
+        "recurse": True,
+    },
+    format="json",
 )
 
-df = spark.createDataFrame([test_row])
+raw_df = raw_dyf.toDF()
+
+print("[INFO] Raw input schema:")
+raw_df.printSchema()
+
+print("[INFO] Raw sample rows:")
+raw_df.show(10, truncate=False)
 
 # ------------------------------------------------------------------
-# 2) Turn the string timestamp into a proper Spark timestamp
-#    (while keeping the original column if you want)
+# Normalize raw telemetry JSON into Athena-ready Parquet shape:
+#
+# device_id       string
+# application_id  string
+# gateway_id      string
+# metric_type     string
+# value           double
+# timestamp       timestamp
+#
+# partitions:
+# year, month, day
 # ------------------------------------------------------------------
 
-df = df.withColumn(
-    "event_ts",
-    to_timestamp(df["timestamp"], "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+df = (
+    raw_df
+    .withColumn("parsed_timestamp", to_timestamp(col("timestamp")))
+    .withColumn(
+        "metric_type",
+        when(col("payload.temperature").isNotNull(), lit("TEMP"))
+        .when(col("payload.moisture").isNotNull(), lit("MOISTURE"))
+        .otherwise(lit("UNKNOWN")),
+    )
+    .withColumn(
+        "value",
+        coalesce(
+            col("payload.temperature").cast("double"),
+            col("payload.moisture").cast("double"),
+        ),
+    )
+    .select(
+        col("device_id").cast("string"),
+        col("application_id").cast("string"),
+        col("gateway_id").cast("string"),
+        col("metric_type").cast("string"),
+        col("value").cast("double"),
+        col("parsed_timestamp").alias("timestamp"),
+    )
+    .filter(col("device_id").isNotNull())
+    .filter(col("timestamp").isNotNull())
+    .filter(col("value").isNotNull())
+    .filter(col("metric_type") != "UNKNOWN")
 )
 
-print("[INFO] Schema of test DataFrame:")
+df = (
+    df
+    .withColumn("year", year(col("timestamp")).cast("string"))
+    .withColumn("month", month(col("timestamp")).cast("string"))
+    .withColumn("day", dayofmonth(col("timestamp")).cast("string"))
+)
+
+print("[INFO] Normalized output schema:")
 df.printSchema()
 
-print("[INFO] Sample row:")
-df.show(truncate=False)
+print("[INFO] Normalized sample rows:")
+df.show(10, truncate=False)
 
-# ------------------------------------------------------------------
-# 3) Write it to S3 as a single Parquet dataset (no partitioning)
-# ------------------------------------------------------------------
+print(f"[INFO] Writing partitioned Parquet to: {PARQUET_S3_PATH}")
 
 (
     df.write
-      .mode("overwrite")          # for testing; change to "append" later
-      .format("parquet")
-      .save(PARQUET_S3_PATH)
+    .mode("overwrite")
+    .format("parquet")
+    .partitionBy("year", "month", "day")
+    .save(PARQUET_S3_PATH)
 )
 
-print("[INFO] Test write complete.")
+print("[INFO] Parquet write complete.")
 
 job.commit()

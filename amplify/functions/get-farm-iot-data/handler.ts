@@ -89,10 +89,12 @@ function getGroups(identity: Identity): string[] {
 }
 
 function isAdmin(identity: Identity): boolean {
-  return getGroups(identity).includes("admin");
+  return getGroups(identity).includes("Admin");
 }
 
-function isGrantActive(givenGrantRecord: GrantRecord | MyGrantRecord | null | undefined): boolean {
+function isGrantActive(
+  givenGrantRecord: GrantRecord | MyGrantRecord | null | undefined,
+): boolean {
   if (!givenGrantRecord) {
     return false;
   }
@@ -186,25 +188,33 @@ export const handler: GetFarmIotDataHandler = async (event) => {
 
   const workGroup = process.env.ATHENA_WORKGROUP ?? "farmvault-wg";
   const db = process.env.ATHENA_DATABASE ?? "iot_telemetry";
-  const table = process.env.ATHENA_TABLE ?? "iot_parquet";
+  const table = process.env.ATHENA_TABLE ?? "iot_metrics_parquet";
 
   const safeDeviceId = deviceIdArg.replace(/'/g, "''");
 
+  const metricType = device.type === "TEMPERATURE" ? "TEMP" : "MOISTURE";
+  const safeMetricType = metricType.replace(/'/g, "''");
+
   const fromClause = event.arguments.from
-    ? `AND event_ts >= TIMESTAMP '${event.arguments.from.replace(/'/g, "''")}'`
+    ? `AND "timestamp" >= TIMESTAMP '${event.arguments.from.replace(/'/g, "''")}'`
     : "";
 
   const toClause = event.arguments.to
-    ? `AND event_ts <= TIMESTAMP '${event.arguments.to.replace(/'/g, "''")}'`
+    ? `AND "timestamp" <= TIMESTAMP '${event.arguments.to.replace(/'/g, "''")}'`
     : "";
 
   const query = `
-    SELECT *
+    SELECT
+      device_id,
+      metric_type,
+      value,
+      "timestamp"
     FROM "${db}"."${table}"
     WHERE device_id = '${safeDeviceId}'
-    ${fromClause}
-    ${toClause}
-    ORDER BY event_ts
+      AND metric_type = '${safeMetricType}'
+      ${fromClause}
+      ${toClause}
+    ORDER BY "timestamp"
     LIMIT 1000;
   `;
 
@@ -235,7 +245,10 @@ export const handler: GetFarmIotDataHandler = async (event) => {
       }),
     );
 
-    state = exec.QueryExecution?.Status?.State as QueryExecutionState | undefined;
+    state = exec.QueryExecution?.Status?.State as
+      | QueryExecutionState
+      | undefined;
+
     console.log(`[getFarmIotData] Attempt ${attempts}, state:`, state);
 
     if (state === "SUCCEEDED") {
@@ -262,6 +275,7 @@ export const handler: GetFarmIotDataHandler = async (event) => {
   );
 
   const rows = resultsResp.ResultSet?.Rows ?? [];
+
   if (rows.length === 0) {
     return [
       {
@@ -276,22 +290,22 @@ export const handler: GetFarmIotDataHandler = async (event) => {
 
   const dataRows: AthenaRow[] = rows.slice(1).map((row) => {
     const obj: AthenaRow = {};
+
     row.Data?.forEach((cell, idx) => {
       obj[columnNames[idx]] = cell.VarCharValue ?? null;
     });
+
     return obj;
   });
 
   console.log("[getFarmIotData] Raw rows:", JSON.stringify(dataRows, null, 2));
 
-  const valueColumn =
-    device.type === "TEMPERATURE" ? "temperature" : "moisture";
-
   const points = dataRows
-    .filter((row) => row["event_ts"] != null && row[valueColumn] != null)
+    .filter((row) => row["timestamp"] != null && row["value"] != null)
     .map((row) => ({
-      timestamp: row["event_ts"] as string,
-      value: parseFloat(row[valueColumn] as string),
+      timestamp: row["timestamp"] as string,
+      value: parseFloat(row["value"] as string),
+      metricType: row["metric_type"] ?? metricType,
     }))
     .filter((point) => !Number.isNaN(point.value));
 

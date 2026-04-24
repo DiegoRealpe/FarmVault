@@ -14,7 +14,7 @@ import { upsertGrantRecordFn } from "./functions/upsert-grant-record/resource";
 import { BucketDeployment, Source } from "aws-cdk-lib/aws-s3-deployment";
 import { CfnDatabase, CfnTable, CfnJob, CfnCrawler } from "aws-cdk-lib/aws-glue";
 import { Role, ServicePrincipal, ManagedPolicy } from "aws-cdk-lib/aws-iam";
-// import * as athena from "aws-cdk-lib/aws-athena";
+import { CfnWorkGroup } from "aws-cdk-lib/aws-athena";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { Stack } from "aws-cdk-lib";
@@ -45,7 +45,7 @@ const bucket = backend.metricsBucket.resources.bucket;
 
 new BucketDeployment(backend.stack, "DeployGlueScripts", {
   destinationBucket: bucket,
-  destinationKeyPrefix: "script/",
+  destinationKeyPrefix: "scripts/",
   sources: [Source.asset(join(__dirname, "glue-scripts"))],
 });
 
@@ -67,10 +67,14 @@ const glueDb = new CfnDatabase(glueStack, "IotTelemetryDb", {
 
 const glueTable = new CfnTable(glueStack, "IotTelemetryParquetTable", {
   catalogId,
-  databaseName: glueDb.ref, // 'iot_telemetry'
+  databaseName: glueDb.ref,
   tableInput: {
     name: "iot_metrics_parquet",
     tableType: "EXTERNAL_TABLE",
+    parameters: {
+      classification: "parquet",
+      "projection.enabled": "false",
+    },
     storageDescriptor: {
       location: `s3://${bucket.bucketName}/parquet/`,
       inputFormat:
@@ -82,16 +86,19 @@ const glueTable = new CfnTable(glueStack, "IotTelemetryParquetTable", {
           "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
       },
       columns: [
-        { name: "id", type: "string" },
-        { name: "payload", type: "string" },
-        { name: "moisture", type: "int" },
-        { name: "timestamp", type: "string" },
-        { name: "event_ts", type: "timestamp" },
-        { name: "application_id", type: "string" },
         { name: "device_id", type: "string" },
+        { name: "application_id", type: "string" },
         { name: "gateway_id", type: "string" },
+        { name: "metric_type", type: "string" },
+        { name: "value", type: "double" },
+        { name: "timestamp", type: "timestamp" },
       ],
     },
+    partitionKeys: [
+      { name: "year", type: "string" },
+      { name: "month", type: "string" },
+      { name: "day", type: "string" },
+    ],
   },
 });
 glueTable.addDependency(glueDb);
@@ -110,12 +117,13 @@ new CfnJob(glueStack, "IotTestWriteParquetJob", {
   command: {
     name: "glueetl",
     pythonVersion: "3",
-    scriptLocation: `s3://${bucket.bucketName}/script/iot_json_to_parquet.py`,
+    scriptLocation: `s3://${bucket.bucketName}/scripts/iot_json_to_parquet.py`,
   },
   glueVersion: "4.0",
   defaultArguments: {
     "--job-language": "python",
     "--enable-metrics": "true",
+    "--RAW_S3_PATH": `s3://${bucket.bucketName}/raw/`,
     "--PARQUET_S3_PATH": `s3://${bucket.bucketName}/parquet/`,
   },
 });
@@ -143,20 +151,18 @@ const crawler = new CfnCrawler(glueStack, "IotParquetCrawler", {
 });
 crawler.addDependency(glueDb);
 
-// const athenaWorkGroup = new athena.CfnWorkGroup(
-//   glueStack,
-//   "FarmVaultAthenaWg",
-//   {
-//     name: "farmvault-wg", // you'll refer to this in the console and in Lambda
-//     workGroupConfiguration: {
-//       resultConfiguration: {
-//         outputLocation: `s3://${bucket.bucketName}/athena-results/`,
-//       },
-//       // Optional extras:
-//       // enforceWorkGroupConfiguration: true,
-//       // publishCloudWatchMetricsEnabled: true,
-//     },
-//   },
-// );
-
-// athenaWorkGroup.addDependency(glueJob);
+const athenaWorkGroup = new CfnWorkGroup(
+  glueStack,
+  "FarmVaultAthenaWg",
+  {
+    name: "farmvault-wg",
+    workGroupConfiguration: {
+      resultConfiguration: {
+        outputLocation: `s3://${bucket.bucketName}/athena-results/`,
+      },
+      enforceWorkGroupConfiguration: true,
+      publishCloudWatchMetricsEnabled: true,
+    },
+  },
+);
+athenaWorkGroup.addDependency(glueDb);
