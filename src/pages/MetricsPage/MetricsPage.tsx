@@ -21,9 +21,7 @@ type TimeSeriesPoint = Schema["TimeSeriesPoint"]["type"];
 function toDateTimeLocalValue(isoString: string): string {
   const date = new Date(isoString);
 
-  if (Number.isNaN(date.getTime())) {
-    return "";
-  }
+  if (Number.isNaN(date.getTime())) return "";
 
   const offsetMs = date.getTimezoneOffset() * 60 * 1000;
   return new Date(date.getTime() - offsetMs)
@@ -60,16 +58,15 @@ function MetricsPage() {
     null
   );
 
-  const selectedDevice = useMemo(() => {
-    return (
+  const selectedDevice = useMemo(
+    () =>
       visibleDevices.find(
         (device) => device.id === selectedDeviceId
-      ) ?? null
-    );
-  }, [visibleDevices, selectedDeviceId]);
+      ) ?? null,
+    [visibleDevices, selectedDeviceId]
+  );
 
   const unit = getMetricUnit(selectedDevice?.type);
-
   const maxDateTimeLocal = toDateTimeLocalValue(
     new Date().toISOString()
   );
@@ -78,8 +75,9 @@ function MetricsPage() {
     dispatch(fetchVisibleDevices());
   }, [dispatch]);
 
-  function handleRefreshDevices() {
-    dispatch(fetchVisibleDevices());
+  function clearMetricsState() {
+    setPoints([]);
+    setMetricsError(null);
   }
 
   async function handleLoadMetrics(event?: React.FormEvent) {
@@ -128,7 +126,7 @@ function MetricsPage() {
         <button
           type="button"
           className="metrics-page__refresh-button"
-          onClick={handleRefreshDevices}
+          onClick={() => dispatch(fetchVisibleDevices())}
         >
           ↻ Refresh devices
         </button>
@@ -138,138 +136,144 @@ function MetricsPage() {
         className="metrics-page__controls card"
         onSubmit={handleLoadMetrics}
       >
-        <div className="metrics-page__control-group">
-          <label
-            htmlFor="metrics-device-select"
-            className="metrics-page__label"
-          >
-            Device
-          </label>
-
-          <select
-            id="metrics-device-select"
-            className="metrics-page__select"
-            value={selectedDeviceId}
-            disabled={
-              loadingVisibleDevices || visibleDevices.length === 0
-            }
-            onChange={(event) => {
-              dispatch(setSelectedDeviceId(event.target.value));
-              setPoints([]);
-              setMetricsError(null);
-            }}
-          >
-            <option value="">Select a device</option>
-
-            {visibleDevices.map((device) => (
-              <option key={device.id} value={device.id}>
-                {device.name || device.id} · {device.type} ·{" "}
-                {device.farmId}
-              </option>
-            ))}
-          </select>
-
-          {loadingVisibleDevices && (
-            <p className="metrics-page__helper-text">
-              Loading devices...
-            </p>
-          )}
-
-          {visibleDevicesError && (
-            <p className="metrics-page__error-text">
-              {visibleDevicesError}
-            </p>
-          )}
-        </div>
-
-        <div className="metrics-page__control-group">
-          <label
-            htmlFor="metrics-from"
-            className="metrics-page__label"
-          >
-            From
-          </label>
-
-          <input
-            id="metrics-from"
-            type="datetime-local"
-            className="metrics-page__datetime"
-            value={toDateTimeLocalValue(from)}
-            max={maxDateTimeLocal}
-            onChange={(event) => {
-              dispatch(
-                setFrom(fromDateTimeLocalValue(event.target.value))
-              );
-              setPoints([]);
-              setMetricsError(null);
-            }}
-          />
-        </div>
-
-        <div className="metrics-page__control-group">
-          <label htmlFor="metrics-to" className="metrics-page__label">
-            To
-          </label>
-
-          <input
-            id="metrics-to"
-            type="datetime-local"
-            className="metrics-page__datetime"
-            value={toDateTimeLocalValue(to)}
-            max={maxDateTimeLocal}
-            onChange={(event) => {
-              dispatch(
-                setTo(fromDateTimeLocalValue(event.target.value))
-              );
-              setPoints([]);
-              setMetricsError(null);
-            }}
-          />
-        </div>
-
-        <div className="metrics-page__control-group">
-          <span className="metrics-page__label">View Mode</span>
-
-          <div className="metrics-page__toggle">
-            <button
-              type="button"
-              className={
-                viewMode === "table"
-                  ? "metrics-page__toggle-button metrics-page__toggle-button--active"
-                  : "metrics-page__toggle-button"
-              }
-              onClick={() => dispatch(setMetricsViewMode("table"))}
+        <div className="metrics-page__control-row">
+          <div className="metrics-page__control-group metrics-page__control-group--device">
+            <label
+              htmlFor="metrics-device-select"
+              className="metrics-page__label"
             >
-              Table
-            </button>
+              Device
+            </label>
+
+            <select
+              id="metrics-device-select"
+              className="metrics-page__select"
+              value={selectedDeviceId}
+              disabled={
+                loadingVisibleDevices || visibleDevices.length === 0
+              }
+              onChange={(event) => {
+                dispatch(setSelectedDeviceId(event.target.value));
+                clearMetricsState();
+              }}
+            >
+              <option value="">Select a device</option>
+
+              {visibleDevices.map((device) => (
+                <option key={device.id} value={device.id}>
+                  {device.name || device.id} · {device.type} ·{" "}
+                  {device.farmId}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="metrics-page__control-group metrics-page__control-group--date">
+            <label
+              htmlFor="metrics-from"
+              className="metrics-page__label"
+            >
+              From
+            </label>
+
+            <input
+              id="metrics-from"
+              type="datetime-local"
+              className="metrics-page__datetime"
+              value={toDateTimeLocalValue(from)}
+              max={maxDateTimeLocal}
+              onChange={(event) => {
+                dispatch(
+                  setFrom(fromDateTimeLocalValue(event.target.value))
+                );
+                clearMetricsState();
+              }}
+            />
+          </div>
+
+          <div className="metrics-page__control-group metrics-page__control-group--date">
+            <label
+              htmlFor="metrics-to"
+              className="metrics-page__label"
+            >
+              To
+            </label>
+
+            <input
+              id="metrics-to"
+              type="datetime-local"
+              className="metrics-page__datetime"
+              value={toDateTimeLocalValue(to)}
+              max={maxDateTimeLocal}
+              onChange={(event) => {
+                dispatch(
+                  setTo(fromDateTimeLocalValue(event.target.value))
+                );
+                clearMetricsState();
+              }}
+            />
+          </div>
+
+          <div className="metrics-page__control-group metrics-page__control-group--view">
+            <span className="metrics-page__label">View Mode</span>
+
+            <div className="metrics-page__toggle">
+              <button
+                type="button"
+                className={
+                  viewMode === "table"
+                    ? "metrics-page__toggle-button metrics-page__toggle-button--active"
+                    : "metrics-page__toggle-button"
+                }
+                onClick={() => dispatch(setMetricsViewMode("table"))}
+              >
+                Table
+              </button>
+
+              <button
+                type="button"
+                className={
+                  viewMode === "graph"
+                    ? "metrics-page__toggle-button metrics-page__toggle-button--active"
+                    : "metrics-page__toggle-button"
+                }
+                onClick={() => dispatch(setMetricsViewMode("graph"))}
+              >
+                Graph
+              </button>
+            </div>
+          </div>
+
+          <div className="metrics-page__control-group metrics-page__control-group--query">
+            <span className="metrics-page__label">Query</span>
 
             <button
-              type="button"
-              className={
-                viewMode === "graph"
-                  ? "metrics-page__toggle-button metrics-page__toggle-button--active"
-                  : "metrics-page__toggle-button"
+              type="submit"
+              className="metrics-page__load-button"
+              disabled={
+                !selectedDeviceId || !from || !to || loadingMetrics
               }
-              onClick={() => dispatch(setMetricsViewMode("graph"))}
             >
-              Graph
+              {loadingMetrics ? "Loading..." : "Load metrics"}
             </button>
           </div>
         </div>
 
-        <div className="metrics-page__control-group">
-          <span className="metrics-page__label">Query</span>
+        {(loadingVisibleDevices || visibleDevicesError) && (
+          <div className="metrics-page__control-feedback">
+            {loadingVisibleDevices && (
+              <p className="metrics-page__helper-text">
+                Loading devices...
+              </p>
+            )}
 
-          <button
-            type="submit"
-            className="metrics-page__refresh-button"
-            disabled={
-              !selectedDeviceId || !from || !to || loadingMetrics
-            }
-          >
-            {loadingMetrics ? "Loading..." : "Load metrics"}
-          </button>
-        </div>
+            {visibleDevicesError && (
+              <p className="metrics-page__error-text">
+                {visibleDevicesError}
+              </p>
+            )}
+          </div>
+        )}
       </form>
 
       <section className="metrics-page__content card">
