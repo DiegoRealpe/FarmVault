@@ -1,9 +1,18 @@
+.metrics-table-container {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  width: 100%;
+  min-width: 0;
+}
+
 .metrics-table-loading,
 .metrics-table-error,
 .metrics-table-empty-state {
   display: grid;
   place-items: center;
   min-height: 18rem;
+  width: 100%;
   padding: 2rem;
   text-align: center;
   color: var(--text-secondary);
@@ -34,8 +43,9 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 0.85rem;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  width: 100%;
 }
 
 .metrics-table-count {
@@ -45,6 +55,9 @@
 }
 
 .metrics-table-device-type {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border: 1px solid rgba(241, 184, 45, 0.55);
   border-radius: 999px;
   background: rgba(241, 184, 45, 0.14);
@@ -53,12 +66,15 @@
   font-size: 0.78rem;
   font-weight: 900;
   letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .metrics-table-wrapper {
+  width: 100%;
+  min-width: 0;
   overflow-x: auto;
   border: 1px solid var(--border-soft);
-  border-radius: 1rem;
+  border-radius: var(--radius-lg);
   background: var(--surface-strong);
 }
 
@@ -92,9 +108,7 @@
 }
 
 .metrics-table tbody tr {
-  transition:
-    background 140ms ease,
-    transform 140ms ease;
+  transition: background 140ms ease;
 }
 
 .metrics-table tbody tr:hover {

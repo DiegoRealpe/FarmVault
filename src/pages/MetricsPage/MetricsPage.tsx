@@ -113,8 +113,14 @@ function MetricsPage() {
         })
       ).unwrap();
 
-      console.log("[MetricsPage] fetchedPoints from thunk:", fetchedPoints);
-      console.log("[MetricsPage] fetchedPoints count:", fetchedPoints.length);
+      console.log(
+        "[MetricsPage] fetchedPoints from thunk:",
+        fetchedPoints
+      );
+      console.log(
+        "[MetricsPage] fetchedPoints count:",
+        fetchedPoints.length
+      );
 
       setPoints(fetchedPoints);
 
@@ -131,7 +137,7 @@ function MetricsPage() {
       setLoadingMetrics(false);
     }
   }
-  
+
   console.log("[MetricsPage] render:", {
     viewMode,
     pointsCount: points.length,

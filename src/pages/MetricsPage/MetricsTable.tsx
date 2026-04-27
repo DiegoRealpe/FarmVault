@@ -20,7 +20,6 @@ function MetricsTable({
   error,
   selectedDevice,
 }: MetricsTableProps) {
-
   console.log("[MetricsTable] received props:", {
     pointsCount: points.length,
     firstPoint: points[0],
@@ -66,7 +65,7 @@ function MetricsTable({
   }
 
   return (
-    <>
+    <div className="metrics-table-container">
       <div className="metrics-table-controls">
         <span className="metrics-table-count">
           {points.length} reading{points.length !== 1 ? "s" : ""}
@@ -114,7 +113,7 @@ function MetricsTable({
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   );
 }
 

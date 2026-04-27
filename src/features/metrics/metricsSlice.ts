@@ -54,7 +54,6 @@ export const fetchMetricsForDevice = createAsyncThunk<
   "metrics/fetchMetricsForDevice",
   async ({ deviceId, from, to }, thunkApi) => {
     try {
-
       const result = await client.queries.getFarmIotData(
         {
           deviceId,
@@ -77,11 +76,10 @@ export const fetchMetricsForDevice = createAsyncThunk<
         (item): item is DeviceTimeSeries => item != null
       );
 
-      const points = (
+      const points =
         series[0]?.points?.filter(
           (point): point is TimeSeriesPoint => point != null
-        ) ?? []
-      );
+        ) ?? [];
       console.log("[metricsSlice] points:", points);
       return points;
     } catch (error) {

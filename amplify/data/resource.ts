@@ -109,7 +109,7 @@ const schema = a
       deviceId: a.string().required(),
       points: a.ref("TimeSeriesPoint").array(),
     }),
-    
+
     TimeSeriesPoint: a.customType({
       timestamp: a.datetime().required(),
       value: a.float().required(),
