@@ -78,6 +78,16 @@ function MetricsPage() {
     dispatch(fetchVisibleDevices());
   }, [dispatch]);
 
+  useEffect(() => {
+    console.log("[MetricsPage] points state changed:", {
+      count: points.length,
+      first: points[0],
+      viewMode,
+      loadingMetrics,
+      metricsError,
+    });
+  }, [points, viewMode, loadingMetrics, metricsError]);
+
   function handleRefreshDevices() {
     dispatch(fetchVisibleDevices());
   }
@@ -107,6 +117,11 @@ function MetricsPage() {
       console.log("[MetricsPage] fetchedPoints count:", fetchedPoints.length);
 
       setPoints(fetchedPoints);
+
+      console.log("[MetricsPage] setPoints called:", {
+        count: fetchedPoints.length,
+        first: fetchedPoints[0],
+      });
     } catch (error) {
       setPoints([]);
       setMetricsError(
@@ -116,6 +131,14 @@ function MetricsPage() {
       setLoadingMetrics(false);
     }
   }
+  
+  console.log("[MetricsPage] render:", {
+    viewMode,
+    pointsCount: points.length,
+    loadingMetrics,
+    metricsError,
+    selectedDevice: selectedDevice?.id,
+  });
 
   return (
     <div className="metrics-page">

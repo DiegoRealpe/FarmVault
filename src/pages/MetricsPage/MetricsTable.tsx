@@ -20,6 +20,16 @@ function MetricsTable({
   error,
   selectedDevice,
 }: MetricsTableProps) {
+
+  console.log("[MetricsTable] received props:", {
+    pointsCount: points.length,
+    firstPoint: points[0],
+    loading,
+    error,
+    selectedDevice: selectedDevice?.id,
+    unit,
+  });
+
   if (loading) {
     return (
       <div className="metrics-table-loading">
