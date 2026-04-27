@@ -4,7 +4,7 @@ import {
   CfnCrawler,
   CfnDatabase,
   CfnJob,
-  CfnTable,
+  // CfnTable,
 } from "aws-cdk-lib/aws-glue";
 import {
   ManagedPolicy,
