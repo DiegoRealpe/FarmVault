@@ -101,6 +101,9 @@ function MetricsPage() {
         })
       ).unwrap();
 
+      console.log("[MetricsPage] fetchedPoints from thunk:", fetchedPoints);
+      console.log("[MetricsPage] fetchedPoints count:", fetchedPoints.length);
+
       setPoints(fetchedPoints);
     } catch (error) {
       setPoints([]);
