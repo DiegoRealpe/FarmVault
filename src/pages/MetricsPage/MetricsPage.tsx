@@ -187,7 +187,6 @@ function MetricsPage() {
             }
             onChange={(event) => {
               dispatch(setSelectedDeviceId(event.target.value));
-              setPoints([]);
               setMetricsError(null);
             }}
           >
@@ -232,7 +231,6 @@ function MetricsPage() {
               dispatch(
                 setFrom(fromDateTimeLocalValue(event.target.value))
               );
-              setPoints([]);
               setMetricsError(null);
             }}
           />
@@ -253,7 +251,6 @@ function MetricsPage() {
               dispatch(
                 setTo(fromDateTimeLocalValue(event.target.value))
               );
-              setPoints([]);
               setMetricsError(null);
             }}
           />
