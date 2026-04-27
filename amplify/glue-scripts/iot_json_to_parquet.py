@@ -14,13 +14,6 @@ from pyspark.sql.functions import (
     year,
 )
 
-# ------------------------------------------------------------------
-# Expected job arguments:
-#   --JOB_NAME
-#   --RAW_S3_PATH      e.g. s3://your-bucket/raw/
-#   --PARQUET_S3_PATH  e.g. s3://your-bucket/parquet/
-# ------------------------------------------------------------------
-
 args = getResolvedOptions(
     sys.argv,
     [
@@ -42,11 +35,7 @@ job.init(args["JOB_NAME"], args)
 
 print(f"[INFO] Reading JSON from: {RAW_S3_PATH}")
 
-raw_df = (
-    spark.read
-    .option("multiLine", "true")
-    .json(RAW_S3_PATH)
-)
+raw_df = spark.read.option("multiLine", "true").json(RAW_S3_PATH)
 
 print("[INFO] Raw input schema:")
 raw_df.printSchema()
@@ -59,20 +48,6 @@ if len(raw_df.columns) == 0:
         f"No columns were read from RAW_S3_PATH={RAW_S3_PATH}. "
         "Check that the path contains valid JSON files and that top-level arrays are being parsed with multiLine=true."
     )
-
-# ------------------------------------------------------------------
-# Normalize raw telemetry JSON into Athena-ready Parquet shape:
-#
-# device_id       string
-# application_id  string
-# gateway_id      string
-# metric_type     string
-# value           double
-# timestamp       timestamp
-#
-# partitions:
-# year, month, day
-# ------------------------------------------------------------------
 
 df = (
     raw_df
@@ -92,6 +67,7 @@ df = (
     )
     .select(
         col("device_id").cast("string"),
+        col("dev_eui").cast("string"),
         col("application_id").cast("string"),
         col("gateway_id").cast("string"),
         col("metric_type").cast("string"),
@@ -99,6 +75,7 @@ df = (
         col("parsed_timestamp").alias("timestamp"),
     )
     .filter(col("device_id").isNotNull())
+    .filter(col("dev_eui").isNotNull())
     .filter(col("timestamp").isNotNull())
     .filter(col("value").isNotNull())
     .filter(col("metric_type") != "UNKNOWN")
