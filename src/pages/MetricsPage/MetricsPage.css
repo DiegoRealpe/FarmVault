@@ -38,10 +38,9 @@
 
 .metrics-page__controls {
   display: grid;
-  grid-template-columns: minmax(16rem, 1.5fr) repeat(
-      2,
-      minmax(12rem, 1fr)
-    ) auto;
+  grid-template-columns:
+    minmax(16rem, 1.5fr) repeat(2, minmax(12rem, 1fr))
+    auto;
   gap: 1rem;
   padding: 1rem;
   margin-bottom: 1.25rem;

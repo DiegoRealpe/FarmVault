@@ -78,83 +78,40 @@ function MetricsPage() {
     dispatch(fetchVisibleDevices());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (!selectedDeviceId || !from || !to) {
-      setPoints([]);
-      return;
-    }
-
-    let cancelled = false;
-
-    async function fetchMetrics() {
-      setLoadingMetrics(true);
-      setMetricsError(null);
-
-      try {
-        const fetchedPoints = await dispatch(
-          fetchMetricsForDevice({
-            deviceId: selectedDeviceId,
-            from,
-            to,
-          })
-        ).unwrap();
-
-        if (!cancelled) {
-          setPoints(fetchedPoints);
-        }
-      } catch (error) {
-        if (!cancelled) {
-          setPoints([]);
-          setMetricsError(
-            typeof error === "string"
-              ? error
-              : "Failed to fetch metrics."
-          );
-        }
-      } finally {
-        if (!cancelled) {
-          setLoadingMetrics(false);
-        }
-      }
-    }
-
-    fetchMetrics();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [dispatch, selectedDeviceId, from, to]);
-
   function handleRefreshDevices() {
     dispatch(fetchVisibleDevices());
   }
 
-  function handleRefreshMetrics() {
-    if (!selectedDeviceId) return;
+  async function handleLoadMetrics(event?: React.FormEvent) {
+    event?.preventDefault();
+
+    if (!selectedDeviceId || !from || !to) {
+      setPoints([]);
+      setMetricsError("Select a device and valid date range first.");
+      return;
+    }
 
     setLoadingMetrics(true);
     setMetricsError(null);
 
-    dispatch(
-      fetchMetricsForDevice({
-        deviceId: selectedDeviceId,
-        from,
-        to,
-      })
-    )
-      .unwrap()
-      .then(setPoints)
-      .catch((error) => {
-        setPoints([]);
-        setMetricsError(
-          typeof error === "string"
-            ? error
-            : "Failed to fetch metrics."
-        );
-      })
-      .finally(() => {
-        setLoadingMetrics(false);
-      });
+    try {
+      const fetchedPoints = await dispatch(
+        fetchMetricsForDevice({
+          deviceId: selectedDeviceId,
+          from,
+          to,
+        })
+      ).unwrap();
+
+      setPoints(fetchedPoints);
+    } catch (error) {
+      setPoints([]);
+      setMetricsError(
+        typeof error === "string" ? error : "Failed to fetch metrics."
+      );
+    } finally {
+      setLoadingMetrics(false);
+    }
   }
 
   return (
@@ -177,7 +134,10 @@ function MetricsPage() {
         </button>
       </header>
 
-      <section className="metrics-page__controls card">
+      <form
+        className="metrics-page__controls card"
+        onSubmit={handleLoadMetrics}
+      >
         <div className="metrics-page__control-group">
           <label
             htmlFor="metrics-device-select"
@@ -193,9 +153,11 @@ function MetricsPage() {
             disabled={
               loadingVisibleDevices || visibleDevices.length === 0
             }
-            onChange={(event) =>
-              dispatch(setSelectedDeviceId(event.target.value))
-            }
+            onChange={(event) => {
+              dispatch(setSelectedDeviceId(event.target.value));
+              setPoints([]);
+              setMetricsError(null);
+            }}
           >
             <option value="">Select a device</option>
 
@@ -234,11 +196,13 @@ function MetricsPage() {
             className="metrics-page__datetime"
             value={toDateTimeLocalValue(from)}
             max={maxDateTimeLocal}
-            onChange={(event) =>
+            onChange={(event) => {
               dispatch(
                 setFrom(fromDateTimeLocalValue(event.target.value))
-              )
-            }
+              );
+              setPoints([]);
+              setMetricsError(null);
+            }}
           />
         </div>
 
@@ -253,11 +217,13 @@ function MetricsPage() {
             className="metrics-page__datetime"
             value={toDateTimeLocalValue(to)}
             max={maxDateTimeLocal}
-            onChange={(event) =>
+            onChange={(event) => {
               dispatch(
                 setTo(fromDateTimeLocalValue(event.target.value))
-              )
-            }
+              );
+              setPoints([]);
+              setMetricsError(null);
+            }}
           />
         </div>
 
@@ -290,7 +256,21 @@ function MetricsPage() {
             </button>
           </div>
         </div>
-      </section>
+
+        <div className="metrics-page__control-group">
+          <span className="metrics-page__label">Query</span>
+
+          <button
+            type="submit"
+            className="metrics-page__refresh-button"
+            disabled={
+              !selectedDeviceId || !from || !to || loadingMetrics
+            }
+          >
+            {loadingMetrics ? "Loading..." : "Load metrics"}
+          </button>
+        </div>
+      </form>
 
       <section className="metrics-page__content card">
         <div className="metrics-page__content-header">
@@ -314,8 +294,10 @@ function MetricsPage() {
           <button
             type="button"
             className="metrics-page__refresh-button"
-            disabled={!selectedDeviceId || loadingMetrics}
-            onClick={handleRefreshMetrics}
+            disabled={
+              !selectedDeviceId || !from || !to || loadingMetrics
+            }
+            onClick={() => void handleLoadMetrics()}
           >
             ↻ Refresh metrics
           </button>
