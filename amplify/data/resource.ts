@@ -72,11 +72,6 @@ const schema = a
       .authorization((allow) => [allow.authenticated()]),
 
     // -- Custom Types --
-    TimeSeriesPoint: a.customType({
-      timestamp: a.datetime().required(),
-      value: a.float().required(),
-    }),
-
     GrantType: a.enum(["farm", "device"]),
 
     GrantEntry: a.customType({
@@ -113,6 +108,11 @@ const schema = a
     DeviceTimeSeries: a.customType({
       deviceId: a.string().required(),
       points: a.ref("TimeSeriesPoint").array(),
+    }),
+    
+    TimeSeriesPoint: a.customType({
+      timestamp: a.datetime().required(),
+      value: a.float().required(),
     }),
 
     //// ---- Lambda Backed Queries ----

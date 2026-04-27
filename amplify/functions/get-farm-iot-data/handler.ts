@@ -268,6 +268,11 @@ async function runAthenaQuery(
   });
 }
 
+function toAwsDateTime(value: string): string {
+  if (value.includes("T")) return value;
+  return `${value.replace(" ", "T")}Z`;
+}
+
 export const handler: GetFarmIotDataHandler = async (event) => {
   console.log(
     "[getFarmIotData] Event:",
@@ -317,9 +322,9 @@ export const handler: GetFarmIotDataHandler = async (event) => {
   const points = rows
     .filter((row) => row.timestamp != null && row.value != null)
     .map((row) => ({
-      timestamp: row.timestamp as string,
+      timestamp: toAwsDateTime(row.timestamp as string),
       value: parseFloat(row.value as string),
-      metricType: row.metric_type ?? metricType,
+      // metricType: row.metric_type ?? metricType,
     }))
     .filter((point) => !Number.isNaN(point.value));
 
