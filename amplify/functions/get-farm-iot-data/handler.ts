@@ -199,7 +199,7 @@ export const handler: GetFarmIotDataHandler = async (event) => {
 
   const workGroup = process.env.ATHENA_WORKGROUP ?? "farmvault-wg";
   const db = process.env.ATHENA_DATABASE ?? "iot_telemetry";
-  const table = process.env.ATHENA_TABLE ?? "iot_metrics_parquet";
+  const table = process.env.ATHENA_TABLE ?? "iot_parquet";
 
   const safeDeviceId = deviceIdArg.replace(/'/g, "''");
 
