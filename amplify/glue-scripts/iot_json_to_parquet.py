@@ -42,22 +42,23 @@ job.init(args["JOB_NAME"], args)
 
 print(f"[INFO] Reading JSON from: {RAW_S3_PATH}")
 
-raw_dyf = glue_context.create_dynamic_frame_from_options(
-    connection_type="s3",
-    connection_options={
-        "paths": [RAW_S3_PATH],
-        "recurse": True,
-    },
-    format="json",
+raw_df = (
+    spark.read
+    .option("multiLine", "true")
+    .json(RAW_S3_PATH)
 )
-
-raw_df = raw_dyf.toDF()
 
 print("[INFO] Raw input schema:")
 raw_df.printSchema()
 
 print("[INFO] Raw sample rows:")
 raw_df.show(10, truncate=False)
+
+if len(raw_df.columns) == 0:
+    raise Exception(
+        f"No columns were read from RAW_S3_PATH={RAW_S3_PATH}. "
+        "Check that the path contains valid JSON files and that top-level arrays are being parsed with multiLine=true."
+    )
 
 # ------------------------------------------------------------------
 # Normalize raw telemetry JSON into Athena-ready Parquet shape:
