@@ -80,47 +80,47 @@ const glueDb = new CfnDatabase(glueStack, "IotTelemetryDb", {
   },
 });
 
-const glueTable = new CfnTable(
-  glueStack,
-  "IotTelemetryParquetTable",
-  {
-    catalogId,
-    databaseName: glueDb.ref,
-    tableInput: {
-      name: "iot_metrics_parquet",
-      tableType: "EXTERNAL_TABLE",
-      parameters: {
-        classification: "parquet",
-        "projection.enabled": "false",
-      },
-      storageDescriptor: {
-        location: `s3://${bucket.bucketName}/parquet/`,
-        inputFormat:
-          "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
-        outputFormat:
-          "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
-        serdeInfo: {
-          serializationLibrary:
-            "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
-        },
-        columns: [
-          { name: "device_id", type: "string" },
-          { name: "application_id", type: "string" },
-          { name: "gateway_id", type: "string" },
-          { name: "metric_type", type: "string" },
-          { name: "value", type: "double" },
-          { name: "timestamp", type: "timestamp" },
-        ],
-      },
-      partitionKeys: [
-        { name: "year", type: "string" },
-        { name: "month", type: "string" },
-        { name: "day", type: "string" },
-      ],
-    },
-  }
-);
-glueTable.addDependency(glueDb);
+// const glueTable = new CfnTable(
+//   glueStack,
+//   "IotTelemetryParquetTable",
+//   {
+//     catalogId,
+//     databaseName: glueDb.ref,
+//     tableInput: {
+//       name: "iot_metrics_parquet",
+//       tableType: "EXTERNAL_TABLE",
+//       parameters: {
+//         classification: "parquet",
+//         "projection.enabled": "false",
+//       },
+//       storageDescriptor: {
+//         location: `s3://${bucket.bucketName}/parquet/`,
+//         inputFormat:
+//           "org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+//         outputFormat:
+//           "org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+//         serdeInfo: {
+//           serializationLibrary:
+//             "org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+//         },
+//         columns: [
+//           { name: "device_id", type: "string" },
+//           { name: "application_id", type: "string" },
+//           { name: "gateway_id", type: "string" },
+//           { name: "metric_type", type: "string" },
+//           { name: "value", type: "double" },
+//           { name: "timestamp", type: "timestamp" },
+//         ],
+//       },
+//       partitionKeys: [
+//         { name: "year", type: "string" },
+//         { name: "month", type: "string" },
+//         { name: "day", type: "string" },
+//       ],
+//     },
+//   }
+// );
+// glueTable.addDependency(glueDb);
 
 const glueJobRole = new Role(glueStack, "GlueJobRole", {
   assumedBy: new ServicePrincipal("glue.amazonaws.com"),
