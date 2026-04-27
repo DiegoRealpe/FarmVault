@@ -94,7 +94,7 @@ function getGroups(identity: Identity): string[] {
 }
 
 function isAdmin(identity: Identity): boolean {
-  return getGroups(identity).includes("Admin");
+  return getGroups(identity).includes("admin");
 }
 
 function isGrantActive(
